@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabase'
 
 import BottomNavbar from '../components/BottomNavbar.vue'
 
-import winnerBadge from '../assets/lottie/Winner_Badge.json'
+import winnerBadge from '../assets/lottie/winner_badge.json'
 
 import { playSound } from '../utils/playSound'
 
