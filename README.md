@@ -1,38 +1,143 @@
 # Quizbere
 
-This template should help get you started developing with Vue 3 in Vite.
+Quizbere is a fast-paced Christian quiz game built with Vue 3 and Supabase where players answer Bible and knowledge questions, compete in challenge modes, earn points, and stand a chance to win rewards.
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+# Features
 
-## Recommended Browser Setup
+## Quizbere Main Quiz
+- Answer 10 questions
+- Win prizes and rewards
+- Reward probability system handled securely with Supabase Edge Functions
+- Username system with account creation and login
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Braindrill
+- Fast survival quiz mode
+- Multiple unlockable levels
+- Timed gameplay
+- Leaderboard support
 
-## Customize configuration
+## Topic Challenge
+- Pick a topic and answer 10 classroom-style questions
+- Pass mark system
+- Teacher-style marked result page
+- Challenge points reward system
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Challenge Modes
+- Multiple special challenge game modes
+- Time-based survival challenges
+- Football challenge
+- Sudden death challenge
+- Speed challenge modes
 
-## Project Setup
+## Versus Mode
+- Challenge another player directly
+- Random challenger system
+- Timed versus battles
+- Live score comparison
+- Winner reward system
 
-```sh
+## Tracking System
+- Tracks:
+  - Quizbere plays
+  - Braindrill plays
+  - Topic Challenge plays
+  - Challenge mode plays
+
+---
+
+# Tech Stack
+
+- Vue 3
+- Vue Router
+- Tailwind CSS
+- Supabase
+- Supabase Edge Functions
+- Vite
+- Lottie Animations
+
+---
+
+# Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/FemiEmm/Quizbere.git
+```
+
+Enter project folder:
+
+```bash
+cd Quizbere
+```
+
+Install dependencies:
+
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+Run development server:
 
-```sh
+```bash
 npm run dev
 ```
 
-### Compile and Minify for Production
+---
 
-```sh
+# Environment Variables
+
+Create a `.env` file in the project root.
+
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+---
+
+# Supabase Setup
+
+Create these tables:
+
+- examinity_users
+- examinity_leaderboard
+- examinity_winners
+- versus_matches
+- quizbere_userate
+
+Enable Row Level Security and add policies.
+
+---
+
+# Deployment
+
+Recommended deployment:
+
+- Vercel
+
+Build command:
+
+```bash
 npm run build
 ```
+
+Output directory:
+
+```bash
+dist
+```
+
+---
+
+# Creator
+
+Created by Olufemi Olaniyi.
+
+---
+
+# License
+
+copyright
