@@ -32,14 +32,14 @@ const username =
     'examinity_username',
   ) || 'anonymous'
 
+const loading =
+  ref(false)
+
 const playerOnePoints =
   ref(0)
 
 const playerTwoPoints =
   ref(0)
-
-const loading =
-  ref(false)
 
 let interval = null
 
@@ -79,28 +79,24 @@ const timeLeft =
       return 'MATCH OVER'
     }
 
-    const days =
-      Math.floor(
-        diff /
-          (1000 *
-            60 *
-            60 *
-            24),
-      )
-
     const hours =
       Math.floor(
-        (diff %
-          (1000 *
-            60 *
-            60 *
-            24)) /
+        diff /
           (1000 *
             60 *
             60),
       )
 
-    return `${days}D ${hours}H LEFT`
+    const minutes =
+      Math.floor(
+        (diff %
+          (1000 *
+            60 *
+            60)) /
+          (1000 * 60),
+      )
+
+    return `${hours}H ${minutes}M`
   })
 
 /* -----------------------------
@@ -119,15 +115,15 @@ const fetchScores =
         )
 
     const p1 = data.find(
-      (p) =>
-        p.username ===
+      (item) =>
+        item.username ===
         props.match
           .player_one,
     )
 
     const p2 = data.find(
-      (p) =>
-        p.username ===
+      (item) =>
+        item.username ===
         props.match
           .player_two,
     )
@@ -159,7 +155,8 @@ const checkWinner =
         props.match.ends_at,
       )
 
-    if (now < end) return
+    if (now < end)
+      return
 
     let winner =
       'draw'
@@ -223,9 +220,6 @@ const giveUp =
 
     loading.value = true
 
-    const winner =
-      opponent.value
-
     await supabase
       .from(
         'versus_matches',
@@ -234,7 +228,8 @@ const giveUp =
         status:
           'completed',
 
-        winner,
+        winner:
+          opponent.value,
       })
       .eq(
         'id',
@@ -265,60 +260,45 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <!-- FULL SCREEN ROOT -->
   <section
-    class="min-h-screen relative overflow-hidden flex items-center justify-center px-4 py-6"
+    class="fixed inset-0 overflow-y-auto bg-[#101010] text-white"
   >
-    <!-- SPLIT BACKGROUND -->
-    <div
-      class="absolute inset-0 flex"
-    >
-      <!-- LEFT -->
-      <div
-        class="flex-1 bg-[#03B5EC]"
-      />
-
-      <!-- CENTER LINE -->
-      <div
-        class="w-5 bg-black"
-      />
-
-      <!-- RIGHT -->
-      <div
-        class="flex-1 bg-[#FF2AA3]"
-      />
-    </div>
-
     <!-- CONTENT -->
     <div
-      class="relative z-10 w-full max-w-md"
+      class="w-full max-w-sm mx-auto px-4 py-5 pb-36"
     >
-      <!-- TOP -->
+      <!-- HEADER -->
       <div
-        class="text-center flex flex-col items-center"
+        class="flex items-start justify-between gap-3"
       >
-        <!-- VERSUS -->
-        <div
-          class="bg-[#F3F400] border-4 border-black rounded-2xl px-8 py-4 shadow-[0_6px_0_#000]"
-        >
+        <!-- LEFT -->
+        <div>
+          <p
+            class="text-[10px] uppercase tracking-[0.25em] text-white/40 font-bold"
+          >
+            Live Match
+          </p>
+
           <h1
-            class="text-5xl font-black text-black leading-none"
+            class="mt-1 text-3xl font-black leading-none"
           >
             VERSUS
           </h1>
         </div>
 
-        <!-- TIME -->
+        <!-- TIMER -->
         <div
-          class="mt-4 bg-white border-4 border-black rounded-2xl px-6 py-4 shadow-[0_6px_0_#000]"
+          class="bg-[#1D1D1D] rounded-2xl px-4 py-3 border border-white/10 shrink-0"
         >
           <p
-            class="text-[10px] font-black text-black/50 leading-none"
+            class="text-[9px] uppercase text-white/40 font-bold text-center"
           >
-            TIME LEFT
+            Remaining
           </p>
 
           <p
-            class="mt-2 text-2xl font-black text-black leading-none"
+            class="mt-1 text-sm font-black text-center"
           >
             {{
               timeLeft
@@ -327,20 +307,26 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- BATTLE AREA -->
+      <!-- MATCH CARD -->
       <div
-        class="mt-10 flex items-center justify-between gap-4"
+        class="mt-6 bg-[#181818] border border-white/10 rounded-[2rem] p-5"
       >
         <!-- PLAYER ONE -->
         <div
-          class="flex-1 text-center"
+          class="flex items-center justify-between gap-4"
         >
-          <!-- NAME -->
+          <!-- INFO -->
           <div
-            class="bg-white border-4 border-black rounded-2xl px-3 py-3"
+            class="min-w-0"
           >
+            <p
+              class="text-[10px] uppercase text-white/40 font-bold"
+            >
+              PLAYER ONE
+            </p>
+
             <h2
-              class="text-lg font-black text-black break-words"
+              class="mt-1 text-xl font-black truncate"
             >
               {{
                 props.match
@@ -351,16 +337,16 @@ onBeforeUnmount(() => {
 
           <!-- SCORE -->
           <div
-            class="mt-4 bg-white border-4 border-black rounded-[2rem] py-8 px-2 shadow-[0_8px_0_#000]"
+            class="w-[88px] h-[88px] rounded-3xl bg-[#222222] flex flex-col items-center justify-center shrink-0"
           >
             <p
-              class="text-[10px] font-black text-black/50"
+              class="text-[9px] uppercase text-white/40 font-bold"
             >
-              SCORE
+              Score
             </p>
 
             <h3
-              class="mt-2 text-6xl font-black text-[#03B5EC] leading-none"
+              class="mt-1 text-4xl font-black text-[#67E8F9]"
             >
               {{
                 playerOnePoints
@@ -371,29 +357,31 @@ onBeforeUnmount(() => {
 
         <!-- VS -->
         <div
-          class="shrink-0"
+          class="py-5 flex justify-center"
         >
           <div
-            class="w-20 h-20 rounded-full bg-[#F3F400] border-4 border-black flex items-center justify-center shadow-[0_6px_0_#000]"
+            class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center text-lg font-black"
           >
-            <span
-              class="text-3xl font-black text-black"
-            >
-              VS
-            </span>
+            VS
           </div>
         </div>
 
         <!-- PLAYER TWO -->
         <div
-          class="flex-1 text-center"
+          class="flex items-center justify-between gap-4"
         >
-          <!-- NAME -->
+          <!-- INFO -->
           <div
-            class="bg-white border-4 border-black rounded-2xl px-3 py-3"
+            class="min-w-0"
           >
+            <p
+              class="text-[10px] uppercase text-white/40 font-bold"
+            >
+              PLAYER TWO
+            </p>
+
             <h2
-              class="text-lg font-black text-black break-words"
+              class="mt-1 text-xl font-black truncate"
             >
               {{
                 props.match
@@ -404,16 +392,16 @@ onBeforeUnmount(() => {
 
           <!-- SCORE -->
           <div
-            class="mt-4 bg-white border-4 border-black rounded-[2rem] py-8 px-2 shadow-[0_8px_0_#000]"
+            class="w-[88px] h-[88px] rounded-3xl bg-[#222222] flex flex-col items-center justify-center shrink-0"
           >
             <p
-              class="text-[10px] font-black text-black/50"
+              class="text-[9px] uppercase text-white/40 font-bold"
             >
-              SCORE
+              Score
             </p>
 
             <h3
-              class="mt-2 text-6xl font-black text-[#FF2AA3] leading-none"
+              class="mt-1 text-4xl font-black text-[#FF82D8]"
             >
               {{
                 playerTwoPoints
@@ -423,26 +411,31 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- EARN POINTS -->
-      <button
-        @click="earnPoints"
-        class="mt-8 w-full bg-[#F3F400] border-4 border-black rounded-2xl py-5 text-black text-xl font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+      <!-- BUTTONS -->
+      <div
+        class="mt-5 flex flex-col gap-3"
       >
-        EARN POINTS
-      </button>
+        <!-- EARN -->
+        <button
+          @click="earnPoints"
+          class="h-[56px] rounded-2xl bg-white text-black text-base font-black active:scale-[0.98] transition-all duration-100"
+        >
+          Earn More Points
+        </button>
 
-      <!-- GIVE UP -->
-      <button
-        @click="giveUp"
-        :disabled="loading"
-        class="mt-4 w-full bg-black border-4 border-black rounded-2xl py-5 text-white text-xl font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
-      >
-        {{
-          loading
-            ? 'LEAVING...'
-            : 'I GIVE UP!'
-        }}
-      </button>
+        <!-- GIVE UP -->
+        <button
+          @click="giveUp"
+          :disabled="loading"
+          class="h-[56px] rounded-2xl bg-[#262626] border border-white/10 text-white text-base font-black active:scale-[0.98] transition-all duration-100"
+        >
+          {{
+            loading
+              ? 'Leaving Match...'
+              : 'Give Up'
+          }}
+        </button>
+      </div>
     </div>
   </section>
 </template>

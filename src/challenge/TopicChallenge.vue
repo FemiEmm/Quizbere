@@ -1,6 +1,7 @@
 <script setup>
 import {
   onMounted,
+  onBeforeUnmount,
 } from 'vue'
 
 import {
@@ -34,6 +35,10 @@ onMounted(() => {
   playTopicMusic()
 })
 
+onBeforeUnmount(() => {
+  stopTopicMusic()
+})
+
 const toggleMusic =
   () => {
     playSound('button')
@@ -57,6 +62,8 @@ const startTopic =
   (topic) => {
     playSound('button')
 
+    stopTopicMusic()
+
     localStorage.setItem(
       'selected_topic',
       JSON.stringify(topic),
@@ -74,6 +81,8 @@ const startTopic =
 const goBack =
   () => {
     playSound('button')
+
+    stopTopicMusic()
 
     router.push(
       '/challenge',
