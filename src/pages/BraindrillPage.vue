@@ -195,8 +195,9 @@ const submitScore =
         <div
           class="mt-6 flex gap-3"
         >
+          <!-- SCORE -->
           <div
-            class="flex-1 bg-[#F3F400] border-4 border-black rounded-2xl py-4 text-center"
+            class="flex-1 bg-[#F3F400] border-4 border-black rounded-2xl py-4 text-center flex flex-col justify-center"
           >
             <p
               class="text-[10px] font-black text-black/70"
@@ -205,7 +206,7 @@ const submitScore =
             </p>
 
             <h2
-              class="mt-2 text-4xl font-black text-black"
+              class="mt-2 text-3xl font-black text-black leading-none"
             >
               {{ runScore }}
             </h2>
@@ -214,7 +215,7 @@ const submitScore =
           <!-- SUBMIT -->
           <button
             @click="submitScore"
-            class="flex-1 bg-[#FD9501] border-4 border-black rounded-2xl py-4 active:translate-y-[3px] transition-all duration-100"
+            class="flex-1 bg-[#FD9501] border-4 border-black rounded-2xl py-4 text-center flex flex-col justify-center active:translate-y-[3px] transition-all duration-100"
           >
             <p
               class="text-[10px] font-black text-black/70"
@@ -223,7 +224,7 @@ const submitScore =
             </p>
 
             <h2
-              class="mt-2 text-2xl font-black text-black"
+              class="mt-2 text-3xl font-black text-black leading-none"
             >
               SUBMIT
             </h2>

@@ -1,120 +1,208 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory,
+} from 'vue-router'
 
 import LandingPage from '../pages/LandingPage.vue'
+
 import NameInputPage from '../pages/NameInputPage.vue'
+
 import QuizPage from '../pages/QuizPage.vue'
+
 import ScorePage from '../pages/ScorePage.vue'
+
 import RewardPage from '../pages/RewardPage.vue'
+
 import WinnerPage from '../pages/WinnerPage.vue'
+
 import WelcomePage from '../pages/WelcomePage.vue'
+
 import BraindrillPage from '../pages/BraindrillPage.vue'
+
 import BraindrillPlayPage from '../pages/BraindrillPlayPage.vue'
+
 import BraindrillIntermissionPage from '../pages/BraindrillIntermissionPage.vue'
+
 import SupportPage from '../pages/SupportPage.vue'
+
 import ChallengePage from '../pages/ChallengePage.vue'
+
 import LeaderboardPage from '../pages/LeaderboardPage.vue'
+
 import PlayChallenge from '../challenge/PlayChallenge.vue'
+
 import ChallengeResult from '@/challenge/ChallengeResult.vue'
+
 import VersusMode from '../challenge/VersusMode.vue'
+
 import TopicChallenge from '../challenge/TopicChallenge.vue'
+
 import TopicQuizPage from '../challenge/TopicQuizPage.vue'
+
 import TopicResult from '../challenge/TopicResult.vue'
 
 const routes = [
   {
     path: '/',
-    component: WelcomePage,
+
+    component:
+      WelcomePage,
   },
-    {
+
+  {
     path: '/home',
-    component: LandingPage,
+
+    component:
+      LandingPage,
   },
+
   {
     path: '/name',
-    component: NameInputPage,
+
+    component:
+      NameInputPage,
   },
+
   {
     path: '/quiz',
-    component: QuizPage,
+
+    component:
+      QuizPage,
   },
+
   {
     path: '/score',
-    component: ScorePage,
+
+    component:
+      ScorePage,
   },
+
   {
     path: '/reward',
-    component: RewardPage,
+
+    component:
+      RewardPage,
   },
+
   {
     path: '/winner',
-    component: WinnerPage,
+
+    component:
+      WinnerPage,
   },
+
   {
     path: '/braindrill',
-    component: BraindrillPage,
+
+    component:
+      BraindrillPage,
   },
+
   {
-    path: '/braindrill/play',
-    component: BraindrillPlayPage,
+    path:
+      '/braindrill/play',
+
+    component:
+      BraindrillPlayPage,
   },
+
   {
-  path: '/braindrill/intermission',
-  component: BraindrillIntermissionPage,
+    path:
+      '/braindrill/intermission',
+
+    component:
+      BraindrillIntermissionPage,
   },
 
   {
     path: '/support',
-    component: SupportPage,
+
+    component:
+      SupportPage,
   },
+
   {
     path: '/challenge',
-    component: ChallengePage,
+
+    component:
+      ChallengePage,
   },
 
   {
-  path: '/challenge/play',
-  component: PlayChallenge,
-},
+    path:
+      '/challenge/play',
+
+    component:
+      PlayChallenge,
+  },
+
   {
-  path: '/challenge/result',
-  component: ChallengeResult,
-},
+    path:
+      '/challenge/result',
 
-{
-  path: '/versus',
-  component: VersusMode,
-},
+    component:
+      ChallengeResult,
+  },
 
-{
-  path: '/topic-challenge',
+  {
+    path: '/versus',
 
-  component:
-    TopicChallenge,
-},
+    component:
+      VersusMode,
+  },
 
-{
-  path: '/topic-quiz',
+  {
+    path:
+      '/topic-challenge',
 
-  component:
-    TopicQuizPage,
-},
+    component:
+      TopicChallenge,
+  },
 
-{
-  path: '/topic-result',
+  {
+    path:
+      '/topic-quiz',
 
-  component:
-    TopicResult,
-},
+    component:
+      TopicQuizPage,
+  },
 
-    {
-    path: '/leaderboard',
-    component: LeaderboardPage,
-  }
+  {
+    path:
+      '/topic-result',
+
+    component:
+      TopicResult,
+  },
+
+  {
+    path:
+      '/leaderboard',
+
+    component:
+      LeaderboardPage,
+  },
 ]
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-})
+const router =
+  createRouter({
+    history:
+      createWebHistory(),
+
+    routes,
+
+    /* -----------------------------
+       ALWAYS SCROLL TO TOP
+    ----------------------------- */
+
+    scrollBehavior() {
+      return {
+        top: 0,
+
+        behavior:
+          'smooth',
+      }
+    },
+  })
 
 export default router

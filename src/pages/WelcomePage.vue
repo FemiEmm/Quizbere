@@ -321,7 +321,7 @@ const createFromMissing =
           <p
             class="mt-5 text-black text-lg font-bold leading-8"
           >
-            Create a brand new Examinity
+            Create a brand new Quizbere
             account.
           </p>
 
@@ -397,7 +397,7 @@ const createFromMissing =
           <p
             class="mt-5 text-black text-lg font-bold leading-8"
           >
-            Log into your Examinity
+            Log into your Quizbere
             account.
           </p>
 
@@ -539,7 +539,7 @@ const createFromMissing =
         <h1
           class="text-5xl font-black text-[#FF2AA3]"
         >
-          EXAMINITY
+          Quizbere
         </h1>
 
         <!-- TEXT -->
