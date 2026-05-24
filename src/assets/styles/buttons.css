@@ -1,0 +1,65 @@
+/* .btn-primary {
+  @apply bg-[#FD9501]
+  text-black
+  font-black
+  px-8
+  py-4
+  rounded-3xl
+  border-4
+  border-black
+  shadow-[0_6px_0_#000];
+} */
+
+/* -----------------------------
+   GLOBAL BUTTON FEEL
+----------------------------- */
+
+button {
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+/* -----------------------------
+   HOVER BUBBLE EFFECT
+----------------------------- */
+
+button:hover {
+  animation:
+    bubbleBounce 0.45s ease;
+}
+
+/* -----------------------------
+   ACTIVE PRESS
+----------------------------- */
+
+button:active {
+  transform: scale(0.96);
+}
+
+/* -----------------------------
+   BUBBLE ANIMATION
+----------------------------- */
+
+@keyframes bubbleBounce {
+  0% {
+    transform: scale(1);
+  }
+
+  30% {
+    transform: scale(1.06, 0.94);
+  }
+
+  55% {
+    transform: scale(0.97, 1.04);
+  }
+
+  75% {
+    transform: scale(1.03, 0.98);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
