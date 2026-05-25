@@ -9,6 +9,8 @@ import BottomNavbar from '../components/BottomNavbar.vue'
 
 import AppLoader from '../components/AppLoader.vue'
 
+import MorePage from '../components/MorePage.vue'
+
 import {
   playSound,
 } from '../utils/playSound'
@@ -18,6 +20,10 @@ import {
   setSoundMuted,
   stopAllSounds,
 } from '../utils/sounds'
+
+import {
+  stopTopicMusic,
+} from '../utils/topicMusic'
 
 const router = useRouter()
 
@@ -49,6 +55,41 @@ const isAdmin =
   'ADMINDEVELOPER'
 
 /* -----------------------------
+   CLEAR APP STORAGE
+----------------------------- */
+
+const clearAppStorage =
+  () => {
+    localStorage.removeItem(
+      'examinity_username',
+    )
+
+    localStorage.removeItem(
+      'braindrill_run_score',
+    )
+
+    localStorage.removeItem(
+      'braindrill_unlocked_level',
+    )
+
+    localStorage.removeItem(
+      'braindrill_selected_level',
+    )
+
+    localStorage.removeItem(
+      'selected_challenge',
+    )
+
+    localStorage.removeItem(
+      'selected_topic',
+    )
+
+    localStorage.removeItem(
+      'sound_muted',
+    )
+  }
+
+/* -----------------------------
    TOGGLE SOUND
 ----------------------------- */
 
@@ -64,11 +105,11 @@ const toggleSound =
       nextState,
     )
 
- if (nextState) {
-  stopAllSounds()
+    if (nextState) {
+      stopAllSounds()
 
-  stopTopicMusic()
-}
+      stopTopicMusic()
+    }
   }
 
 /* -----------------------------
@@ -80,7 +121,7 @@ const explainApp =
     playSound('button')
 
     router.push(
-      '/explainapp',
+      '/onboarding',
     )
   }
 
@@ -92,7 +133,7 @@ const resetApp =
   () => {
     playSound('button')
 
-    localStorage.clear()
+    clearAppStorage()
 
     router.push('/')
 
@@ -107,7 +148,7 @@ const logout =
   () => {
     playSound('button')
 
-    localStorage.clear()
+    clearAppStorage()
 
     window.location.href =
       '/'
@@ -208,7 +249,7 @@ const deleteAccount =
 
       /* SUCCESS */
 
-      localStorage.clear()
+      clearAppStorage()
 
       playSound('pass')
 
@@ -404,15 +445,7 @@ const deleteAccount =
       <!-- EXPLAIN APP -->
       <button
         @click="
-          () => {
-            playSound(
-              'button',
-            )
-
-            router.push(
-              '/onboarding',
-            )
-          }
+          explainApp
         "
         class="mt-6 w-full bg-[#F3F400] border-4 border-black rounded-2xl py-5 text-black text-xl font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
       >
@@ -477,6 +510,8 @@ const deleteAccount =
           </button>
         </div>
       </div>
+
+      <MorePage />
 
       <!-- DELETE ACCOUNT -->
       <button

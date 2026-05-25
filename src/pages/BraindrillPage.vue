@@ -38,11 +38,7 @@ const username =
 ----------------------------- */
 
 const unlockedLevel =
-  Number(
-    localStorage.getItem(
-      'braindrill_unlocked_level',
-    ),
-  ) || 1
+  ref(1)
 
 /* -----------------------------
    SCORE
@@ -50,6 +46,53 @@ const unlockedLevel =
 
 const runScore =
   ref(0)
+
+/* -----------------------------
+   LOAD USER LEVEL
+----------------------------- */
+
+const loadUserLevel =
+  async () => {
+    try {
+      const {
+        data: user,
+      } = await supabase
+        .from(
+          'examinity_users',
+        )
+        .select(
+          'braindrill_level',
+        )
+        .eq(
+          'username',
+          username,
+        )
+        .maybeSingle()
+
+      if (
+        user?.braindrill_level
+      ) {
+        unlockedLevel.value =
+          user.braindrill_level
+
+        localStorage.setItem(
+          'braindrill_unlocked_level',
+          user.braindrill_level,
+        )
+      }
+
+      else {
+        unlockedLevel.value =
+          Number(
+            localStorage.getItem(
+              'braindrill_unlocked_level',
+            ),
+          ) || 1
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
 /* -----------------------------
    LOAD + SAVE SCORE
@@ -64,6 +107,13 @@ const loadRunScore =
             'braindrill_run_score',
           ),
         ) || 0
+
+      const localLevel =
+        Number(
+          localStorage.getItem(
+            'braindrill_unlocked_level',
+          ),
+        ) || 1
 
       const {
         data: existingUser,
@@ -94,8 +144,10 @@ const loadRunScore =
           Math.max(
             existingUser.highest_level ||
               1,
-            unlockedLevel,
+            localLevel,
           )
+
+        /* UPDATE LEADERBOARD */
 
         await supabase
           .from(
@@ -113,8 +165,26 @@ const loadRunScore =
             username,
           )
 
+        /* UPDATE USER LEVEL */
+
+        await supabase
+          .from(
+            'examinity_users',
+          )
+          .update({
+            braindrill_level:
+              highestLevel,
+          })
+          .eq(
+            'username',
+            username,
+          )
+
         runScore.value =
           updatedScore
+
+        unlockedLevel.value =
+          highestLevel
       }
 
       /* NEW USER */
@@ -132,15 +202,31 @@ const loadRunScore =
                 localRunScore,
 
               highest_level:
-                unlockedLevel,
+                localLevel,
             },
           ])
 
+        await supabase
+          .from(
+            'examinity_users',
+          )
+          .update({
+            braindrill_level:
+              localLevel,
+          })
+          .eq(
+            'username',
+            username,
+          )
+
         runScore.value =
           localRunScore
+
+        unlockedLevel.value =
+          localLevel
       }
 
-      /* CLEAR LOCAL */
+      /* CLEAR LOCAL SCORE */
 
       localStorage.removeItem(
         'braindrill_run_score',
@@ -160,7 +246,7 @@ const startLevel =
   ) => {
     if (
       levelData.level >
-      unlockedLevel
+      unlockedLevel.value
     )
       return
 
@@ -184,11 +270,12 @@ const startLevel =
    MOUNT
 ----------------------------- */
 
-onMounted(() => {
-  loadRunScore()
+onMounted(async () => {
+  await loadUserLevel()
+
+  await loadRunScore()
 })
 </script>
-
 <template>
   <main
     class="min-h-screen bg-[#03B5EC] pb-28 px-5 pt-8"

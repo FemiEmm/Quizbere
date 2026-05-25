@@ -143,15 +143,15 @@ export const questions = [
     answer: '8',
   },
   {
-    id: 14,
-    question: 'Which word can be formed from the letters: "CIPFIEC"?',
-    options: [
-      'Pacific',
-      'Specific',
-      'Science',
-      'Office',
-    ],
-    answer: 'Specific',
+     id: 14,
+      question: 'Which word can be formed from the letters: "PLEPA"?',
+      options: [
+        'Apple',
+        'Plane',
+        'Paper',
+        'Pearl',
+      ],
+  answer: 'Apple',
   },
   {
     id: 15,
