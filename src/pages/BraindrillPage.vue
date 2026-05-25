@@ -54,6 +54,20 @@ const runScore =
 const loadUserLevel =
   async () => {
     try {
+      /* LOCAL FIRST */
+
+      const localLevel =
+        Number(
+          localStorage.getItem(
+            'braindrill_unlocked_level',
+          ),
+        ) || 1
+
+      unlockedLevel.value =
+        localLevel
+
+      /* THEN CHECK SUPABASE */
+
       const {
         data: user,
       } = await supabase
@@ -69,25 +83,46 @@ const loadUserLevel =
         )
         .maybeSingle()
 
-      if (
-        user?.braindrill_level
-      ) {
-        unlockedLevel.value =
-          user.braindrill_level
+      const dbLevel =
+        user?.braindrill_level ||
+        1
 
-        localStorage.setItem(
-          'braindrill_unlocked_level',
-          user.braindrill_level,
+      /* KEEP HIGHEST */
+
+      const highestLevel =
+        Math.max(
+          localLevel,
+          dbLevel,
         )
-      }
 
-      else {
-        unlockedLevel.value =
-          Number(
-            localStorage.getItem(
-              'braindrill_unlocked_level',
-            ),
-          ) || 1
+      unlockedLevel.value =
+        highestLevel
+
+      /* UPDATE LOCAL */
+
+      localStorage.setItem(
+        'braindrill_unlocked_level',
+        highestLevel,
+      )
+
+      /* SYNC SUPABASE */
+
+      if (
+        highestLevel >
+        dbLevel
+      ) {
+        await supabase
+          .from(
+            'examinity_users',
+          )
+          .update({
+            braindrill_level:
+              highestLevel,
+          })
+          .eq(
+            'username',
+            username,
+          )
       }
     } catch (error) {
       console.error(error)
@@ -276,6 +311,7 @@ onMounted(async () => {
   await loadRunScore()
 })
 </script>
+
 <template>
   <main
     class="min-h-screen bg-[#03B5EC] pb-28 px-5 pt-8"

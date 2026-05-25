@@ -1,3 +1,4 @@
+```vue id="n6t2qy"
 <!-- src/pages/WinnerPage.vue -->
 
 <script setup>
@@ -27,8 +28,8 @@ const router = useRouter()
 
 const username =
   localStorage.getItem(
-    'examinity_username',
-  ) || 'Player'
+    'quiz_temp_name',
+  ) || 'PLAYER'
 
 const reward =
   localStorage.getItem(
@@ -520,3 +521,4 @@ const stayPage = () => {
     <BottomNavbar />
   </main>
 </template>
+```

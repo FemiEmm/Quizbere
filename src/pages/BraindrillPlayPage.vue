@@ -1,3 +1,5 @@
+<!-- src/pages/BrainDrillPlayPage.vue -->
+
 <script setup>
 import {
   computed,
@@ -6,13 +8,23 @@ import {
   ref,
 } from 'vue'
 
-import { useRouter } from 'vue-router'
+import {
+  useRouter,
+} from 'vue-router'
 
 import BottomNavbar from '../components/BottomNavbar.vue'
 
-import { braindrillLevels } from '../data/braindrillLevels'
+import BrainQuiz from '../braindrill/BrainQuiz.vue'
 
-import { playSound } from '../utils/playSound'
+import BrainMatch from '../braindrill/BrainMatch.vue'
+
+import {
+  braindrillLevels,
+} from '../data/braindrillLevels'
+
+import {
+  playSound,
+} from '../utils/playSound'
 
 const router = useRouter()
 
@@ -27,7 +39,9 @@ const levelData = JSON.parse(
 )
 
 if (!levelData) {
-  router.push('/braindrill')
+  router.push(
+    '/braindrill',
+  )
 }
 
 const currentLevel =
@@ -36,6 +50,19 @@ const currentLevel =
       level.level ===
       levelData.level,
   )
+
+if (!currentLevel) {
+  router.push(
+    '/braindrill',
+  )
+}
+
+/* -----------------------------
+   GAME TYPE
+----------------------------- */
+
+const gameType =
+  currentLevel.gameType
 
 /* -----------------------------
    DIFFICULTY MAP
@@ -46,7 +73,7 @@ const difficultyMap = {
 
   2: ['easy', 'mid'],
 
-  3: ['mid', 'hard'],
+  3: ['easy', 'mid'],
 
   4: ['hard', 'extreme'],
 
@@ -59,10 +86,10 @@ const difficulties =
   ] || ['easy']
 
 /* -----------------------------
-   AUTO IMPORT QUESTIONS
+   IMPORT MODULES
 ----------------------------- */
 
-const questionModules =
+const allModules =
   import.meta.glob(
     '../data/**/*.js',
     {
@@ -71,29 +98,65 @@ const questionModules =
   )
 
 /* -----------------------------
-   FILTER QUESTIONS
+   FILTER MODULES
 ----------------------------- */
 
-const filteredModules =
-  Object.entries(
-    questionModules,
-  ).filter(([path]) =>
-    difficulties.some(
-      (difficulty) =>
-        path.includes(
-          `/data/${difficulty}/`,
+let filteredModules = []
+
+/* QUIZ */
+
+if (
+  gameType ===
+  'quiz'
+) {
+  filteredModules =
+    Object.entries(
+      allModules,
+    ).filter(
+      ([path]) =>
+        difficulties.some(
+          (
+            difficulty,
+          ) =>
+            path.includes(
+              `/data/${difficulty}/`,
+            ),
         ),
-    ),
-  )
+    )
+}
+
+/* MATCH */
+
+if (
+  gameType ===
+  'match'
+) {
+  filteredModules =
+    Object.entries(
+      allModules,
+    ).filter(
+      ([path]) =>
+        difficulties.some(
+          (
+            difficulty,
+          ) =>
+            path.includes(
+              `/data/match/${difficulty}/`,
+            ),
+        ),
+    )
+}
 
 /* -----------------------------
-   COMBINE QUESTIONS
+   QUESTIONS
 ----------------------------- */
 
 const allQuestions =
   filteredModules.flatMap(
     ([, module]) => {
-      if (module.default) {
+      if (
+        module.default
+      ) {
         return module.default
       }
 
@@ -103,15 +166,12 @@ const allQuestions =
     },
   )
 
-/* -----------------------------
-   RANDOMIZE QUESTIONS
------------------------------ */
-
 const shuffledQuestions =
   [...allQuestions]
     .sort(
       () =>
-        Math.random() - 0.5,
+        Math.random() -
+        0.5,
     )
     .slice(
       0,
@@ -121,14 +181,13 @@ const shuffledQuestions =
       ),
     )
 
-/* -----------------------------
-   SAFETY
------------------------------ */
-
 if (
-  shuffledQuestions.length === 0
+  shuffledQuestions.length ===
+  0
 ) {
-  router.push('/braindrill')
+  router.push(
+    '/braindrill',
+  )
 }
 
 /* -----------------------------
@@ -137,6 +196,16 @@ if (
 
 const currentQuestionIndex =
   ref(0)
+
+const currentQuestion =
+  computed(() => {
+    return (
+      shuffledQuestions[
+        currentQuestionIndex
+          .value
+      ] || null
+    )
+  })
 
 const score = ref(0)
 
@@ -147,11 +216,6 @@ const timeLeft = ref(
   currentLevel.time,
 )
 
-const selectedAnswer =
-  ref('')
-
-const answered = ref(false)
-
 const runScore = ref(
   Number(
     localStorage.getItem(
@@ -161,69 +225,48 @@ const runScore = ref(
 )
 
 /* -----------------------------
-   CURRENT QUESTION
------------------------------ */
-
-const currentQuestion =
-  computed(() => {
-    return (
-      shuffledQuestions[
-        currentQuestionIndex.value
-      ] || null
-    )
-  })
-
-/* -----------------------------
    TIMER
 ----------------------------- */
 
 let timer = null
 
-const startTimer = () => {
-  timer = setInterval(() => {
-    if (
-      timeLeft.value > 0
-    ) {
-      timeLeft.value--
-    } else {
-      endGame()
-    }
-  }, 1000)
-}
-
-/* -----------------------------
-   ANSWER
------------------------------ */
-
-const selectAnswer = (
-  option,
-) => {
-  if (
-    answered.value ||
-    !currentQuestion.value
-  ) {
-    return
+const startTimer =
+  () => {
+    timer =
+      setInterval(() => {
+        if (
+          timeLeft.value >
+          0
+        ) {
+          timeLeft.value--
+        } else {
+          endGame()
+        }
+      }, 1000)
   }
 
-  answered.value = true
+/* -----------------------------
+   QUIZ EVENTS
+----------------------------- */
 
-  selectedAnswer.value =
-    option
-
-  playSound('button')
-
-  if (
-    option ===
-    currentQuestion.value
-      .answer
-  ) {
+const handleCorrect =
+  () => {
     score.value +=
       currentLevel.points
 
     correctAnswers.value++
 
-    playSound('correct')
-  } else {
+    playSound(
+      'correct',
+    )
+
+    setTimeout(() => {
+      nextQuestion()
+    }, 600)
+  }
+
+const handleWrong =
+  () => {
     score.value -= 3
 
     if (
@@ -232,118 +275,156 @@ const selectAnswer = (
       score.value = 0
     }
 
-    playSound('wrong')
+    playSound(
+      'wrong',
+    )
+
+    setTimeout(() => {
+      nextQuestion()
+    }, 600)
   }
 
-  setTimeout(() => {
-    nextQuestion()
-  }, 500)
-}
+/* -----------------------------
+   MATCH EVENTS
+----------------------------- */
+
+const handleMatchCorrect =
+  () => {
+    score.value += 1
+
+    correctAnswers.value += 1
+
+    playSound(
+      'correct',
+    )
+  }
+
+const handleMatchWrong =
+  () => {
+    score.value -= 1
+
+    if (
+      score.value < 0
+    ) {
+      score.value = 0
+    }
+
+    playSound(
+      'wrong',
+    )
+  }
 
 /* -----------------------------
    NEXT QUESTION
 ----------------------------- */
 
-const nextQuestion = () => {
-  answered.value = false
-
-  selectedAnswer.value =
-    ''
-
-  if (
-    currentQuestionIndex.value <
-    shuffledQuestions.length - 1
-  ) {
-    currentQuestionIndex.value++
-  } else {
-    endGame()
+const nextQuestion =
+  () => {
+    if (
+      currentQuestionIndex.value <
+      shuffledQuestions.length -
+        1
+    ) {
+      currentQuestionIndex.value++
+    } else {
+      endGame()
+    }
   }
-}
 
 /* -----------------------------
    END GAME
 ----------------------------- */
 
-const endGame = () => {
-  clearInterval(timer)
+const endGame =
+  () => {
+    clearInterval(
+      timer,
+    )
 
-  runScore.value +=
-    score.value
+    runScore.value +=
+      score.value
 
-  localStorage.setItem(
-    'braindrill_run_score',
-    runScore.value,
-  )
+    localStorage.setItem(
+      'braindrill_run_score',
+      runScore.value,
+    )
 
-  localStorage.setItem(
-    'braindrill_last_score',
-    score.value,
-  )
+    localStorage.setItem(
+      'braindrill_last_score',
+      score.value,
+    )
 
-  localStorage.setItem(
-    'braindrill_correct_answers',
-    correctAnswers.value,
-  )
+    localStorage.setItem(
+      'braindrill_correct_answers',
+      correctAnswers.value,
+    )
 
-  localStorage.setItem(
-    'braindrill_current_level',
-    currentLevel.level,
-  )
-
-  /* PASS / FAIL SOUND */
-
-  if (
-    correctAnswers.value >=
-    currentLevel.requiredCorrect
-  ) {
-    playSound('pass')
-  } else {
-    playSound('fail')
-  }
-
-  /* STRICT UNLOCK */
-
-  if (
-    correctAnswers.value >=
-    currentLevel.requiredCorrect
-  ) {
-    const unlockedLevel =
-      Number(
-        localStorage.getItem(
-          'braindrill_unlocked_level',
-        ),
-      ) || 1
+    localStorage.setItem(
+      'braindrill_current_level',
+      currentLevel.level,
+    )
 
     if (
-      currentLevel.level >=
-      unlockedLevel
+      correctAnswers.value >=
+      currentLevel.requiredCorrect
     ) {
-      localStorage.setItem(
-        'braindrill_unlocked_level',
-        currentLevel.level +
-          1,
+      playSound(
+        'pass',
+      )
+    } else {
+      playSound(
+        'fail',
       )
     }
-  }
 
-  setTimeout(() => {
-    router.push(
-      '/braindrill/intermission',
-    )
-  }, 1200)
-}
+    if (
+      correctAnswers.value >=
+      currentLevel.requiredCorrect
+    ) {
+      const unlockedLevel =
+        Number(
+          localStorage.getItem(
+            'braindrill_unlocked_level',
+          ),
+        ) || 1
+
+      if (
+        currentLevel.level >=
+        unlockedLevel
+      ) {
+        localStorage.setItem(
+          'braindrill_unlocked_level',
+          currentLevel.level +
+            1,
+        )
+      }
+    }
+
+    setTimeout(() => {
+      router.push(
+        '/braindrill/intermission',
+      )
+    }, 1200)
+  }
 
 /* -----------------------------
    LEAVE
 ----------------------------- */
 
-const leaveGame = () => {
-  clearInterval(timer)
+const leaveGame =
+  () => {
+    clearInterval(
+      timer,
+    )
 
-  playSound('button')
+    playSound(
+      'button',
+    )
 
-  router.push('/braindrill')
-}
+    router.push(
+      '/braindrill',
+    )
+  }
 
 /* -----------------------------
    LIFECYCLE
@@ -354,7 +435,9 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  clearInterval(timer)
+  clearInterval(
+    timer,
+  )
 })
 </script>
 
@@ -365,7 +448,7 @@ onBeforeUnmount(() => {
     <section
       class="max-w-md mx-auto"
     >
-      <!-- TOP BAR -->
+      <!-- TOP -->
       <div
         class="flex items-center gap-2"
       >
@@ -381,7 +464,9 @@ onBeforeUnmount(() => {
           <h2
             class="text-xl font-black text-black mt-1"
           >
-            {{ currentLevel.level }}
+            {{
+              currentLevel.level
+            }}
           </h2>
         </div>
 
@@ -397,7 +482,9 @@ onBeforeUnmount(() => {
           <h2
             class="text-xl font-black text-black mt-1"
           >
-            {{ timeLeft }}s
+            {{
+              timeLeft
+            }}s
           </h2>
         </div>
 
@@ -413,7 +500,9 @@ onBeforeUnmount(() => {
           <h2
             class="text-xl font-black text-black mt-1"
           >
-            {{ score }}
+            {{
+              score
+            }}
           </h2>
         </div>
       </div>
@@ -425,71 +514,81 @@ onBeforeUnmount(() => {
         <p
           class="text-sm font-black text-black"
         >
-          CORRECT ANSWERS
+          CORRECT
         </p>
 
         <h2
           class="text-2xl font-black text-[#FF2AA3]"
         >
-          {{ correctAnswers }}
+          {{
+            correctAnswers
+          }}
           /
-          {{ currentLevel.requiredCorrect }}
+          {{
+            currentLevel.requiredCorrect
+          }}
         </h2>
       </div>
 
-      <!-- QUESTION -->
+      <!-- GAME -->
       <div
         class="mt-4 bg-white border-4 border-black rounded-[2rem] p-5"
       >
-        <p
-          class="text-[11px] font-black text-black/50"
-        >
-          Q{{
-            currentQuestionIndex +
-            1
-          }}/{{ shuffledQuestions.length }}
-        </p>
+        <!-- QUIZ -->
+        <BrainQuiz
+          v-if="
+            gameType ===
+            'quiz'
+          "
+          :question="
+            currentQuestion
+          "
+          :question-index="
+            currentQuestionIndex
+          "
+          :total-questions="
+            shuffledQuestions.length
+          "
+          @correct="
+            handleCorrect
+          "
+          @wrong="
+            handleWrong
+          "
+        />
 
-        <h1
-          class="mt-3 text-2xl font-black text-black leading-tight"
-        >
-          {{
-            currentQuestion?.question
-          }}
-        </h1>
-
-        <div
-          class="mt-5 flex flex-col gap-3"
-        >
-          <button
-            v-for="option in currentQuestion?.options || []"
-            :key="option"
-            @click="
-              selectAnswer(
-                option,
-              )
-            "
-            class="w-full border-4 border-black rounded-2xl px-4 py-4 text-base font-black transition-all duration-100"
-            :class="[
-              answered &&
-              option ===
-                currentQuestion?.answer
-                ? 'bg-green-400'
-                : answered &&
-                  selectedAnswer ===
-                    option
-                ? 'bg-red-400'
-                : 'bg-[#03B5EC]',
-            ]"
-          >
-            {{ option }}
-          </button>
-        </div>
+        <!-- MATCH -->
+        <BrainMatch
+          v-if="
+            gameType ===
+            'match'
+          "
+          :question="
+            currentQuestion
+          "
+          :question-index="
+            currentQuestionIndex
+          "
+          :total-questions="
+            shuffledQuestions.length
+          "
+          @correct="
+            handleMatchCorrect
+          "
+          @complete="
+            nextQuestion
+          "
+          @wrong="
+            handleMatchWrong
+          "
+        />
       </div>
 
       <!-- LEAVE -->
       <button
-        @click="leaveGame"
+        @click="
+          leaveGame
+        "
         class="mt-4 w-full bg-white border-4 border-black rounded-2xl py-4 text-black text-lg font-black"
       >
         LEAVE DRILL

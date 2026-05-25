@@ -52,14 +52,14 @@ const startQuiz =
 
 <template>
   <main
-    class="min-h-screen bg-[#03B5EC] flex items-center justify-center px-6 relative overflow-hidden"
+    class="min-h-screen bg-[#03B5EC] flex items-center justify-center px-5 py-6 relative overflow-hidden"
   >
     <!-- BACK BUTTON -->
     <button
       @click="
         goBack
       "
-      class="absolute top-6 left-6 bg-white border-4 border-black rounded-2xl px-5 py-3 shadow-[0_6px_0_#000] text-black font-black text-lg active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+      class="absolute top-4 left-4 bg-white border-4 border-black rounded-xl px-4 py-2 shadow-[0_5px_0_#000] text-black font-black text-base active:translate-y-[3px] active:shadow-[0_2px_0_#000] transition-all duration-100"
     >
       BACK
     </button>
@@ -69,21 +69,21 @@ const startQuiz =
     >
       <!-- TITLE -->
       <h1
-        class="text-5xl font-black text-white leading-none"
+        class="text-3xl sm:text-5xl font-black text-white leading-none"
       >
         ROUND NAME
       </h1>
 
       <!-- SUBTITLE -->
       <p
-        class="mt-4 text-black text-lg font-bold"
+        class="mt-3 text-black text-base font-bold"
       >
         Create a temporary name for this round.
       </p>
 
       <!-- INPUT CARD -->
       <div
-        class="mt-10 bg-white border-4 border-black rounded-[2rem] p-6 shadow-[0_8px_0_#000]"
+        class="mt-7 bg-white border-4 border-black rounded-[2rem] p-5 shadow-[0_7px_0_#000]"
       >
         <!-- INPUT -->
         <input
@@ -95,12 +95,12 @@ const startQuiz =
           type="text"
           maxlength="15"
           placeholder="ROUND NAME..."
-          class="w-full bg-[#E8E8E8] border-4 border-black rounded-2xl px-5 py-4 text-xl font-black text-center outline-none placeholder:text-black/40"
+          class="w-full bg-[#E8E8E8] border-4 border-black rounded-2xl px-4 py-3 text-lg font-black text-center outline-none placeholder:text-black/40"
         />
 
         <!-- INFO -->
         <p
-          class="mt-4 text-sm font-bold text-black/60 leading-6"
+          class="mt-4 text-xs font-bold text-black/60 leading-5"
         >
           This name is only used for this
           game session and screenshots.
@@ -111,7 +111,7 @@ const startQuiz =
           @click="
             startQuiz
           "
-          class="mt-6 w-full bg-[#FD9501] text-black text-2xl font-black py-5 rounded-3xl border-4 border-black shadow-[0_8px_0_#000] active:translate-y-[4px] active:shadow-[0_4px_0_#000] transition-all duration-100"
+          class="mt-5 w-full bg-[#FD9501] text-black text-xl font-black py-4 rounded-3xl border-4 border-black shadow-[0_7px_0_#000] active:translate-y-[4px] active:shadow-[0_3px_0_#000] transition-all duration-100"
         >
           START ROUND
         </button>
@@ -119,7 +119,7 @@ const startQuiz =
 
       <!-- BOTTOM TEXT -->
       <p
-        class="mt-6 text-sm font-bold text-black"
+        class="mt-5 text-xs font-bold text-black"
       >
         Temporary Name • One Session Only
       </p>

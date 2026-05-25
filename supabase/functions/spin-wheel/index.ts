@@ -21,12 +21,12 @@ const corsHeaders = {
 const rewards = [
   {
     name: 'TRY AGAIN',
-    probability: 70,
+    probability: 50,
   },
 
   {
     name: '1GB DATA',
-    probability: 10,
+    probability: 30,
   },
 
   {
