@@ -267,7 +267,7 @@ onMounted(async () => {
             <p
               class="text-[9px] font-black text-black/60"
             >
-              SCORE
+              CORRECT ANSWERS
             </p>
 
             <h3

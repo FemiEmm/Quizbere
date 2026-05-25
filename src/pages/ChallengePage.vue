@@ -64,7 +64,7 @@ const challenges = [
     questionFolders: ['easy'],
 
     description:
-      'One wrong answer instantly ends your run.',
+      'One wrong answer instantly ends your run. Get 10 correct answers to PASS.',
 
     color: 'bg-[#FF2AA3]',
 
@@ -95,7 +95,7 @@ const challenges = [
     questionFolders: ['football'],
 
     description:
-      'Football-only questions. No mercy.',
+      'Football-only questions. No mercy. Get 10 correct answers before timer runs out.',
 
     color: 'bg-[#03B5EC]',
 
@@ -111,7 +111,7 @@ const challenges = [
 
     questionCount: 30,
 
-    startingTime: 60,
+    startingTime: 120,
 
     passMark: 15,
 
@@ -124,7 +124,7 @@ const challenges = [
     questionFolders: ['easy', 'mid'],
 
     description:
-      'Answer as many questions as possible before time explodes.',
+      'Answer as many questions as possible before time explodes. Get 15 correct answers before 120 seconds ends.',
 
     color: 'bg-[#FD9501]',
 

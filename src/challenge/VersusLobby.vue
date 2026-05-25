@@ -411,6 +411,10 @@ const challengeUser =
           <!-- INPUT -->
           <input
             v-model="opponent"
+              @input="
+                opponent =
+                  opponent.toUpperCase()
+              "
             type="text"
             placeholder="Username..."
             class="mt-4 w-full bg-[#F5F5F5] border-4 border-black rounded-2xl px-4 py-4 text-lg font-black text-center outline-none"
