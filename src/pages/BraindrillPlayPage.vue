@@ -186,8 +186,6 @@ const startTimer = () => {
     ) {
       timeLeft.value--
     } else {
-      playSound('fail')
-
       endGame()
     }
   }, 1000)
