@@ -70,4 +70,22 @@ export const topicChallenges = [
 
     color: 'bg-[#7C3AED]',
   },
+
+  {
+    id: 5,
+
+    name: 'NIGERIAN HISTORY',
+
+    folder: 'easy',
+
+    topic: 'nigeria',
+
+    points: 20,
+
+    questionCount: 20,
+
+    passMark: 16,
+
+    color: 'bg-[#FF2AA3]',
+  },
 ]

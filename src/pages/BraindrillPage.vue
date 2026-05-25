@@ -1,5 +1,12 @@
 <script setup>
-import { useRouter } from 'vue-router'
+import {
+  onMounted,
+  ref,
+} from 'vue'
+
+import {
+  useRouter,
+} from 'vue-router'
 
 import { supabase } from '../lib/supabase'
 
@@ -27,7 +34,7 @@ const username =
   ) || 'anonymous'
 
 /* -----------------------------
-   LEVEL + SCORE
+   LEVEL
 ----------------------------- */
 
 const unlockedLevel =
@@ -37,12 +44,111 @@ const unlockedLevel =
     ),
   ) || 1
 
+/* -----------------------------
+   SCORE
+----------------------------- */
+
 const runScore =
-  Number(
-    localStorage.getItem(
-      'braindrill_run_score',
-    ),
-  ) || 0
+  ref(0)
+
+/* -----------------------------
+   LOAD + SAVE SCORE
+----------------------------- */
+
+const loadRunScore =
+  async () => {
+    try {
+      const localRunScore =
+        Number(
+          localStorage.getItem(
+            'braindrill_run_score',
+          ),
+        ) || 0
+
+      const {
+        data: existingUser,
+      } = await supabase
+        .from(
+          'examinity_leaderboard',
+        )
+        .select(
+          'best_run_score, highest_level',
+        )
+        .eq(
+          'username',
+          username,
+        )
+        .maybeSingle()
+
+      /* EXISTING USER */
+
+      if (existingUser) {
+        const updatedScore =
+          (
+            existingUser.best_run_score ||
+            0
+          ) +
+          localRunScore
+
+        const highestLevel =
+          Math.max(
+            existingUser.highest_level ||
+              1,
+            unlockedLevel,
+          )
+
+        await supabase
+          .from(
+            'examinity_leaderboard',
+          )
+          .update({
+            best_run_score:
+              updatedScore,
+
+            highest_level:
+              highestLevel,
+          })
+          .eq(
+            'username',
+            username,
+          )
+
+        runScore.value =
+          updatedScore
+      }
+
+      /* NEW USER */
+
+      else {
+        await supabase
+          .from(
+            'examinity_leaderboard',
+          )
+          .insert([
+            {
+              username,
+
+              best_run_score:
+                localRunScore,
+
+              highest_level:
+                unlockedLevel,
+            },
+          ])
+
+        runScore.value =
+          localRunScore
+      }
+
+      /* CLEAR LOCAL */
+
+      localStorage.removeItem(
+        'braindrill_run_score',
+      )
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
 /* -----------------------------
    START LEVEL
@@ -75,98 +181,12 @@ const startLevel =
   }
 
 /* -----------------------------
-   SUBMIT SCORE
+   MOUNT
 ----------------------------- */
 
-const submitScore =
-  async () => {
-    try {
-      playSound('button')
-
-      /* CHECK EXISTING USER */
-
-      const {
-        data: existingUser,
-      } = await supabase
-        .from(
-          'examinity_leaderboard',
-        )
-        .select('*')
-        .eq(
-          'username',
-          username,
-        )
-        .maybeSingle()
-
-      /* UPDATE */
-
-      if (existingUser) {
-        const bestScore =
-          Math.max(
-            existingUser.best_run_score ||
-              0,
-            runScore,
-          )
-
-        const highestLevel =
-          Math.max(
-            existingUser.highest_level ||
-              1,
-            unlockedLevel,
-          )
-
-        await supabase
-          .from(
-            'examinity_leaderboard',
-          )
-          .update({
-            best_run_score:
-              bestScore,
-
-            highest_level:
-              highestLevel,
-          })
-          .eq(
-            'username',
-            username,
-          )
-      }
-
-      /* INSERT */
-
-      else {
-        await supabase
-          .from(
-            'examinity_leaderboard',
-          )
-          .insert([
-            {
-              username,
-
-              best_run_score:
-                runScore,
-
-              highest_level:
-                unlockedLevel,
-            },
-          ])
-      }
-
-      /* CLEAR LOCAL SCORE */
-
-      localStorage.removeItem(
-        'braindrill_run_score',
-      )
-
-      /* ROUTE */
-
-      router.push(
-        '/leaderboard',
-      )
-    } catch (error) {
-      console.error(error)
-    }
-  }
+onMounted(() => {
+  loadRunScore()
+})
 </script>
 
 <template>
@@ -193,42 +213,23 @@ const submitScore =
 
         <!-- RUN SCORE -->
         <div
-          class="mt-6 flex gap-3"
+          class="mt-6"
         >
-          <!-- SCORE -->
           <div
-            class="flex-1 bg-[#F3F400] border-4 border-black rounded-2xl py-4 text-center flex flex-col justify-center"
+            class="bg-[#F3F400] border-4 border-black rounded-2xl py-4 text-center"
           >
             <p
               class="text-[10px] font-black text-black/70"
             >
-              RUN SCORE
+              TOTAL RUN SCORE
             </p>
 
             <h2
-              class="mt-2 text-3xl font-black text-black leading-none"
+              class="mt-2 text-4xl font-black text-black leading-none"
             >
               {{ runScore }}
             </h2>
           </div>
-
-          <!-- SUBMIT -->
-          <button
-            @click="submitScore"
-            class="flex-1 bg-[#FD9501] border-4 border-black rounded-2xl py-4 text-center flex flex-col justify-center active:translate-y-[3px] transition-all duration-100"
-          >
-            <p
-              class="text-[10px] font-black text-black/70"
-            >
-              FINISH RUN
-            </p>
-
-            <h2
-              class="mt-2 text-3xl font-black text-black leading-none"
-            >
-              SUBMIT
-            </h2>
-          </button>
         </div>
       </div>
 

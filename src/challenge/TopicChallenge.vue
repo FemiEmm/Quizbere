@@ -95,7 +95,7 @@ const goBack =
     class="min-h-screen bg-[#F3F400] px-4 pt-5 pb-28 overflow-x-hidden"
   >
     <section
-      class="max-w-md mx-auto"
+      class="max-w-sm mx-auto"
     >
       <!-- TOP -->
       <div
@@ -106,7 +106,7 @@ const goBack =
           @click="
             goBack
           "
-          class="bg-black text-white border-4 border-black rounded-2xl px-5 py-3 text-sm font-black shadow-[0_5px_0_#222]"
+          class="bg-black text-white border-4 border-black rounded-xl px-4 py-2 text-xs font-black shadow-[0_4px_0_#222]"
         >
           BACK
         </button>
@@ -116,7 +116,7 @@ const goBack =
           @click="
             toggleMusic
           "
-          class="bg-black text-white border-4 border-black rounded-2xl px-5 py-3 text-sm font-black shadow-[0_5px_0_#222]"
+          class="bg-black text-white border-4 border-black rounded-xl px-4 py-2 text-xs font-black shadow-[0_4px_0_#222]"
         >
           MUTE
         </button>
@@ -124,12 +124,12 @@ const goBack =
 
       <!-- HEADER -->
       <div
-        class="mt-4 flex items-center justify-between gap-2 px-2"
+        class="mt-4 flex items-center justify-between gap-2 px-1"
       >
         <!-- LEFT -->
         <img
           src="/mascot/mascot_marking.png"
-          class="w-[90px] shrink-0"
+          class="w-[75px] shrink-0"
         />
 
         <!-- RIGHT -->
@@ -137,13 +137,13 @@ const goBack =
           class="flex-1 text-right min-w-0"
         >
           <h1
-            class="text-[42px] font-black text-black leading-none"
+            class="text-[30px] font-black text-black leading-none"
           >
             TOPIC
           </h1>
 
           <h2
-            class="text-[42px] font-black text-[#FF2AA3] leading-none break-words"
+            class="text-[30px] font-black text-[#FF2AA3] leading-none break-words"
           >
             CHALLENGE
           </h2>
@@ -152,49 +152,82 @@ const goBack =
 
       <!-- TOPICS -->
       <div
-        class="mt-8 flex flex-col gap-5"
+        class="mt-6 flex flex-col gap-4"
       >
         <div
           v-for="topic in topicChallenges"
           :key="topic.id"
-          class="bg-white border-4 border-black rounded-[2rem] p-5"
+          class="bg-white border-4 border-black rounded-[1.6rem] p-4"
         >
           <!-- TOP -->
           <div
-            class="flex justify-between items-start gap-4"
+            class="flex items-start justify-between gap-3"
           >
             <!-- LEFT -->
             <div>
+              <p
+                class="text-[11px] font-black text-black/50"
+              >
+                TOPIC
+              </p>
+
               <h2
-                class="text-3xl font-black text-black"
+                class="mt-1 text-2xl font-black text-black leading-tight"
               >
                 {{
                   topic.name
                 }}
               </h2>
+            </div>
 
+            <!-- RIGHT -->
+            <div
+              class="text-right"
+            >
               <p
-                class="mt-2 text-sm font-bold text-black/60"
+                class="text-[11px] font-black text-black/50"
+              >
+                QUESTIONS
+              </p>
+
+              <h3
+                class="mt-1 text-2xl font-black text-black"
               >
                 {{
                   topic.questionCount
                 }}
-                Questions
-              </p>
+              </h3>
             </div>
+          </div>
 
-            <!-- POINTS -->
+          <!-- BOTTOM -->
+          <div
+            class="mt-4 flex"
+          >
+            <!-- START -->
+            <button
+              @click="
+                startTopic(
+                  topic,
+                )
+              "
+              class="w-[70%] bg-[#03B5EC] border-y-4 border-l-4 border-black rounded-l-xl py-4 text-base font-black text-black shadow-[0_4px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] transition-all duration-100"
+            >
+              START TOPIC
+            </button>
+
+            <!-- REWARD -->
             <div
-              class="bg-[#F3F400] border-4 border-black rounded-2xl px-4 py-3 text-center min-w-[90px]"
+              class="w-[30%] bg-[#F3F400] border-4 border-black rounded-r-xl flex flex-col items-center justify-center shadow-[0_4px_0_#000]"
             >
               <p
-                class="text-[10px] font-black"
+                class="text-[9px] font-black text-black/70"
               >
                 REWARD
               </p>
 
               <h3
-                class="text-3xl font-black"
+                class="mt-1 text-2xl font-black text-black leading-none"
               >
                 {{
                   topic.points
@@ -202,18 +235,6 @@ const goBack =
               </h3>
             </div>
           </div>
-
-          <!-- BUTTON -->
-          <button
-            @click="
-              startTopic(
-                topic,
-              )
-            "
-            class="mt-5 w-full bg-[#03B5EC] border-4 border-black rounded-2xl py-5 text-xl font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000]"
-          >
-            START TOPIC
-          </button>
         </div>
       </div>
     </section>

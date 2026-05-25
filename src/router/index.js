@@ -41,6 +41,8 @@ import TopicQuizPage from '../challenge/TopicQuizPage.vue'
 
 import TopicResult from '../challenge/TopicResult.vue'
 
+import Onboarding from '../pages/OnBoarding.vue'
+
 const routes = [
   {
     path: '/',
@@ -181,6 +183,14 @@ const routes = [
 
     component:
       LeaderboardPage,
+  },
+
+    {
+    path:
+      '/onboarding',
+
+    component:
+      Onboarding,
   },
 ]
 

@@ -1,23 +1,46 @@
 import topicmusic from '../assets/sounds/topicmusic.mp3'
 
+import {
+  isSoundMuted,
+} from './sounds'
+
 let audio = null
 
 let muted = false
 
+/* -----------------------------
+   PLAY
+----------------------------- */
+
 export const playTopicMusic =
   async () => {
-    if (muted) return
+    /* GLOBAL SOUND MUTE */
+
+    if (
+      isSoundMuted()
+    )
+      return
+
+    /* LOCAL MUSIC MUTE */
+
+    if (muted)
+      return
 
     try {
       if (!audio) {
-        audio = new Audio(
-          topicmusic,
-        )
+        audio =
+          new Audio(
+            topicmusic,
+          )
 
         audio.loop = true
 
         audio.volume = 0.1
       }
+
+      audio.pause()
+
+      audio.currentTime = 0
 
       await audio.play()
     } catch (err) {
@@ -25,17 +48,34 @@ export const playTopicMusic =
     }
   }
 
+/* -----------------------------
+   STOP
+----------------------------- */
+
 export const stopTopicMusic =
   () => {
     muted = true
 
     if (audio) {
       audio.pause()
+
+      audio.currentTime = 0
     }
   }
 
+/* -----------------------------
+   RESUME
+----------------------------- */
+
 export const resumeTopicMusic =
   async () => {
+    /* GLOBAL SOUND MUTE */
+
+    if (
+      isSoundMuted()
+    )
+      return
+
     muted = false
 
     if (audio) {
@@ -46,6 +86,10 @@ export const resumeTopicMusic =
       }
     }
   }
+
+/* -----------------------------
+   STATUS
+----------------------------- */
 
 export const isTopicMuted =
   () => muted

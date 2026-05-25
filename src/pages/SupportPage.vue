@@ -1,4 +1,3 @@
-```vue id="k8r2qx"
 <script setup>
 import { ref } from 'vue'
 
@@ -10,7 +9,15 @@ import BottomNavbar from '../components/BottomNavbar.vue'
 
 import AppLoader from '../components/AppLoader.vue'
 
-import { playSound } from '../utils/playSound'
+import {
+  playSound,
+} from '../utils/playSound'
+
+import {
+  isSoundMuted,
+  setSoundMuted,
+  stopAllSounds,
+} from '../utils/sounds'
 
 const router = useRouter()
 
@@ -22,6 +29,11 @@ const showDeleteModal =
 
 const deleteMessage =
   ref('')
+
+const muted =
+  ref(
+    isSoundMuted(),
+  )
 
 /* -----------------------------
    FETCH USERNAME
@@ -35,6 +47,42 @@ const username =
 const isAdmin =
   username ===
   'ADMINDEVELOPER'
+
+/* -----------------------------
+   TOGGLE SOUND
+----------------------------- */
+
+const toggleSound =
+  () => {
+    const nextState =
+      !muted.value
+
+    muted.value =
+      nextState
+
+    setSoundMuted(
+      nextState,
+    )
+
+ if (nextState) {
+  stopAllSounds()
+
+  stopTopicMusic()
+}
+  }
+
+/* -----------------------------
+   EXPLAIN APP
+----------------------------- */
+
+const explainApp =
+  () => {
+    playSound('button')
+
+    router.push(
+      '/explainapp',
+    )
+  }
 
 /* -----------------------------
    RESET APP
@@ -223,7 +271,7 @@ const deleteAccount =
             @click="
               deleteAccount
             "
-            class="w-full bg-[#FF2AA3] border-4 border-black rounded-2xl py-5 text-white text-xl font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+            class="w-full bg-[#FF2AA3] border-4 border-black rounded-2xl py-5 text-white text-xl font-black shadow-[0_6px_0_#000]"
           >
             YES DELETE
           </button>
@@ -243,7 +291,7 @@ const deleteAccount =
                   false
               }
             "
-            class="w-full bg-[#F3F400] border-4 border-black rounded-2xl py-5 text-black text-xl font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+            class="w-full bg-[#F3F400] border-4 border-black rounded-2xl py-5 text-black text-xl font-black shadow-[0_6px_0_#000]"
           >
             CANCEL
           </button>
@@ -353,6 +401,51 @@ const deleteAccount =
         </div>
       </div>
 
+      <!-- EXPLAIN APP -->
+      <button
+        @click="
+          () => {
+            playSound(
+              'button',
+            )
+
+            router.push(
+              '/onboarding',
+            )
+          }
+        "
+        class="mt-6 w-full bg-[#F3F400] border-4 border-black rounded-2xl py-5 text-black text-xl font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+      >
+        EXPLAIN APP
+      </button>
+
+      <!-- SOUND + LOGOUT -->
+      <div
+        class="mt-4 grid grid-cols-2 gap-4"
+      >
+        <!-- SOUND -->
+        <button
+          @click="
+            toggleSound
+          "
+          class="bg-[#03B5EC] border-4 border-black rounded-2xl py-5 px-3 text-black text-sm font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+        >
+          {{
+            muted
+              ? 'UNMUTE'
+              : 'MUTE'
+          }}
+        </button>
+
+        <!-- LOGOUT -->
+        <button
+          @click="logout"
+          class="bg-black border-4 border-black rounded-2xl py-5 px-3 text-white text-sm font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+        >
+          LOGOUT
+        </button>
+      </div>
+
       <!-- RESET CARD -->
       <div
         v-if="isAdmin"
@@ -385,14 +478,6 @@ const deleteAccount =
         </div>
       </div>
 
-      <!-- LOGOUT -->
-      <button
-        @click="logout"
-        class="mt-6 w-full bg-black border-4 border-black rounded-2xl py-5 text-white text-xl font-black shadow-[0_6px_0_#000]"
-      >
-        LOGOUT
-      </button>
-
       <!-- DELETE ACCOUNT -->
       <button
         @click="
@@ -405,7 +490,7 @@ const deleteAccount =
               true
           }
         "
-        class="mt-4 w-full bg-white border-4 border-black rounded-2xl py-5 text-[#FF2AA3] text-xl font-black shadow-[0_6px_0_#000]"
+        class="mt-16 w-full bg-white border-4 border-black rounded-2xl py-5 text-[#FF2AA3] text-xl font-black shadow-[0_6px_0_#000]"
       >
         DELETE ACCOUNT
       </button>
@@ -414,4 +499,3 @@ const deleteAccount =
     <BottomNavbar />
   </main>
 </template>
-```

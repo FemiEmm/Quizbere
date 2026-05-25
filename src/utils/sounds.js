@@ -14,6 +14,31 @@ import screenshotMp3 from '../assets/sounds/screenshot.mp3'
 
 import examinityMp3 from '../assets/sounds/examinity.mp3'
 
+/* -----------------------------
+   GLOBAL MUTE
+----------------------------- */
+
+export const isSoundMuted =
+  () => {
+    return (
+      localStorage.getItem(
+        'quizbere_muted',
+      ) === 'true'
+    )
+  }
+
+export const setSoundMuted =
+  (value) => {
+    localStorage.setItem(
+      'quizbere_muted',
+      value,
+    )
+  }
+
+/* -----------------------------
+   AUDIO OBJECTS
+----------------------------- */
+
 const button =
   new Audio(buttonMp3)
 
@@ -54,6 +79,10 @@ const examinity =
 
 examinity.volume = 0.2
 
+/* -----------------------------
+   EXPORT SOUNDS
+----------------------------- */
+
 export const sounds = {
   button,
 
@@ -71,3 +100,44 @@ export const sounds = {
 
   examinity,
 }
+
+/* -----------------------------
+   PLAY SOUND
+----------------------------- */
+
+export const playSound =
+  (name) => {
+    if (
+      isSoundMuted()
+    )
+      return
+
+    const sound =
+      sounds[name]
+
+    if (!sound)
+      return
+
+    sound.pause()
+
+    sound.currentTime = 0
+
+    sound.play()
+  }
+
+/* -----------------------------
+   STOP ALL SOUND
+----------------------------- */
+
+export const stopAllSounds =
+  () => {
+    Object.values(
+      sounds,
+    ).forEach(
+      (sound) => {
+        sound.pause()
+
+        sound.currentTime = 0
+      },
+    )
+  }

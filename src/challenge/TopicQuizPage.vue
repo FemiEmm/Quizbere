@@ -40,6 +40,10 @@ import {
   questions as animalQuestions,
 } from '../data/easy/animal'
 
+import {
+  questions as nigeriaQuestions,
+} from '../data/easy/nigeria.js'
+
 const router = useRouter()
 
 const selectedTopic =
@@ -93,6 +97,10 @@ const topicMap = {
 
   animal:
     animalQuestions,
+
+  nigeria:
+    nigeriaQuestions,
+
 }
 
 const questions =

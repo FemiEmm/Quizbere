@@ -66,44 +66,48 @@ onMounted(() => {
 
 <template>
   <main
-    class="min-h-screen bg-[#03B5EC] pb-28 px-5 pt-8"
+    class="min-h-screen bg-[#03B5EC] pb-28 px-4 pt-5"
   >
     <section
       class="max-w-md mx-auto"
     >
       <!-- HEADER -->
-      <div class="text-center">
+      <div
+        class="text-center"
+      >
         <h1
-          class="text-5xl font-black text-white"
+          class="text-3xl font-black text-white"
         >
-          LEADERBOARD
+          BRAINDRILL
         </h1>
 
         <p
-          class="mt-4 text-black text-base font-bold leading-6"
+          class="mt-1 text-[12px] font-black text-black/70"
         >
-          Top BrainDrill players.
+          LEADERBOARD
         </p>
       </div>
 
       <!-- LOADING -->
-      <AppLoader v-if="loading" />
+      <AppLoader
+        v-if="loading"
+      />
 
       <!-- EMPTY -->
       <div
         v-else-if="
           leaderboard.length === 0
         "
-        class="mt-10 bg-white border-4 border-black rounded-[2rem] p-8 text-center"
+        class="mt-6 bg-white border-4 border-black rounded-[2rem] p-6 text-center"
       >
         <h2
-          class="text-3xl font-black text-black"
+          class="text-2xl font-black text-black"
         >
           NO SCORES YET
         </h2>
 
         <p
-          class="mt-3 text-sm font-bold text-black/60"
+          class="mt-2 text-xs font-bold text-black/60"
         >
           Be the first to dominate
           BrainDrill.
@@ -113,72 +117,84 @@ onMounted(() => {
       <!-- LEADERBOARD -->
       <div
         v-else
-        class="mt-10 flex flex-col gap-4"
+        class="mt-6 flex flex-col gap-3"
       >
-        <!-- FIRST PLACE -->
+        <!-- #1 PLAYER -->
         <div
           v-if="leaderboard[0]"
-          class="bg-[#F3F400] border-4 border-black rounded-[2.5rem] p-6 shadow-[0_8px_0_#000] text-center"
+          class="bg-[#F3F400] border-4 border-black rounded-[2rem] px-4 py-4 shadow-[0_6px_0_#000]"
         >
-          <!-- BADGE -->
           <div
-            class="flex justify-center"
+            class="flex items-center gap-3"
           >
-            <Vue3Lottie
-              :animationData="
-                winnerBadge
-              "
-              :height="120"
-              :width="120"
-            />
-          </div>
-
-          <!-- TITLE -->
-          <p
-            class="-mt-2 text-sm font-black text-black/70"
-          >
-            #1 PLAYER
-          </p>
-
-          <!-- NAME -->
-          <h2
-            class="mt-2 text-3xl font-black text-black break-words"
-          >
-            {{
-              leaderboard[0]
-                .username
-            }}
-          </h2>
-
-          <!-- LEVEL -->
-          <p
-            class="mt-2 text-lg font-black text-black/70"
-          >
-            LEVEL
-            {{
-              leaderboard[0]
-                .highest_level
-            }}
-          </p>
-
-          <!-- SCORE -->
-          <div
-            class="mt-5 bg-white border-4 border-black rounded-3xl py-5"
-          >
-            <p
-              class="text-sm font-black text-[#FF2AA3]"
+            <!-- LEFT -->
+            <div
+              class="w-[80px] flex justify-center shrink-0"
             >
-              BEST RUN
-            </p>
+              <Vue3Lottie
+                :animationData="
+                  winnerBadge
+                "
+                :height="70"
+                :width="70"
+              />
+            </div>
 
-            <h3
-              class="mt-2 text-5xl font-black text-black"
+            <!-- RIGHT -->
+            <div
+              class="flex-1 min-w-0 pr-2"
             >
-              {{
-                leaderboard[0]
-                  .best_run_score
-              }}
-            </h3>
+              <!-- TOP -->
+              <div
+                class="flex items-center justify-between gap-2"
+              >
+                <p
+                  class="text-xs font-black text-black/60"
+                >
+                  #1 PLAYER
+                </p>
+
+                <p
+                  class="text-xs font-black text-black/60 shrink-0"
+                >
+                  LVL
+                  {{
+                    leaderboard[0]
+                      .highest_level
+                  }}
+                </p>
+              </div>
+
+              <!-- NAME -->
+              <h2
+                class="mt-1 text-2xl font-black text-black truncate"
+              >
+                {{
+                  leaderboard[0]
+                    .username
+                }}
+              </h2>
+
+              <!-- SCORE -->
+              <div
+                class="mt-3 bg-white border-4 border-black rounded-2xl py-3 text-center"
+              >
+                <p
+                  class="text-[9px] font-black text-[#FF2AA3]"
+                >
+                  SCORE
+                </p>
+
+                <h3
+                  class="mt-1 text-3xl font-black text-black leading-none"
+                >
+                  {{
+                    leaderboard[0]
+                      .best_run_score
+                  }}
+                </h3>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -189,63 +205,60 @@ onMounted(() => {
             index
           ) in leaderboard.slice(1)"
           :key="player.id"
-          class="bg-white border-4 border-black rounded-3xl px-5 py-5 flex items-center justify-between"
+          class="bg-white border-4 border-black rounded-2xl pl-3 pr-5 py-3 grid grid-cols-[20%_80%] gap-2 items-center"
         >
-          <!-- LEFT -->
+          <!-- POSITION -->
           <div
-            class="flex items-center gap-4"
+            class="flex justify-center"
           >
-            <!-- RANK -->
             <div
-              class="w-16 h-16 rounded-2xl bg-[#F3F400] border-4 border-black flex items-center justify-center"
+              class="w-12 h-12 rounded-xl bg-[#F3F400] border-4 border-black flex items-center justify-center"
             >
               <span
-                class="text-xl font-black text-black"
+                class="text-sm font-black text-black"
               >
                 #{{
                   index + 2
                 }}
               </span>
             </div>
+          </div>
 
-            <!-- USER -->
-            <div>
-              <h2
-                class="text-xl font-black text-black"
+          <!-- RIGHT -->
+          <div
+            class="min-w-0 pr-2"
+          >
+            <!-- NAME -->
+            <h2
+              class="text-base font-black text-black truncate"
+            >
+              {{
+                player.username
+              }}
+            </h2>
+
+            <!-- SCORE + LEVEL -->
+            <div
+              class="mt-1 flex items-center justify-between gap-4"
+            >
+              <p
+                class="text-[12px] font-black text-[#FF2AA3]"
               >
+                SCORE
                 {{
-                  player.username
+                  player.best_run_score
                 }}
-              </h2>
+              </p>
 
               <p
-                class="text-sm font-bold text-black/60"
+                class="text-[12px] font-black text-black/60 shrink-0"
               >
-                Level
+                LEVEL
                 {{
                   player.highest_level
                 }}
               </p>
             </div>
-          </div>
-
-          <!-- SCORE -->
-          <div
-            class="bg-[#FF2AA3]/15 border-2 border-[#FF2AA3] rounded-2xl px-4 py-3 text-center"
-          >
-            <p
-              class="text-[10px] font-black text-[#FF2AA3]"
-            >
-              BEST RUN
-            </p>
-
-            <h3
-              class="mt-1 text-2xl font-black text-black"
-            >
-              {{
-                player.best_run_score
-              }}
-            </h3>
           </div>
         </div>
       </div>
