@@ -16,8 +16,9 @@ const props =
 
 const emit =
   defineEmits([
-    'correct',
-    'wrong',
+    'success',
+    'fail',
+    'complete',
   ])
 
 /* -----------------------------
@@ -50,24 +51,32 @@ const selectAnswer =
     selectedAnswer.value =
       option
 
-    /* CORRECT */
+    /* SUCCESS */
 
     if (
       option ===
       props.question.answer
     ) {
       emit(
-        'correct',
+        'success',
       )
     }
 
-    /* WRONG */
+    /* FAIL */
 
     else {
       emit(
-        'wrong',
+        'fail',
       )
     }
+
+    /* COMPLETE */
+
+    setTimeout(() => {
+      emit(
+        'complete',
+      )
+    }, 600)
   }
 
 /* -----------------------------

@@ -24,9 +24,9 @@ const props =
 
 const emit =
   defineEmits([
+    'success',
+    'fail',
     'complete',
-    'correct',
-    'wrong',
   ])
 
 /* -----------------------------
@@ -167,7 +167,7 @@ const selectRight =
       return
     }
 
-    /* CORRECT */
+    /* SUCCESS */
 
     if (
       selectedLeft.value
@@ -184,9 +184,11 @@ const selectRight =
 
       currentMatches.value++
 
-      emit('correct')
+      emit(
+        'success',
+      )
 
-      /* FINISHED */
+      /* COMPLETE */
 
       if (
         currentMatches.value >=
@@ -204,10 +206,12 @@ const selectRight =
       }
     }
 
-    /* WRONG */
+    /* FAIL */
 
     else {
-      emit('wrong')
+      emit(
+        'fail',
+      )
     }
 
     selectedLeft.value =

@@ -1,4 +1,4 @@
-<!-- src/pages/BrainDrillPlayPage.vue -->
+<!-- src/pages/BraindrillPlayPage.vue -->
 
 <script setup>
 import {
@@ -17,6 +17,8 @@ import BottomNavbar from '../components/BottomNavbar.vue'
 import BrainQuiz from '../braindrill/BrainQuiz.vue'
 
 import BrainMatch from '../braindrill/BrainMatch.vue'
+
+import BrainTrueFalse from '../braindrill/BrainTrueFalse.vue'
 
 import {
   braindrillLevels,
@@ -75,9 +77,19 @@ const difficultyMap = {
 
   3: ['easy', 'mid'],
 
-  4: ['hard', 'extreme'],
+  4: ['easy', 'mid'],
 
-  5: ['extreme'],
+  5: ['easy'],
+
+  6: ['easy'],
+
+  7: ['easy'],
+
+  8: ['easy','mid'],
+
+  9: ['easy','mid'],
+
+  10: ['extreme'],
 }
 
 const difficulties =
@@ -147,6 +159,28 @@ if (
     )
 }
 
+/* TRUE FALSE */
+
+if (
+  gameType ===
+  'truefalse'
+) {
+  filteredModules =
+    Object.entries(
+      allModules,
+    ).filter(
+      ([path]) =>
+        difficulties.some(
+          (
+            difficulty,
+          ) =>
+            path.includes(
+              `/data/othergames/trueorfalse/${difficulty}/`,
+            ),
+        ),
+    )
+}
+
 /* -----------------------------
    QUESTIONS
 ----------------------------- */
@@ -207,7 +241,9 @@ const currentQuestion =
     )
   })
 
-const score = ref(0)
+/* -----------------------------
+   PERFORMANCE
+----------------------------- */
 
 const correctAnswers =
   ref(0)
@@ -215,6 +251,10 @@ const correctAnswers =
 const timeLeft = ref(
   currentLevel.time,
 )
+
+/* -----------------------------
+   REWARD SCORE
+----------------------------- */
 
 const runScore = ref(
   Number(
@@ -246,72 +286,30 @@ const startTimer =
   }
 
 /* -----------------------------
-   QUIZ EVENTS
+   EVENTS
 ----------------------------- */
 
-const handleCorrect =
+const handleSuccess =
   () => {
-    score.value +=
-      currentLevel.points
-
     correctAnswers.value++
 
     playSound(
       'correct',
     )
-
-    setTimeout(() => {
-      nextQuestion()
-    }, 600)
   }
 
-const handleWrong =
+const handleFail =
   () => {
-    score.value -= 3
-
-    if (
-      score.value < 0
-    ) {
-      score.value = 0
-    }
-
     playSound(
       'wrong',
     )
+  }
 
+const handleComplete =
+  () => {
     setTimeout(() => {
       nextQuestion()
     }, 600)
-  }
-
-/* -----------------------------
-   MATCH EVENTS
------------------------------ */
-
-const handleMatchCorrect =
-  () => {
-    score.value += 1
-
-    correctAnswers.value += 1
-
-    playSound(
-      'correct',
-    )
-  }
-
-const handleMatchWrong =
-  () => {
-    score.value -= 1
-
-    if (
-      score.value < 0
-    ) {
-      score.value = 0
-    }
-
-    playSound(
-      'wrong',
-    )
   }
 
 /* -----------------------------
@@ -341,17 +339,22 @@ const endGame =
       timer,
     )
 
-    runScore.value +=
-      score.value
+    const passed =
+      correctAnswers.value >=
+      currentLevel.requiredCorrect
+
+    /* REWARD PLAYER */
+
+    if (passed) {
+      runScore.value +=
+        currentLevel.points
+    }
+
+    /* SAVE */
 
     localStorage.setItem(
       'braindrill_run_score',
       runScore.value,
-    )
-
-    localStorage.setItem(
-      'braindrill_last_score',
-      score.value,
     )
 
     localStorage.setItem(
@@ -364,23 +367,25 @@ const endGame =
       currentLevel.level,
     )
 
-    if (
-      correctAnswers.value >=
-      currentLevel.requiredCorrect
-    ) {
+    /* PASS SOUND */
+
+    if (passed) {
       playSound(
         'pass',
       )
-    } else {
+    }
+
+    /* FAIL SOUND */
+
+    else {
       playSound(
         'fail',
       )
     }
 
-    if (
-      correctAnswers.value >=
-      currentLevel.requiredCorrect
-    ) {
+    /* UNLOCK NEXT LEVEL */
+
+    if (passed) {
       const unlockedLevel =
         Number(
           localStorage.getItem(
@@ -399,6 +404,8 @@ const endGame =
         )
       }
     }
+
+    /* GO RESULT */
 
     setTimeout(() => {
       router.push(
@@ -427,7 +434,37 @@ const leaveGame =
   }
 
 /* -----------------------------
-   LIFECYCLE
+   CURRENT COMPONENT
+----------------------------- */
+
+const currentComponent =
+  computed(() => {
+    if (
+      gameType ===
+      'quiz'
+    ) {
+      return BrainQuiz
+    }
+
+    if (
+      gameType ===
+      'match'
+    ) {
+      return BrainMatch
+    }
+
+    if (
+      gameType ===
+      'truefalse'
+    ) {
+      return BrainTrueFalse
+    }
+
+    return BrainQuiz
+  })
+
+/* -----------------------------
+   MOUNT
 ----------------------------- */
 
 onMounted(() => {
@@ -452,6 +489,7 @@ onBeforeUnmount(() => {
       <div
         class="flex items-center gap-2"
       >
+        <!-- LEVEL -->
         <div
           class="flex-1 bg-white border-4 border-black rounded-2xl py-3 text-center"
         >
@@ -470,6 +508,7 @@ onBeforeUnmount(() => {
           </h2>
         </div>
 
+        <!-- TIME -->
         <div
           class="flex-1 bg-[#F3F400] border-4 border-black rounded-2xl py-3 text-center"
         >
@@ -488,20 +527,21 @@ onBeforeUnmount(() => {
           </h2>
         </div>
 
+        <!-- REWARD -->
         <div
           class="flex-1 bg-[#03B5EC] border-4 border-black rounded-2xl py-3 text-center"
         >
           <p
             class="text-[10px] font-black text-black/60"
           >
-            SCORE
+            REWARD
           </p>
 
           <h2
             class="text-xl font-black text-black mt-1"
           >
-            {{
-              score
+            +{{
+              currentLevel.points
             }}
           </h2>
         </div>
@@ -534,11 +574,9 @@ onBeforeUnmount(() => {
       <div
         class="mt-4 bg-white border-4 border-black rounded-[2rem] p-5"
       >
-        <!-- QUIZ -->
-        <BrainQuiz
-          v-if="
-            gameType ===
-            'quiz'
+        <component
+          :is="
+            currentComponent
           "
           :question="
             currentQuestion
@@ -549,37 +587,14 @@ onBeforeUnmount(() => {
           :total-questions="
             shuffledQuestions.length
           "
-          @correct="
-            handleCorrect
+          @success="
+            handleSuccess
           "
-          @wrong="
-            handleWrong
-          "
-        />
-
-        <!-- MATCH -->
-        <BrainMatch
-          v-if="
-            gameType ===
-            'match'
-          "
-          :question="
-            currentQuestion
-          "
-          :question-index="
-            currentQuestionIndex
-          "
-          :total-questions="
-            shuffledQuestions.length
-          "
-          @correct="
-            handleMatchCorrect
+          @fail="
+            handleFail
           "
           @complete="
-            nextQuestion
-          "
-          @wrong="
-            handleMatchWrong
+            handleComplete
           "
         />
       </div>

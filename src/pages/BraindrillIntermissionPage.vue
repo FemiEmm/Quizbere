@@ -1,7 +1,11 @@
 <script setup>
-import { computed } from 'vue'
+import {
+  computed,
+} from 'vue'
 
-import { useRouter } from 'vue-router'
+import {
+  useRouter,
+} from 'vue-router'
 
 import BottomNavbar from '../components/BottomNavbar.vue'
 
@@ -46,13 +50,65 @@ const unlocked =
   correctAnswers >=
   currentLevel.requiredCorrect
 
-const headmasterMessage = computed(() => {
-  if (unlocked) {
-    return 'Headmaster says: Fine. You earned it.'
-  }
+/* -----------------------------
+   MASCOT MESSAGE
+----------------------------- */
 
-  return 'Headmaster says: Not enough. Try again.'
-})
+const passMessages = [
+  'Not bad. Promotion granted.',
+
+  'You survived the drill.',
+
+  'Sharp work. Move forward.',
+
+  'Acceptable performance.',
+
+  'You earned the next rank.',
+]
+
+const failMessages = [
+  'Low score. Try again.',
+
+  'You need more practice.',
+
+  'That performance was weak.',
+
+  'Back to training.',
+
+  'Not enough. Repeat the level.',
+]
+
+const mascotMessage =
+  computed(() => {
+    const messages =
+      unlocked
+        ? passMessages
+        : failMessages
+
+    return messages[
+      Math.floor(
+        Math.random() *
+          messages.length,
+      )
+    ]
+  })
+
+/* -----------------------------
+   STATUS
+----------------------------- */
+
+const resultStatus =
+  computed(() => {
+    if (unlocked) {
+      return 'PASSED: PROMOTION'
+    }
+
+    return 'LOW SCORE: TRY AGAIN'
+  })
+
+/* -----------------------------
+   NEXT LEVEL
+----------------------------- */
 
 const nextLevel = () => {
   localStorage.setItem(
@@ -62,11 +118,19 @@ const nextLevel = () => {
     }),
   )
 
-  router.push('/braindrill/play')
+  router.push(
+    '/braindrill/play',
+  )
 }
 
+/* -----------------------------
+   BACK
+----------------------------- */
+
 const backToDrill = () => {
-  router.push('/braindrill')
+  router.push(
+    '/braindrill',
+  )
 }
 </script>
 
@@ -78,26 +142,76 @@ const backToDrill = () => {
       class="w-full max-w-sm mx-auto"
     >
       <div
-        class="bg-white border-4 border-black rounded-[2rem] p-6 text-center"
+        class="relative overflow-hidden bg-white border-4 border-black rounded-[2rem] p-6 text-center"
       >
+        <!-- PAPER LINES -->
+        <div
+          class="absolute inset-0 pointer-events-none opacity-10"
+        >
+          <div
+            v-for="n in 20"
+            :key="n"
+            class="w-full border-t border-black"
+            :style="{
+              top: `${n * 32}px`,
+              position: 'absolute',
+            }"
+          />
+        </div>
+
+        <!-- TITLE -->
         <h1
-          class="text-4xl font-black text-[#FF2AA3]"
+          class="relative z-10 text-4xl font-black text-[#FF2AA3]"
         >
           LEVEL COMPLETE
         </h1>
 
-        <p
-          class="mt-4 text-black text-base font-black leading-6"
+        <!-- MASCOT -->
+        <div
+          class="relative z-10 mt-5 flex items-center"
         >
-          {{ headmasterMessage }}
-        </p>
+          <!-- CHARACTER -->
+          <img
+            src="/mascot/mascot_marking.png"
+            alt="Mascot"
+            class="w-24 h-32 object-contain shrink-0 relative z-10 -mt-2"
+          />
+
+          <!-- MESSAGE -->
+          <div
+            class="flex-1 -ml-2 min-h-[72px] bg-white border-4 border-black rounded-[2rem] px-4 py-3 flex items-center justify-center relative"
+          >
+            <!-- PAPER LINES -->
+            <div
+              class="absolute inset-0 overflow-hidden rounded-[2rem] opacity-10 pointer-events-none"
+            >
+              <div
+                v-for="n in 8"
+                :key="n"
+                class="w-full border-t border-black absolute"
+                :style="{
+                  top: `${n * 18}px`,
+                }"
+              />
+            </div>
+
+            <p
+              class="relative z-10 text-center text-[13px] font-black text-black leading-5"
+            >
+              {{
+                mascotMessage
+              }}
+            </p>
+          </div>
+        </div>
 
         <!-- STATS -->
         <div
-          class="mt-6 flex gap-3"
+          class="relative z-10 mt-4 flex gap-3 items-stretch"
         >
+          <!-- LEVEL -->
           <div
-            class="flex-1 bg-[#FD9501] border-4 border-black rounded-2xl py-4"
+            class="flex-1 bg-[#FD9501] border-4 border-black rounded-2xl py-4 flex flex-col items-center justify-center"
           >
             <p
               class="text-[10px] font-black text-black/70"
@@ -106,14 +220,15 @@ const backToDrill = () => {
             </p>
 
             <h2
-              class="mt-2 text-4xl font-black text-black"
+              class="mt-2 text-4xl font-black text-black leading-none"
             >
               {{ level }}
             </h2>
           </div>
 
+          <!-- CORRECT -->
           <div
-            class="flex-1 bg-[#03B5EC] border-4 border-black rounded-2xl py-4"
+            class="flex-1 py-4 flex flex-col items-center justify-center"
           >
             <p
               class="text-[10px] font-black text-black/70"
@@ -121,33 +236,37 @@ const backToDrill = () => {
               CORRECT
             </p>
 
-            <h2
-              class="mt-2 text-4xl font-black text-white"
+            <div
+              class="mt-2 w-20 h-20 border-[5px] border-[#FF2D2D] rounded-full flex items-center justify-center rotate-[10deg]"
             >
-              {{ correctAnswers }}
-            </h2>
+              <h2
+                class="text-3xl font-black text-[#FF2D2D]"
+              >
+                {{ correctAnswers }}
+              </h2>
+            </div>
           </div>
         </div>
 
-        <!-- REQUIREMENT -->
+        <!-- RESULT -->
         <div
-          class="mt-4 bg-[#FF2AA3]/15 border-2 border-[#FF2AA3] rounded-2xl py-4"
+          class="relative z-10 mt-5 bg-[#FF2AA3]/15 border-2 border-[#FF2AA3] rounded-2xl py-4"
         >
           <p
             class="text-sm font-black text-black"
           >
-            NEED
-            {{ currentLevel.requiredCorrect }}
-            CORRECT ANSWERS
+            {{
+              resultStatus
+            }}
           </p>
         </div>
 
         <!-- BUTTONS -->
         <div
-          class="mt-5 flex flex-col gap-3"
+          class="relative z-10 mt-5 flex flex-col gap-3"
         >
           <button
-            v-if="unlocked && level < 4"
+            v-if="unlocked && level < 5"
             @click="nextLevel"
             class="w-full bg-[#03B5EC] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000]"
           >

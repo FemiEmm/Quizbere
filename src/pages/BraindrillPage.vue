@@ -54,8 +54,6 @@ const runScore =
 const loadUserLevel =
   async () => {
     try {
-      /* LOCAL FIRST */
-
       const localLevel =
         Number(
           localStorage.getItem(
@@ -65,8 +63,6 @@ const loadUserLevel =
 
       unlockedLevel.value =
         localLevel
-
-      /* THEN CHECK SUPABASE */
 
       const {
         data: user,
@@ -87,8 +83,6 @@ const loadUserLevel =
         user?.braindrill_level ||
         1
 
-      /* KEEP HIGHEST */
-
       const highestLevel =
         Math.max(
           localLevel,
@@ -98,14 +92,10 @@ const loadUserLevel =
       unlockedLevel.value =
         highestLevel
 
-      /* UPDATE LOCAL */
-
       localStorage.setItem(
         'braindrill_unlocked_level',
         highestLevel,
       )
-
-      /* SYNC SUPABASE */
 
       if (
         highestLevel >
@@ -165,8 +155,6 @@ const loadRunScore =
         )
         .maybeSingle()
 
-      /* EXISTING USER */
-
       if (existingUser) {
         const updatedScore =
           (
@@ -181,8 +169,6 @@ const loadRunScore =
               1,
             localLevel,
           )
-
-        /* UPDATE LEADERBOARD */
 
         await supabase
           .from(
@@ -199,8 +185,6 @@ const loadRunScore =
             'username',
             username,
           )
-
-        /* UPDATE USER LEVEL */
 
         await supabase
           .from(
@@ -220,11 +204,7 @@ const loadRunScore =
 
         unlockedLevel.value =
           highestLevel
-      }
-
-      /* NEW USER */
-
-      else {
+      } else {
         await supabase
           .from(
             'examinity_leaderboard',
@@ -261,8 +241,6 @@ const loadRunScore =
           localLevel
       }
 
-      /* CLEAR LOCAL SCORE */
-
       localStorage.removeItem(
         'braindrill_run_score',
       )
@@ -282,10 +260,13 @@ const startLevel =
     if (
       levelData.level >
       unlockedLevel.value
-    )
+    ) {
       return
+    }
 
-    playSound('button')
+    playSound(
+      'button',
+    )
 
     await trackGame(
       'braindrill',
@@ -314,51 +295,65 @@ onMounted(async () => {
 
 <template>
   <main
-    class="min-h-screen bg-[#03B5EC] pb-28 px-5 pt-8"
+    class="min-h-screen bg-[#03B5EC] pb-24 px-4 pt-4"
   >
     <section
       class="max-w-md mx-auto"
     >
       <!-- HEADER -->
-      <div class="text-center">
-        <h1
-          class="text-5xl font-black text-white"
-        >
-          BRAINDRILL
-        </h1>
+      <div
+        class="flex items-center gap-2"
+      >
+        <!-- MASCOT -->
+        <img
+          src="/mascot/mascot_win.png"
+          alt="Mascot"
+          class="w-20 shrink-0 object-contain"
+        />
 
-        <p
-          class="mt-3 text-black text-base font-bold leading-6"
-        >
-          Answer as many questions as possible
-          before time runs out.
-        </p>
-
-        <!-- RUN SCORE -->
+        <!-- TEXT -->
         <div
-          class="mt-6"
+          class="text-left"
         >
-          <div
-            class="bg-[#F3F400] border-4 border-black rounded-2xl py-4 text-center"
+          <h1
+            class="text-[2.1rem] font-black text-white leading-none"
           >
-            <p
-              class="text-[10px] font-black text-black/70"
-            >
-              TOTAL RUN SCORE
-            </p>
+            BRAINDRILL
+          </h1>
 
-            <h2
-              class="mt-2 text-4xl font-black text-black leading-none"
-            >
-              {{ runScore }}
-            </h2>
-          </div>
+          <p
+            class="mt-1 text-black text-xs font-bold leading-4"
+          >
+            Answer as many questions as possible
+            before time runs out.
+          </p>
+        </div>
+      </div>
+
+      <!-- RUN SCORE -->
+      <div
+        class="mt-4"
+      >
+        <div
+          class="bg-[#F3F400] border-4 border-black rounded-2xl py-3 text-center"
+        >
+          <p
+            class="text-[9px] font-black text-black/70"
+          >
+            TOTAL RUN SCORE
+          </p>
+
+          <h2
+            class="mt-1 text-3xl font-black text-black leading-none"
+          >
+            {{ runScore }}
+          </h2>
         </div>
       </div>
 
       <!-- LEVELS -->
       <div
-        class="mt-10 flex flex-col gap-4"
+        class="mt-6 flex flex-col gap-3"
       >
         <button
           v-for="level in braindrillLevels"
@@ -370,42 +365,38 @@ onMounted(async () => {
             level.level >
             unlockedLevel
           "
-          class="w-full border-4 border-black rounded-3xl px-5 py-5 flex items-center justify-between transition-all duration-100"
+          class="w-full border-4 border-black rounded-[2rem] px-4 py-4 flex items-center justify-between transition-all duration-100"
           :class="[
             level.level >
             unlockedLevel
               ? 'bg-gray-300 opacity-60 cursor-not-allowed'
-              : 'bg-white active:translate-y-[3px]',
+              : level.color || 'bg-white',
           ]"
         >
           <!-- LEFT -->
           <div
-            class="flex items-center gap-4"
+            class="flex items-center gap-3"
           >
+            <!-- LEVEL NUMBER -->
             <div
-              class="w-14 h-14 rounded-2xl border-4 border-black flex items-center justify-center font-black text-xl"
-              :class="[
-                level.level >
-                unlockedLevel
-                  ? 'bg-gray-400'
-                  : 'bg-[#FD9501]',
-              ]"
+              class="w-11 h-11 rounded-[1rem] border-4 border-black flex items-center justify-center font-black text-lg bg-[#FD9501] shrink-0"
             >
               {{ level.level }}
             </div>
 
+            <!-- INFO -->
             <div
               class="text-left"
             >
               <h2
-                class="text-xl font-black text-black"
+                class="text-lg font-black text-black leading-none"
               >
                 LEVEL
                 {{ level.level }}
               </h2>
 
               <p
-                class="text-sm font-bold text-black/70"
+                class="mt-1 text-xs font-bold text-black/70 leading-4"
               >
                 {{ level.questions }}
                 Questions •
@@ -415,18 +406,47 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- REQUIREMENT -->
+          <!-- RIGHT -->
           <div
-            class="bg-[#FF2AA3]/20 border-2 border-[#FF2AA3] rounded-xl px-3 py-2"
+            class="flex items-center gap-1.5 shrink-0"
           >
-            <p
-              class="text-xs font-black text-[#FF2AA3]"
+            <!-- PASS -->
+            <div
+              class="bg-[#FF2AA3]/20 border-2 border-[#FF2AA3] rounded-lg px-2 py-1.5 text-center min-w-[58px]"
             >
-              {{
-                level.requiredCorrect
-              }}
-              CORRECT
-            </p>
+              <p
+                class="text-[8px] font-black text-[#FF2AA3]/70 leading-none"
+              >
+                PASS
+              </p>
+
+              <p
+                class="mt-1 text-sm font-black text-[#FF2AA3] leading-none"
+              >
+                {{
+                  level.requiredCorrect
+                }}
+              </p>
+            </div>
+
+            <!-- REWARD -->
+            <div
+              class="bg-[#FF2AA3]/20 border-2 border-[#FF2AA3] rounded-lg px-2 py-1.5 text-center min-w-[58px]"
+            >
+              <p
+                class="text-[8px] font-black text-[#FF2AA3]/70 leading-none"
+              >
+                REWARD
+              </p>
+
+              <p
+                class="mt-1 text-sm font-black text-[#FF2AA3] leading-none"
+              >
+                +{{
+                  level.points
+                }}
+              </p>
+            </div>
           </div>
         </button>
       </div>
