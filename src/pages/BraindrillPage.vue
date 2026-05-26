@@ -8,11 +8,11 @@ import {
   useRouter,
 } from 'vue-router'
 
-import { supabase } from '../lib/supabase'
-
 import BottomNavbar from '../components/BottomNavbar.vue'
 
 import { braindrillLevels } from '../data/braindrillLevels'
+
+import TopNav from '../components/TopNav.vue'
 
 import {
   trackGame,
@@ -25,15 +25,6 @@ import {
 const router = useRouter()
 
 /* -----------------------------
-   USERNAME
------------------------------ */
-
-const username =
-  localStorage.getItem(
-    'examinity_username',
-  ) || 'anonymous'
-
-/* -----------------------------
    LEVEL
 ----------------------------- */
 
@@ -44,209 +35,95 @@ const unlockedLevel =
    SCORE
 ----------------------------- */
 
-const runScore =
+const displayScore =
   ref(0)
+
+const loadingScore =
+  ref(true)
+
+/* -----------------------------
+   ANIMATE SCORE
+----------------------------- */
+
+const animateScore =
+  (targetScore) => {
+    displayScore.value = 0
+
+    const duration = 1200
+
+    const frameRate = 16
+
+    const totalFrames =
+      duration / frameRate
+
+    const increment =
+      targetScore /
+      totalFrames
+
+    let currentScore = 0
+
+    const counter =
+      setInterval(() => {
+        currentScore +=
+          increment
+
+        if (
+          currentScore >=
+          targetScore
+        ) {
+          displayScore.value =
+            targetScore
+
+          clearInterval(
+            counter,
+          )
+
+          return
+        }
+
+        displayScore.value =
+          Math.floor(
+            currentScore,
+          )
+      }, frameRate)
+  }
 
 /* -----------------------------
    LOAD USER LEVEL
 ----------------------------- */
 
 const loadUserLevel =
-  async () => {
-    try {
-      const localLevel =
-        Number(
-          localStorage.getItem(
-            'braindrill_unlocked_level',
-          ),
-        ) || 1
+  () => {
+    const localLevel =
+      Number(
+        localStorage.getItem(
+          'braindrill_unlocked_level',
+        ),
+      ) || 1
 
-      unlockedLevel.value =
-        localLevel
-
-      const {
-        data: user,
-      } = await supabase
-        .from(
-          'examinity_users',
-        )
-        .select(
-          'braindrill_level',
-        )
-        .eq(
-          'username',
-          username,
-        )
-        .maybeSingle()
-
-      const dbLevel =
-        user?.braindrill_level ||
-        1
-
-      const highestLevel =
-        Math.max(
-          localLevel,
-          dbLevel,
-        )
-
-      unlockedLevel.value =
-        highestLevel
-
-      localStorage.setItem(
-        'braindrill_unlocked_level',
-        highestLevel,
-      )
-
-      if (
-        highestLevel >
-        dbLevel
-      ) {
-        await supabase
-          .from(
-            'examinity_users',
-          )
-          .update({
-            braindrill_level:
-              highestLevel,
-          })
-          .eq(
-            'username',
-            username,
-          )
-      }
-    } catch (error) {
-      console.error(error)
-    }
+    unlockedLevel.value =
+      localLevel
   }
 
 /* -----------------------------
-   LOAD + SAVE SCORE
+   LOAD SCORE
 ----------------------------- */
 
-const loadRunScore =
-  async () => {
-    try {
-      const localRunScore =
-        Number(
-          localStorage.getItem(
-            'braindrill_run_score',
-          ),
-        ) || 0
+const loadScore =
+  () => {
+    const totalScore =
+      Number(
+        localStorage.getItem(
+          'braindrill_total_points',
+        ),
+      ) || 0
 
-      const localLevel =
-        Number(
-          localStorage.getItem(
-            'braindrill_unlocked_level',
-          ),
-        ) || 1
+    animateScore(
+      totalScore,
+    )
 
-      const {
-        data: existingUser,
-      } = await supabase
-        .from(
-          'examinity_leaderboard',
-        )
-        .select(
-          'best_run_score, highest_level',
-        )
-        .eq(
-          'username',
-          username,
-        )
-        .maybeSingle()
-
-      if (existingUser) {
-        const updatedScore =
-          (
-            existingUser.best_run_score ||
-            0
-          ) +
-          localRunScore
-
-        const highestLevel =
-          Math.max(
-            existingUser.highest_level ||
-              1,
-            localLevel,
-          )
-
-        await supabase
-          .from(
-            'examinity_leaderboard',
-          )
-          .update({
-            best_run_score:
-              updatedScore,
-
-            highest_level:
-              highestLevel,
-          })
-          .eq(
-            'username',
-            username,
-          )
-
-        await supabase
-          .from(
-            'examinity_users',
-          )
-          .update({
-            braindrill_level:
-              highestLevel,
-          })
-          .eq(
-            'username',
-            username,
-          )
-
-        runScore.value =
-          updatedScore
-
-        unlockedLevel.value =
-          highestLevel
-      } else {
-        await supabase
-          .from(
-            'examinity_leaderboard',
-          )
-          .insert([
-            {
-              username,
-
-              best_run_score:
-                localRunScore,
-
-              highest_level:
-                localLevel,
-            },
-          ])
-
-        await supabase
-          .from(
-            'examinity_users',
-          )
-          .update({
-            braindrill_level:
-              localLevel,
-          })
-          .eq(
-            'username',
-            username,
-          )
-
-        runScore.value =
-          localRunScore
-
-        unlockedLevel.value =
-          localLevel
-      }
-
-      localStorage.removeItem(
-        'braindrill_run_score',
-      )
-    } catch (error) {
-      console.error(error)
-    }
+    loadingScore.value =
+      false
   }
 
 /* -----------------------------
@@ -286,14 +163,16 @@ const startLevel =
    MOUNT
 ----------------------------- */
 
-onMounted(async () => {
-  await loadUserLevel()
+onMounted(() => {
+  loadUserLevel()
 
-  await loadRunScore()
+  loadScore()
 })
 </script>
 
 <template>
+  <TopNav />
+
   <main
     class="min-h-screen bg-[#03B5EC] pb-24 px-4 pt-4"
   >
@@ -344,9 +223,17 @@ onMounted(async () => {
           </p>
 
           <h2
-            class="mt-1 text-3xl font-black text-black leading-none"
+            class="mt-1 text-3xl font-black text-black leading-none min-h-[36px]"
           >
-            {{ runScore }}
+            <span
+              v-if="
+                !loadingScore
+              "
+            >
+              {{
+                displayScore
+              }}
+            </span>
           </h2>
         </div>
       </div>

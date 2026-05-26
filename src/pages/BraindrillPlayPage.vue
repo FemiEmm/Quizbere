@@ -20,6 +20,8 @@ import BrainMatch from '../braindrill/BrainMatch.vue'
 
 import BrainTrueFalse from '../braindrill/BrainTrueFalse.vue'
 
+import BrainTap from '../braindrill/BrainTap.vue'
+
 import {
   braindrillLevels,
 } from '../data/braindrillLevels'
@@ -85,9 +87,9 @@ const difficultyMap = {
 
   7: ['easy'],
 
-  8: ['easy','mid'],
+  8: ['easy', 'mid'],
 
-  9: ['easy','mid'],
+  9: ['easy', 'mid'],
 
   10: ['extreme'],
 }
@@ -176,6 +178,28 @@ if (
           ) =>
             path.includes(
               `/data/othergames/trueorfalse/${difficulty}/`,
+            ),
+        ),
+    )
+}
+
+/* TAP */
+
+if (
+  gameType ===
+  'tap'
+) {
+  filteredModules =
+    Object.entries(
+      allModules,
+    ).filter(
+      ([path]) =>
+        difficulties.some(
+          (
+            difficulty,
+          ) =>
+            path.includes(
+              `/data/othergames/tap/${difficulty}/`,
             ),
         ),
     )
@@ -458,6 +482,13 @@ const currentComponent =
       'truefalse'
     ) {
       return BrainTrueFalse
+    }
+
+    if (
+      gameType ===
+      'tap'
+    ) {
+      return BrainTap
     }
 
     return BrainQuiz

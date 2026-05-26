@@ -15,6 +15,8 @@ import BottomNavbar from '../components/BottomNavbar.vue'
 
 import landingAnimation from '../assets/lottie/landing_mation.json'
 
+import TopNav from '../components/TopNav.vue'
+
 import {
   playSound,
 } from '../utils/playSound'
@@ -52,15 +54,17 @@ const goToNamePage =
 </script>
 
 <template>
+  <TopNav />
+
   <main
-    class="min-h-screen bg-[#F3F400] overflow-hidden px-5 pt-6 pb-28"
+    class="min-h-screen bg-[#F3F400] overflow-hidden px-5 pt-6 pb-28 flex items-center justify-center"
   >
     <section
       class="w-full max-w-md mx-auto flex flex-col items-center text-center"
     >
       <!-- LOGO -->
       <div
-        class="w-24 h-24 overflow-hidden"
+        class="w-20 h-20 overflow-hidden"
       >
         <img
           src="/quizbere_logo.png"
@@ -71,14 +75,14 @@ const goToNamePage =
 
       <!-- TITLE -->
       <h1
-        class="mt-5 text-4xl md:text-5xl font-black text-[#FF2AA3] leading-none"
+        class="mt-4 text-4xl md:text-5xl font-black text-[#FF2AA3] leading-none"
       >
         Quizbere
       </h1>
 
       <!-- SUBTITLE -->
       <p
-        class="mt-3 text-black text-base font-bold leading-6 max-w-sm"
+        class="mt-3 text-black text-sm font-bold leading-6 max-w-[280px]"
       >
         Answer 10 questions correctly and
         unlock surprise rewards.
@@ -86,46 +90,46 @@ const goToNamePage =
 
       <!-- LOTTIE -->
       <div
-        class="-mt-2"
+        class="-mt-1"
       >
         <Vue3Lottie
           :animationData="landingAnimation"
-          :height="140"
-          :width="140"
+          :height="125"
+          :width="125"
         />
       </div>
 
-      <!-- PRIZE CARDS -->
+      <!-- PRIZES -->
       <div
-        class="w-full -mt-2 flex flex-col gap-3"
+        class="w-full -mt-1 flex items-center justify-center gap-2"
       >
         <div
-          class="bg-white border-4 border-black rounded-2xl px-5 py-4"
+          class="flex-1 bg-white border-4 border-black rounded-2xl px-2 py-3"
         >
           <span
-            class="font-black text-lg"
+            class="font-black text-sm"
           >
-            ₦100,000
+            ₦100K
           </span>
         </div>
 
         <div
-          class="bg-white border-4 border-black rounded-2xl px-5 py-4"
+          class="flex-1 bg-white border-4 border-black rounded-2xl px-2 py-3"
         >
           <span
-            class="font-black text-lg"
+            class="font-black text-sm"
           >
-            ₦10,000
+            ₦10K
           </span>
         </div>
 
         <div
-          class="bg-white border-4 border-black rounded-2xl px-5 py-4"
+          class="flex-1 bg-white border-4 border-black rounded-2xl px-2 py-3"
         >
           <span
-            class="font-black text-lg"
+            class="font-black text-sm"
           >
-            ₦2,000
+            ₦2K
           </span>
         </div>
       </div>
@@ -133,14 +137,14 @@ const goToNamePage =
       <!-- CTA -->
       <button
         @click="goToNamePage"
-        class="mt-6 w-full bg-[#FD9501] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_7px_0_#000] active:translate-y-[4px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+        class="mt-5 w-full bg-[#FD9501] text-black text-lg font-black py-4 rounded-2xl border-4 border-black shadow-[0_7px_0_#000] active:translate-y-[4px] active:shadow-[0_3px_0_#000] transition-all duration-100"
       >
         START QUIZ
       </button>
 
       <!-- BOTTOM TEXT -->
       <p
-        class="mt-4 text-xs font-bold text-black/70"
+        class="mt-3 text-[11px] font-bold text-black/70"
       >
         Answer. Spin. Win.
       </p>

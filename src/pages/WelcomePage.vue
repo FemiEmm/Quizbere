@@ -7,6 +7,8 @@ import { supabase } from '../lib/supabase'
 
 import { playSound } from '../utils/playSound'
 
+import { syncUserData } from '../utils/syncUserData'
+
 const router = useRouter()
 
 const username = ref('')
@@ -66,6 +68,49 @@ const forceUppercase =
   }
 
 /* -----------------------------
+   SAVE USER DATA LOCAL
+----------------------------- */
+
+const saveUserDataLocal =
+  (
+    userData,
+    leaderboardData,
+  ) => {
+    /* USERNAME */
+
+    localStorage.setItem(
+      'examinity_username',
+      userData.username,
+    )
+
+    /* BRAINDRILL */
+
+    localStorage.setItem(
+      'braindrill_total_points',
+      Number(
+        leaderboardData?.best_run_score,
+      ) || 0,
+    )
+
+    /* CHALLENGE */
+
+    localStorage.setItem(
+      'challenge_total_points',
+      Number(
+        leaderboardData?.challenge_points,
+      ) || 0,
+    )
+
+    /* LEVEL */
+
+    localStorage.setItem(
+      'braindrill_unlocked_level',
+      userData?.braindrill_level ||
+        1,
+    )
+  }
+
+/* -----------------------------
    NEW USER
 ----------------------------- */
 
@@ -74,7 +119,9 @@ const createNewUser =
     playSound('button')
 
     const cleanUsername =
-      username.value.trim()
+      username.value
+        .trim()
+        .toUpperCase()
 
     /* VALIDATION */
 
@@ -141,6 +188,7 @@ const createNewUser =
     /* CREATE USER */
 
     const {
+      data: newUser,
       error: insertError,
     } = await supabase
       .from(
@@ -150,8 +198,12 @@ const createNewUser =
         {
           username:
             cleanUsername,
+
+          braindrill_level: 1,
         },
       ])
+      .select()
+      .single()
 
     loading.value =
       false
@@ -163,10 +215,39 @@ const createNewUser =
       return
     }
 
-    localStorage.setItem(
-      'examinity_username',
-      cleanUsername,
+    /* CREATE LEADERBOARD */
+
+    await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .insert([
+        {
+          username:
+            cleanUsername,
+
+          best_run_score: 0,
+
+          challenge_points: 0,
+
+          highest_level: 1,
+        },
+      ])
+
+    /* SAVE LOCAL */
+
+    saveUserDataLocal(
+      newUser,
+      {
+        best_run_score: 0,
+
+        challenge_points: 0,
+      },
     )
+
+    /* SYNC */
+
+    await syncUserData()
 
     playSound('pass')
 
@@ -182,7 +263,9 @@ const loginUser =
     playSound('button')
 
     const cleanUsername =
-      username.value.trim()
+      username.value
+        .trim()
+        .toUpperCase()
 
     /* VALIDATION */
 
@@ -200,7 +283,7 @@ const loginUser =
     /* CHECK USER */
 
     const {
-      data,
+      data: userData,
       error,
     } = await supabase
       .from(
@@ -213,10 +296,10 @@ const loginUser =
       )
       .maybeSingle()
 
-    loading.value =
-      false
-
     if (error) {
+      loading.value =
+        false
+
       errorMessage.value =
         'Something went wrong.'
 
@@ -225,7 +308,10 @@ const loginUser =
 
     /* USER NOT FOUND */
 
-    if (!data) {
+    if (!userData) {
+      loading.value =
+        false
+
       playSound('fail')
 
       confirmedUsername.value =
@@ -237,12 +323,44 @@ const loginUser =
       return
     }
 
-    /* LOGIN */
+    /* FETCH LEADERBOARD */
 
-    localStorage.setItem(
-      'examinity_username',
-      cleanUsername,
+    const {
+      data: leaderboardData,
+      error:
+        leaderboardError,
+    } = await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .select('*')
+      .eq(
+        'username',
+        cleanUsername,
+      )
+      .maybeSingle()
+
+    if (
+      leaderboardError
+    ) {
+      console.error(
+        leaderboardError,
+      )
+    }
+
+    /* SAVE LOCAL */
+
+    saveUserDataLocal(
+      userData,
+      leaderboardData,
     )
+
+    /* SYNC */
+
+    await syncUserData()
+
+    loading.value =
+      false
 
     playSound('examinity')
 
@@ -259,7 +377,10 @@ const createFromMissing =
 
     loading.value = true
 
+    /* CREATE USER */
+
     const {
+      data: newUser,
       error,
     } = await supabase
       .from(
@@ -269,23 +390,59 @@ const createFromMissing =
         {
           username:
             confirmedUsername.value,
+
+          braindrill_level: 1,
         },
       ])
-
-    loading.value =
-      false
+      .select()
+      .single()
 
     if (error) {
+      loading.value =
+        false
+
       errorMessage.value =
         'Failed to create account.'
 
       return
     }
 
-    localStorage.setItem(
-      'examinity_username',
-      confirmedUsername.value,
+    /* CREATE LEADERBOARD */
+
+    await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .insert([
+        {
+          username:
+            confirmedUsername.value,
+
+          best_run_score: 0,
+
+          challenge_points: 0,
+
+          highest_level: 1,
+        },
+      ])
+
+    /* SAVE LOCAL */
+
+    saveUserDataLocal(
+      newUser,
+      {
+        best_run_score: 0,
+
+        challenge_points: 0,
+      },
     )
+
+    /* SYNC */
+
+    await syncUserData()
+
+    loading.value =
+      false
 
     playSound('pass')
 
@@ -325,7 +482,6 @@ const createFromMissing =
             account.
           </p>
 
-          <!-- INPUT -->
           <input
             v-model="username"
             @input="
@@ -336,7 +492,6 @@ const createFromMissing =
             class="mt-8 w-full bg-[#F5F5F5] border-4 border-black rounded-2xl px-5 py-5 text-xl font-black uppercase outline-none"
           />
 
-          <!-- ERROR -->
           <p
             v-if="
               errorMessage
@@ -348,21 +503,18 @@ const createFromMissing =
             }}
           </p>
 
-          <!-- BUTTONS -->
           <div
             class="mt-8 flex gap-4"
           >
-            <!-- CANCEL -->
             <button
               @click="
                 closeModal
               "
-              class="flex-1 bg-[#FF2AA3] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000]"
+              class="flex-1 bg-[#FF2AA3] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000]"
             >
               CANCEL
             </button>
 
-            <!-- CREATE -->
             <button
               @click="
                 createNewUser
@@ -370,7 +522,7 @@ const createFromMissing =
               :disabled="
                 loading
               "
-              class="flex-1 bg-[#FD9501] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000]"
+              class="flex-1 bg-[#FD9501] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000]"
             >
               {{
                 loading
@@ -401,7 +553,6 @@ const createFromMissing =
             account.
           </p>
 
-          <!-- INPUT -->
           <input
             v-model="username"
             @input="
@@ -412,7 +563,6 @@ const createFromMissing =
             class="mt-8 w-full bg-[#F5F5F5] border-4 border-black rounded-2xl px-5 py-5 text-xl font-black uppercase outline-none"
           />
 
-          <!-- ERROR -->
           <p
             v-if="
               errorMessage
@@ -424,21 +574,18 @@ const createFromMissing =
             }}
           </p>
 
-          <!-- BUTTONS -->
           <div
             class="mt-8 flex gap-4"
           >
-            <!-- CANCEL -->
             <button
               @click="
                 closeModal
               "
-              class="flex-1 bg-[#FF2AA3] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000]"
+              class="flex-1 bg-[#FF2AA3] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000]"
             >
               CANCEL
             </button>
 
-            <!-- LOGIN -->
             <button
               @click="
                 loginUser
@@ -446,7 +593,7 @@ const createFromMissing =
               :disabled="
                 loading
               "
-              class="flex-1 bg-[#03B5EC] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000]"
+              class="flex-1 bg-[#03B5EC] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000]"
             >
               {{
                 loading
@@ -484,17 +631,11 @@ const createFromMissing =
             </span>
 
             does not exist.
-
-            <br /><br />
-
-            Try again or create a new account.
           </p>
 
-          <!-- BUTTONS -->
           <div
             class="mt-8 flex gap-4"
           >
-            <!-- TRY AGAIN -->
             <button
               @click="
                 () => {
@@ -505,12 +646,11 @@ const createFromMissing =
                     confirmedUsername
                 }
               "
-              class="flex-1 bg-[#FF2AA3] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000]"
+              class="flex-1 bg-[#FF2AA3] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000]"
             >
               TRY AGAIN
             </button>
 
-            <!-- CREATE -->
             <button
               @click="
                 createFromMissing
@@ -518,7 +658,7 @@ const createFromMissing =
               :disabled="
                 loading
               "
-              class="flex-1 bg-[#FD9501] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000]"
+              class="flex-1 bg-[#FD9501] text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000]"
             >
               CREATE
             </button>
@@ -531,44 +671,39 @@ const createFromMissing =
     <section
       class="w-full max-w-md"
     >
-      <!-- CARD -->
       <div
         class="bg-white border-4 border-black rounded-[2rem] p-6 text-center"
       >
-        <!-- TITLE -->
         <h1
           class="text-5xl font-black text-[#FF2AA3]"
         >
           Quizbere
         </h1>
 
-        <!-- TEXT -->
         <p
           class="mt-4 text-black text-base font-bold leading-6"
         >
           Choose how you want to continue.
         </p>
 
-        <!-- NEW USER -->
         <button
           @click="
             openModal(
               'new',
             )
           "
-          class="mt-8 w-full bg-[#FD9501] text-black text-2xl font-black py-5 rounded-2xl border-4 border-black shadow-[0_8px_0_#000] active:translate-y-[4px] active:shadow-[0_4px_0_#000]"
+          class="mt-8 w-full bg-[#FD9501] text-black text-2xl font-black py-5 rounded-2xl border-4 border-black shadow-[0_8px_0_#000]"
         >
           NEW USER
         </button>
 
-        <!-- LOGIN -->
         <button
           @click="
             openModal(
               'login',
             )
           "
-          class="mt-5 w-full bg-[#03B5EC] text-black text-2xl font-black py-5 rounded-2xl border-4 border-black shadow-[0_8px_0_#000] active:translate-y-[4px] active:shadow-[0_4px_0_#000]"
+          class="mt-5 w-full bg-[#03B5EC] text-black text-2xl font-black py-5 rounded-2xl border-4 border-black shadow-[0_8px_0_#000]"
         >
           LOG IN
         </button>

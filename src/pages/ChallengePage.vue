@@ -5,6 +5,8 @@ import BottomNavbar from '../components/BottomNavbar.vue'
 
 import { playSound } from '../utils/playSound'
 
+import TopNav from '../components/TopNav.vue'
+
 import {
   trackGame,
 } from '../utils/trackGame'
@@ -188,6 +190,7 @@ const playChallenge =
 </script>
 
 <template>
+  <TopNav />
   <main
     class="min-h-screen bg-[#FF2AA3] pb-28 px-4 pt-8"
   >

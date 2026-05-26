@@ -390,7 +390,7 @@ const stayPage = () => {
         {{
           reward ===
           'TRY AGAIN'
-            ? 'UNLUCKY!'
+            ? 'YOU GOT THIS!'
             : 'CONGRATS!'
         }}
       </h1>
@@ -458,7 +458,7 @@ const stayPage = () => {
               'TRY AGAIN'
             "
           >
-            Better luck next time.
+            One next time?
           </template>
 
           <template

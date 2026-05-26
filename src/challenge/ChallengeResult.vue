@@ -12,6 +12,8 @@ import BottomNavbar from '../components/BottomNavbar.vue'
 
 import { playSound } from '../utils/playSound'
 
+import { syncUserData } from '../utils/syncUserData'
+
 const router = useRouter()
 
 /* -----------------------------
@@ -141,6 +143,10 @@ const saveChallengePoints =
           },
         ])
     }
+
+    /* SYNC LOCAL DATA */
+
+    await syncUserData()
   }
 
 /* -----------------------------

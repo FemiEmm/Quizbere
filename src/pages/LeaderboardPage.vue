@@ -1,5 +1,6 @@
 <script setup>
 import {
+  computed,
   onMounted,
   ref,
 } from 'vue'
@@ -34,20 +35,39 @@ const fetchLeaderboard =
         'examinity_leaderboard',
       )
       .select('*')
-      .order(
-        'best_run_score',
-        {
-          ascending: false,
-        },
-      )
-      .limit(50)
 
     if (
       !error &&
       data
     ) {
+      /* COMBINE SCORES */
+
+      const updatedData =
+        data.map(
+          (player) => ({
+            ...player,
+
+            total_score:
+              (player.best_run_score ||
+                0) +
+              (player.challenge_points ||
+                0),
+          }),
+        )
+
+      /* SORT */
+
+      updatedData.sort(
+        (a, b) =>
+          b.total_score -
+          a.total_score,
+      )
+
       leaderboard.value =
-        data
+        updatedData.slice(
+          0,
+          50,
+        )
     }
 
     loading.value = false
@@ -78,14 +98,8 @@ onMounted(() => {
         <h1
           class="text-3xl font-black text-white"
         >
-          BRAINDRILL
-        </h1>
-
-        <p
-          class="mt-1 text-[12px] font-black text-black/70"
-        >
           LEADERBOARD
-        </p>
+        </h1>
       </div>
 
       <!-- LOADING -->
@@ -110,7 +124,7 @@ onMounted(() => {
           class="mt-2 text-xs font-bold text-black/60"
         >
           Be the first to dominate
-          BrainDrill.
+          Quizbere.
         </p>
       </div>
 
@@ -182,7 +196,7 @@ onMounted(() => {
                 <p
                   class="text-[9px] font-black text-[#FF2AA3]"
                 >
-                  SCORE
+                  TOTAL SCORE
                 </p>
 
                 <h3
@@ -190,7 +204,7 @@ onMounted(() => {
                 >
                   {{
                     leaderboard[0]
-                      .best_run_score
+                      .total_score
                   }}
                 </h3>
               </div>
@@ -246,7 +260,7 @@ onMounted(() => {
               >
                 SCORE
                 {{
-                  player.best_run_score
+                  player.total_score
                 }}
               </p>
 

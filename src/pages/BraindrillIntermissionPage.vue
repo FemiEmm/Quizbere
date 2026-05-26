@@ -1,6 +1,7 @@
 <script setup>
 import {
   computed,
+  onMounted,
 } from 'vue'
 
 import {
@@ -11,6 +12,10 @@ import BottomNavbar from '../components/BottomNavbar.vue'
 
 import { braindrillLevels } from '../data/braindrillLevels'
 
+import { supabase } from '../lib/supabase'
+
+import { syncUserData } from '../utils/syncUserData'
+
 const router = useRouter()
 
 const level =
@@ -20,26 +25,17 @@ const level =
     ),
   ) || 1
 
-const score =
-  Number(
-    localStorage.getItem(
-      'braindrill_last_score',
-    ),
-  ) || 0
-
-const runScore =
-  Number(
-    localStorage.getItem(
-      'braindrill_run_score',
-    ),
-  ) || 0
-
 const correctAnswers =
   Number(
     localStorage.getItem(
       'braindrill_correct_answers',
     ),
   ) || 0
+
+const username =
+  localStorage.getItem(
+    'examinity_username',
+  ) || 'anonymous'
 
 const currentLevel =
   braindrillLevels.find(
@@ -107,6 +103,93 @@ const resultStatus =
   })
 
 /* -----------------------------
+   SAVE SCORE
+----------------------------- */
+
+const saveBraindrillScore =
+  async () => {
+    if (!unlocked) {
+      return
+    }
+
+    const {
+      data: existingUser,
+    } = await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .select('*')
+      .eq(
+        'username',
+        username,
+      )
+      .maybeSingle()
+
+    const updatedScore =
+      (existingUser?.best_run_score ||
+        0) +
+      currentLevel.points
+
+    if (existingUser) {
+      await supabase
+        .from(
+          'examinity_leaderboard',
+        )
+        .update({
+          best_run_score:
+            updatedScore,
+
+          highest_level:
+            Math.max(
+              existingUser.highest_level ||
+                1,
+              level + 1,
+            ),
+        })
+        .eq(
+          'username',
+          username,
+        )
+    } else {
+      await supabase
+        .from(
+          'examinity_leaderboard',
+        )
+        .insert([
+          {
+            username,
+
+            best_run_score:
+              currentLevel.points,
+
+            challenge_points: 0,
+
+            highest_level:
+              level + 1,
+          },
+        ])
+    }
+
+    /* SAVE NEXT LEVEL */
+
+    localStorage.setItem(
+      'braindrill_unlocked_level',
+      Math.max(
+        Number(
+          localStorage.getItem(
+            'braindrill_unlocked_level',
+          ),
+        ) || 1,
+        level + 1,
+      ),
+    )
+
+    /* SYNC */
+
+    await syncUserData()
+  }
+
+/* -----------------------------
    NEXT LEVEL
 ----------------------------- */
 
@@ -132,6 +215,14 @@ const backToDrill = () => {
     '/braindrill',
   )
 }
+
+/* -----------------------------
+   MOUNT
+----------------------------- */
+
+onMounted(async () => {
+  await saveBraindrillScore()
+})
 </script>
 
 <template>
@@ -226,24 +317,30 @@ const backToDrill = () => {
             </h2>
           </div>
 
-          <!-- CORRECT -->
+          <!-- SCORE -->
           <div
             class="flex-1 py-1 flex flex-col items-center justify-center"
           >
             <p
               class="text-[8px] font-black text-black/70"
             >
-              CORRECT
+              FINAL SCORE
             </p>
 
             <div
-              class="mt-1 w-[58px] h-[58px] border-4 border-[#FF2D2D] rounded-full flex items-center justify-center rotate-[10deg]"
+              class="mt-1 w-[78px] h-[78px] border-4 border-[#FF2D2D] rounded-full flex flex-col items-center justify-center rotate-[6deg] bg-white"
             >
               <h2
-                class="text-[1.5rem] font-black text-[#FF2D2D]"
+                class="text-[1.4rem] font-black text-[#FF2D2D] leading-none"
               >
                 {{ correctAnswers }}
               </h2>
+
+              <p
+                class="mt-[2px] text-[10px] font-black text-[#FF2D2D] leading-none"
+              >
+                /{{ currentLevel.questions }}
+              </p>
             </div>
           </div>
         </div>

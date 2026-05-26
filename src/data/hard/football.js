@@ -188,7 +188,7 @@ export const questions = [
   },
   {
     id: 18,
-    question: 'Which African player became Liverpools star winger alongside Mohamed Salah and Sadio Mane?',
+    question: 'Which African player became Liverpools star winger alongside Mohamed Salah and Firmino?',
     options: [
       'Andre Ayew',
       'Sadio Mane',

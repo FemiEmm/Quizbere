@@ -18,13 +18,13 @@ export const braindrillLevels = [
   {
     level: 2,
 
-    gameType: 'quiz',
+    gameType: 'tap',
 
     questions: 10,
 
     time: 90,
 
-    requiredCorrect: 10,
+    requiredCorrect: 6,
 
     points: 10,
 
@@ -76,13 +76,13 @@ export const braindrillLevels = [
 
     points: 50,
 
-    color: 'bg-[#FD9501]',
+    color: 'bg-[#F3F400]',
   },
 
   {
     level: 6,
 
-    gameType: 'match',
+    gameType: 'quiz',
 
     questions: 8,
 
@@ -90,15 +90,15 @@ export const braindrillLevels = [
 
     requiredCorrect: 28,
 
-    points: 2,
+    points: 20,
 
-    color: 'bg-[#03B5EC]',
+    color: 'bg-white',
   },
 
   {
     level: 7,
 
-    gameType: 'quiz',
+    gameType: 'tap',
 
     questions: 70,
 
@@ -106,7 +106,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 50,
 
-    points: 20,
+    points: 25,
 
     color: 'bg-[#FF2AA3]',
   },
@@ -122,7 +122,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 30,
 
-    points: 15,
+    points: 30,
 
     color: 'bg-[#7C3AED]',
   },
@@ -138,7 +138,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 40,
 
-    points: 3,
+    points: 35,
 
     color: 'bg-[#FD9501]',
   },
@@ -154,7 +154,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 80,
 
-    points: 50,
+    points: 100,
 
     color: 'bg-[#F3F400]',
 
