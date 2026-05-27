@@ -99,6 +99,16 @@ const timeLeft = ref(
 )
 
 /* -----------------------------
+   MODAL
+----------------------------- */
+
+const showResultModal =
+  ref(false)
+
+const resultType =
+  ref('')
+
+/* -----------------------------
    CURRENT QUESTION
 ----------------------------- */
 
@@ -127,10 +137,52 @@ const startTimer = () => {
     ) {
       timeLeft.value--
     } else {
-      finishChallenge()
+      showTimeUpModal()
     }
   }, 1000)
 }
+
+/* -----------------------------
+   TIME UP MODAL
+----------------------------- */
+
+const showTimeUpModal =
+  () => {
+    clearInterval(timer)
+
+    resultType.value =
+      'timesup'
+
+    showResultModal.value =
+      true
+
+    playSound('fail')
+
+    setTimeout(() => {
+      finishChallenge()
+    }, 1800)
+  }
+
+/* -----------------------------
+   COMPLETE MODAL
+----------------------------- */
+
+const showCompleteModal =
+  () => {
+    clearInterval(timer)
+
+    resultType.value =
+      'done'
+
+    showResultModal.value =
+      true
+
+    playSound('pass')
+
+    setTimeout(() => {
+      finishChallenge()
+    }, 1800)
+  }
 
 /* -----------------------------
    FINISH CHALLENGE
@@ -161,17 +213,9 @@ const finishChallenge =
       }),
     )
 
-    if (passed) {
-      playSound('pass')
-    } else {
-      playSound('fail')
-    }
-
-    setTimeout(() => {
-      router.push(
-        '/challenge/result',
-      )
-    }, 1000)
+    router.push(
+      '/challenge/result',
+    )
   }
 
 /* -----------------------------
@@ -192,7 +236,9 @@ const nextQuestion = () => {
     currentQuestionIndex.value >=
     shuffledQuestions.length
   ) {
-    finishChallenge()
+    showCompleteModal()
+
+    return
   }
 }
 
@@ -257,7 +303,7 @@ const selectAnswer = (
       'sudden_death'
     ) {
       setTimeout(() => {
-        finishChallenge()
+        showTimeUpModal()
       }, 700)
 
       return
@@ -288,6 +334,8 @@ const leaveChallenge =
 
 onMounted(() => {
   startTimer()
+
+  window.scrollTo(0, 0)
 })
 
 onBeforeUnmount(() => {
@@ -299,6 +347,59 @@ onBeforeUnmount(() => {
   <main
     class="min-h-screen bg-[#03B5EC] pb-28 px-4 pt-4"
   >
+    <!-- RESULT MODAL -->
+    <div
+      v-if="
+        showResultModal
+      "
+      class="fixed inset-0 z-50 bg-[#F3F400] flex items-center justify-center px-5"
+    >
+      <div
+        class="w-full max-w-sm text-center"
+      >
+        <!-- DONE -->
+        <template
+          v-if="
+            resultType ===
+            'done'
+          "
+        >
+          <h2
+            class="text-6xl font-black text-[#03B5EC]"
+          >
+            DONE!
+          </h2>
+
+          <p
+            class="mt-5 text-black text-2xl font-black"
+          >
+            ALL QUESTIONS
+            COMPLETED
+          </p>
+        </template>
+
+        <!-- TIME UP -->
+        <template
+          v-if="
+            resultType ===
+            'timesup'
+          "
+        >
+          <h2
+            class="text-6xl font-black text-[#FF2AA3]"
+          >
+            TIME UP!
+          </h2>
+
+          <p
+            class="mt-5 text-black text-2xl font-black"
+          >
+            CHALLENGE ENDED
+          </p>
+        </template>
+      </div>
+    </div>
+
     <section
       class="max-w-md mx-auto"
     >
