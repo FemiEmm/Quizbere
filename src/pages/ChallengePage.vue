@@ -82,7 +82,7 @@ const challenges = [
 
     questionCount: 20,
 
-    startingTime: 15,
+    startingTime: 30,
 
     timeReward: 3,
 
