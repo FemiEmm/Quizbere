@@ -113,9 +113,9 @@ const challenges = [
 
     questionCount: 30,
 
-    startingTime: 120,
+    startingTime: 60,
 
-    passMark: 15,
+    passMark: 20,
 
     useTimer: true,
 
