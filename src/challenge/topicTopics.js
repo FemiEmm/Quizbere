@@ -88,4 +88,22 @@ export const topicChallenges = [
 
     color: 'bg-[#FF2AA3]',
   },
+
+    {
+    id: 6,
+
+    name: 'HEALTH',
+
+    folder: 'easy',
+
+    topic: 'health',
+
+    points: 50,
+
+    questionCount: 20,
+
+    passMark: 15,
+
+    color: 'bg-[#FF2AA3]',
+  },
 ]

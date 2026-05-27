@@ -171,16 +171,8 @@ onMounted(async () => {
                 <h2
                   class="text-4xl font-black text-red-500 leading-none"
                 >
-                  {{
-                    result.score
-                  }}
+                  {{ result.score }}/{{ result.total }}
                 </h2>
-
-                <p
-                  class="mt-1 text-[10px] font-black text-black/50"
-                >
-                  / {{ result.total }}
-                </p>
               </div>
             </div>
           </div>

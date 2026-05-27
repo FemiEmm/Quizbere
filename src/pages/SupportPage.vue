@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 import { useRouter } from 'vue-router'
 
@@ -50,9 +50,34 @@ const username =
     'examinity_username',
   ) || ''
 
+const displayUsername =
+  computed(() => {
+    if (
+      username.length > 11
+    ) {
+      return `${username.slice(0, 11)}...`
+    }
+
+    return username
+  })
+
 const isAdmin =
   username ===
   'ADMINDEVELOPER'
+
+/* -----------------------------
+   REPORT FORM
+----------------------------- */
+
+const openReportForm =
+  () => {
+    playSound('button')
+
+    window.open(
+      'https://forms.gle/tDSwWE4fEwjJiCALA',
+      '_blank',
+    )
+  }
 
 /* -----------------------------
    CLEAR APP STORAGE
@@ -172,8 +197,6 @@ const deleteAccount =
       ''
 
     try {
-      /* USERS */
-
       const usersDelete =
         await supabase
           .from(
@@ -190,8 +213,6 @@ const deleteAccount =
       ) {
         throw usersDelete.error
       }
-
-      /* LEADERBOARD */
 
       const leaderboardDelete =
         await supabase
@@ -210,8 +231,6 @@ const deleteAccount =
         throw leaderboardDelete.error
       }
 
-      /* WINNERS */
-
       const winnersDelete =
         await supabase
           .from(
@@ -229,8 +248,6 @@ const deleteAccount =
         throw winnersDelete.error
       }
 
-      /* VERSUS */
-
       const versusDelete =
         await supabase
           .from(
@@ -246,8 +263,6 @@ const deleteAccount =
       ) {
         throw versusDelete.error
       }
-
-      /* SUCCESS */
 
       clearAppStorage()
 
@@ -303,11 +318,9 @@ const deleteAccount =
           data and versus matches.
         </p>
 
-        <!-- BUTTONS -->
         <div
           class="mt-6 flex flex-col gap-4"
         >
-          <!-- DELETE -->
           <button
             @click="
               deleteAccount
@@ -317,7 +330,6 @@ const deleteAccount =
             YES DELETE
           </button>
 
-          <!-- CANCEL -->
           <button
             @click="
               () => {
@@ -338,7 +350,6 @@ const deleteAccount =
           </button>
         </div>
 
-        <!-- ERROR -->
         <p
           v-if="
             deleteMessage
@@ -363,14 +374,29 @@ const deleteAccount =
           SUPPORT
         </h1>
 
-        <!-- ACTIVE USER -->
+        <!-- USER + MUTE -->
         <div
-          class="mt-6 flex justify-center"
+          class="mt-6 flex gap-3"
         >
+          <!-- USER -->
           <button
-            class="bg-[#F3F400] border-4 border-black rounded-2xl px-6 py-4 text-black text-xl font-black shadow-[0_6px_0_#000]"
+            class="flex-1 bg-[#F3F400] border-4 border-black rounded-2xl px-4 py-4 text-black text-lg font-black shadow-[0_6px_0_#000] truncate"
           >
-            @{{ username }}
+            @{{ displayUsername }}
+          </button>
+
+          <!-- MUTE -->
+          <button
+            @click="
+              toggleSound
+            "
+            class="w-[110px] bg-[#03B5EC] border-4 border-black rounded-2xl py-4 text-black text-sm font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+          >
+            {{
+              muted
+                ? 'UNMUTE'
+                : 'MUTE'
+            }}
           </button>
         </div>
       </div>
@@ -385,7 +411,6 @@ const deleteAccount =
           GAME MODES
         </h2>
 
-        <!-- QUIZBERE -->
         <div
           class="mt-6"
         >
@@ -404,7 +429,6 @@ const deleteAccount =
           </p>
         </div>
 
-        <!-- BRAINDRILL -->
         <div
           class="mt-5"
         >
@@ -422,7 +446,6 @@ const deleteAccount =
           </p>
         </div>
 
-        <!-- CHALLENGE -->
         <div
           class="mt-5"
         >
@@ -452,25 +475,19 @@ const deleteAccount =
         EXPLAIN APP
       </button>
 
-      <!-- SOUND + LOGOUT -->
+      <!-- REPORT + LOGOUT -->
       <div
         class="mt-4 grid grid-cols-2 gap-4"
       >
-        <!-- SOUND -->
         <button
           @click="
-            toggleSound
+            openReportForm
           "
           class="bg-[#03B5EC] border-4 border-black rounded-2xl py-5 px-3 text-black text-sm font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
         >
-          {{
-            muted
-              ? 'UNMUTE'
-              : 'MUTE'
-          }}
+          REPORT
         </button>
 
-        <!-- LOGOUT -->
         <button
           @click="logout"
           class="bg-black border-4 border-black rounded-2xl py-5 px-3 text-white text-sm font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"

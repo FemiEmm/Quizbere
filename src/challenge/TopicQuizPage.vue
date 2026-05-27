@@ -44,6 +44,10 @@ import {
   questions as nigeriaQuestions,
 } from '../data/easy/nigeria.js'
 
+import {
+  questions as healthQuestions,
+} from '../data/topicmulti/health.js'
+
 const router = useRouter()
 
 const selectedTopic =
@@ -101,6 +105,8 @@ const topicMap = {
   nigeria:
     nigeriaQuestions,
 
+  health:
+    healthQuestions,
 }
 
 const questions =
@@ -120,10 +126,14 @@ const questions =
 const currentIndex =
   ref(0)
 
-const score = ref(0)
+const score =
+  ref(0)
 
 const selectedAnswer =
   ref(null)
+
+const selectedAnswers =
+  ref([])
 
 const showCorrect =
   ref(false)
@@ -137,6 +147,18 @@ const currentQuestion =
     return questions[
       currentIndex.value
     ]
+  })
+
+/* -----------------------------
+   QUESTION TYPE
+----------------------------- */
+
+const isMultipleChoice =
+  computed(() => {
+    return Array.isArray(
+      currentQuestion.value
+        .answers,
+    )
   })
 
 /* -----------------------------
@@ -218,15 +240,64 @@ const finishQuiz =
   }
 
 /* -----------------------------
-   ANSWER
+   NEXT QUESTION
+----------------------------- */
+
+const nextQuestion =
+  () => {
+    const delay =
+      isMultipleChoice.value
+        ? 2000
+        : 1000
+
+    setTimeout(
+      async () => {
+        if (
+          currentIndex.value <
+          questions.length -
+            1
+        ) {
+          currentIndex.value++
+
+          selectedAnswer.value =
+            null
+
+          selectedAnswers.value =
+            []
+
+          showCorrect.value =
+            false
+
+          return
+        }
+
+        finishQuiz()
+      },
+      delay,
+    )
+  }
+
+/* -----------------------------
+   SINGLE ANSWER
 ----------------------------- */
 
 const selectAnswer =
   async (answer) => {
     if (
-      selectedAnswer.value
-    )
+      isMultipleChoice.value
+    ) {
+      toggleMultipleAnswer(
+        answer,
+      )
+
       return
+    }
+
+    if (
+      selectedAnswer.value
+    ) {
+      return
+    }
 
     selectedAnswer.value =
       answer
@@ -250,28 +321,85 @@ const selectAnswer =
       )
     }
 
-    setTimeout(
-      async () => {
-        if (
-          currentIndex.value <
-          questions.length -
-            1
-        ) {
-          currentIndex.value++
+    nextQuestion()
+  }
 
-          selectedAnswer.value =
-            null
+/* -----------------------------
+   MULTIPLE ANSWERS
+----------------------------- */
 
-          showCorrect.value =
-            false
+const toggleMultipleAnswer =
+  (answer) => {
+    if (
+      showCorrect.value
+    ) {
+      return
+    }
 
-          return
-        }
+    const exists =
+      selectedAnswers.value.includes(
+        answer,
+      )
 
-        finishQuiz()
-      },
-      1000,
+    if (exists) {
+      selectedAnswers.value =
+        selectedAnswers.value.filter(
+          (item) =>
+            item !== answer,
+        )
+
+      return
+    }
+
+    selectedAnswers.value.push(
+      answer,
     )
+  }
+
+/* -----------------------------
+   SUBMIT MULTIPLE
+----------------------------- */
+
+const submitMultipleAnswers =
+  () => {
+    if (
+      selectedAnswers.value
+        .length === 0
+    ) {
+      return
+    }
+
+    showCorrect.value =
+      true
+
+    const correctAnswers =
+      currentQuestion.value
+        .answers
+
+    const isCorrect =
+      selectedAnswers.value
+        .length ===
+        correctAnswers.length &&
+      selectedAnswers.value.every(
+        (answer) =>
+          correctAnswers.includes(
+            answer,
+          ),
+      )
+
+    if (isCorrect) {
+      score.value++
+
+      playSound(
+        'correct',
+      )
+    } else {
+      playSound(
+        'wrong',
+      )
+    }
+
+    nextQuestion()
   }
 
 /* -----------------------------
@@ -302,11 +430,52 @@ const giveUp =
 
 const getButtonClass =
   (answer) => {
+    /* BEFORE SUBMIT */
+
     if (
       !showCorrect.value
     ) {
+      if (
+        isMultipleChoice.value &&
+        selectedAnswers.value.includes(
+          answer,
+        )
+      ) {
+        return 'bg-[#FF2AA3] text-white'
+      }
+
       return 'bg-[#F3F400]'
     }
+
+    /* MULTIPLE */
+
+    if (
+      isMultipleChoice.value
+    ) {
+      const correctAnswers =
+        currentQuestion.value
+          .answers
+
+      if (
+        correctAnswers.includes(
+          answer,
+        )
+      ) {
+        return 'bg-[#22C55E] text-white'
+      }
+
+      if (
+        selectedAnswers.value.includes(
+          answer,
+        )
+      ) {
+        return 'bg-[#EF4444] text-white'
+      }
+
+      return 'bg-[#F3F400]'
+    }
+
+    /* SINGLE */
 
     if (
       answer ===
@@ -325,7 +494,6 @@ const getButtonClass =
     return 'bg-[#F3F400]'
   }
 </script>
-
 <template>
   <main
     class="min-h-screen bg-[#03B5EC] px-4 pt-5 pb-5"
@@ -415,6 +583,16 @@ const getButtonClass =
           }}
         </h2>
 
+        <!-- MULTIPLE NOTICE -->
+        <p
+          v-if="
+            isMultipleChoice
+          "
+          class="mt-2 text-center text-sm font-black text-[#FF2AA3]"
+        >
+          Select all correct answers
+        </p>
+
         <!-- ANSWERS -->
         <div
           class="mt-5 flex flex-col gap-3"
@@ -428,6 +606,7 @@ const getButtonClass =
               )
             "
             :disabled="
+              !isMultipleChoice &&
               selectedAnswer
             "
             class="border-4 border-black rounded-2xl py-4 px-4 text-base font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] transition-all duration-100"
@@ -445,25 +624,47 @@ const getButtonClass =
         <div
           class="mt-5 flex gap-3"
         >
-          <!-- SKIP -->
-          <button
-            @click="
-              skipQuestion
+          <!-- SINGLE -->
+          <template
+            v-if="
+              !isMultipleChoice
             "
-            class="flex-1 bg-[#FD9501] border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
           >
-            SKIP
-          </button>
+            <!-- SKIP -->
+            <button
+              @click="
+                skipQuestion
+              "
+              class="flex-1 bg-[#FD9501] border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+            >
+              SKIP
+            </button>
 
-          <!-- GIVE UP -->
-          <button
-            @click="
-              giveUp
-            "
-            class="flex-1 bg-[#EF4444] text-white border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+            <!-- GIVE UP -->
+            <button
+              @click="
+                giveUp
+              "
+              class="flex-1 bg-[#EF4444] text-white border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+            >
+              GIVE UP
+            </button>
+          </template>
+
+          <!-- MULTIPLE -->
+          <template
+            v-else
           >
-            GIVE UP
-          </button>
+            <!-- SUBMIT -->
+            <button
+              @click="
+                submitMultipleAnswers
+              "
+              class="w-full bg-[#FF2AA3] text-white border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+            >
+              SUBMIT ANSWER
+            </button>
+          </template>
         </div>
       </div>
     </section>
