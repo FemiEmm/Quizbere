@@ -101,7 +101,7 @@ const difficultyMap = {
 
   9: ['easy', 'mid'],
 
-  10: ['extreme'],
+  10: ['easy'],
 }
 
 const difficulties =

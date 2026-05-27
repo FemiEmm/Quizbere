@@ -126,7 +126,7 @@ const challenges = [
     questionFolders: ['easy', 'mid'],
 
     description:
-      'Answer as many questions as possible before time explodes. Get 15 correct answers before 120 seconds ends.',
+      'Answer as many questions as possible before time explodes. Get 15 correct answers before 60 seconds ends.',
 
     color: 'bg-[#FD9501]',
 
