@@ -21,27 +21,27 @@ const corsHeaders = {
 const rewards = [
   {
     name: 'TRY AGAIN',
-    probability: 50,
+    probability: 80,
   },
 
   {
     name: '1GB DATA',
-    probability: 35,
+    probability: 20,
   },
 
   {
     name: '2GB DATA',
-    probability: 5,
+    probability: 0,
   },
 
   {
     name: '₦500',
-    probability: 5,
+    probability: 0,
   },
 
   {
     name: '₦1,000',
-    probability: 5,
+    probability: 0,
   },
 
   {

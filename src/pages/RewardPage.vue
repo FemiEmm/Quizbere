@@ -10,6 +10,8 @@ import { supabase } from '../lib/supabase'
 
 import SpinWheel from '../components/SpinWheel.vue'
 
+import BottomNavbar from '../components/BottomNavbar.vue'
+
 import { rewards } from '../data/rewards'
 
 import { playSound } from '../utils/playSound'
@@ -39,6 +41,9 @@ const selectedReward =
   ref('')
 
 const wheelRef = ref(null)
+
+const forcedTryAgain =
+  ref(false)
 
 /* -----------------------------
    SPIN TOKEN
@@ -119,30 +124,93 @@ const consumeSpinToken =
   }
 
 /* -----------------------------
+   CHECK WINNER LIMIT
+----------------------------- */
+
+const shouldForceTryAgain =
+  async () => {
+    try {
+      const {
+        count,
+        error,
+      } = await supabase
+        .from(
+          'examinity_winners',
+        )
+        .select('*', {
+          count: 'exact',
+          head: true,
+        })
+
+      if (error) {
+        return false
+      }
+
+      return count >= 10
+    } catch (err) {
+      console.error(err)
+
+      return false
+    }
+  }
+
+/* -----------------------------
    HANDLE SPIN COMPLETE
 ----------------------------- */
 
 const handleSpinComplete =
   async (reward) => {
-    selectedReward.value =
+    let finalReward =
       reward.name
+
+    /* FORCE TRY AGAIN */
+
+    if (
+      forcedTryAgain.value
+    ) {
+      finalReward =
+        'TRY AGAIN'
+    }
+
+    selectedReward.value =
+      finalReward
 
     spinning.value = false
 
     localStorage.setItem(
       'examinity_reward',
-      reward.name,
+      finalReward,
     )
 
     /* WIN / FAIL SOUND */
 
     if (
-      reward.name ===
+      finalReward ===
       'TRY AGAIN'
     ) {
       playSound('fail')
     } else {
       playSound('pass')
+    }
+
+    /* SAVE WINNER */
+
+    if (
+      finalReward !==
+      'TRY AGAIN'
+    ) {
+      await supabase
+        .from(
+          'examinity_winners',
+        )
+        .insert([
+          {
+            username,
+
+            reward:
+              finalReward,
+          },
+        ])
     }
   }
 
@@ -165,6 +233,11 @@ const startSpin =
 
       return
     }
+
+    /* CHECK LIMIT */
+
+    forcedTryAgain.value =
+      await shouldForceTryAgain()
 
     playSound('button')
 
@@ -221,7 +294,7 @@ const handleButton =
 
 <template>
   <main
-    class="min-h-screen bg-[#03B5EC] flex items-center justify-center px-4 py-6 overflow-hidden"
+    class="min-h-screen bg-[#03B5EC] flex items-center justify-center px-4 py-6 pb-28 overflow-hidden"
   >
     <section
       class="w-full max-w-sm text-center"
@@ -292,5 +365,7 @@ const handleButton =
         {{ buttonText }}
       </button>
     </section>
+
+    <BottomNavbar />
   </main>
 </template>
