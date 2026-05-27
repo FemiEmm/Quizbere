@@ -1,11 +1,11 @@
 export const questions = [
-    {
+{
   id: 1,
   question: 'What is the nickname of the Nigerian national football team?',
   options: [
+    'Super Eagles',
     'Black Stars',
     'Indomitable Lions',
-    'Super Eagles',
     'Atlas Lions',
   ],
   answer: 'Super Eagles',
@@ -16,8 +16,8 @@ export const questions = [
   question: 'Which country did Nigeria defeat to win AFCON 2013?',
   options: [
     'Egypt',
-    'Cameroon',
     'Burkina Faso',
+    'Cameroon',
     'Ghana',
   ],
   answer: 'Burkina Faso',
@@ -29,8 +29,8 @@ export const questions = [
   options: [
     'John Obi Mikel',
     'Ahmed Musa',
-    'Victor Moses',
     'Sunday Mba',
+    'Victor Moses',
   ],
   answer: 'Sunday Mba',
 },
@@ -44,16 +44,16 @@ export const questions = [
     'Vincent Enyeama',
     'Ike Shorunmu',
   ],
-  answer: 'Vincent Enyeama',
+  answer: 'Ike Shorunmu',
 },
 
 {
   id: 5,
   question: 'Which Nigerian player was nicknamed Papilo?',
   options: [
+    'Nwankwo Kanu',
     'Jay-Jay Okocha',
     'Daniel Amokachi',
-    'Nwankwo Kanu',
     'Ahmed Musa',
   ],
   answer: 'Nwankwo Kanu',
@@ -64,8 +64,8 @@ export const questions = [
   question: 'Which country eliminated Nigeria from the 1994 FIFA World Cup?',
   options: [
     'Germany',
-    'Brazil',
     'Italy',
+    'Brazil',
     'Spain',
   ],
   answer: 'Italy',
@@ -99,9 +99,9 @@ export const questions = [
   id: 9,
   question: 'Which Nigerian player became famous for his dribbling at Bolton Wanderers?',
   options: [
+    'Jay-Jay Okocha',
     'Mikel Obi',
     'Yakubu',
-    'Jay-Jay Okocha',
     'Victor Moses',
   ],
   answer: 'Jay-Jay Okocha',
@@ -112,8 +112,8 @@ export const questions = [
   question: 'Which Nigerian defender captained the Super Eagles for many years?',
   options: [
     'Taribo West',
-    'Chidozie Awaziem',
     'Joseph Yobo',
+    'Chidozie Awaziem',
     'William Troost-Ekong',
   ],
   answer: 'Joseph Yobo',
@@ -137,8 +137,8 @@ export const questions = [
   options: [
     'Jay-Jay Okocha',
     'Kanu',
-    'Rashidi Yekini',
     'Segun Odegbami',
+    'Rashidi Yekini',
   ],
   answer: 'Rashidi Yekini',
 },
@@ -147,9 +147,9 @@ export const questions = [
   id: 13,
   question: 'Which country beat Nigeria in the AFCON 2000 final?',
   options: [
+    'Cameroon',
     'Tunisia',
     'Ghana',
-    'Cameroon',
     'Algeria',
   ],
   answer: 'Cameroon',
@@ -160,8 +160,8 @@ export const questions = [
   question: 'Which Nigerian player played for Arsenal and won the Premier League?',
   options: [
     'Victor Moses',
-    'Kelechi Iheanacho',
     'Nwankwo Kanu',
+    'Kelechi Iheanacho',
     'Wilfred Ndidi',
   ],
   answer: 'Nwankwo Kanu',
@@ -188,16 +188,16 @@ export const questions = [
     'Shooting Stars',
     'Bendel Insurance',
   ],
-  answer: 'Shooting Stars',
+  answer: 'Bendel Insurance',
 },
 
 {
   id: 17,
   question: 'Which Super Eagles player played for Chelsea and Middlesbrough?',
   options: [
+    'John Obi Mikel',
     'Ahmed Musa',
     'Victor Osimhen',
-    'John Obi Mikel',
     'Victor Boniface',
   ],
   answer: 'John Obi Mikel',
@@ -208,8 +208,8 @@ export const questions = [
   question: 'Who scored Nigerias first ever World Cup goal?',
   options: [
     'Daniel Amokachi',
-    'Emmanuel Amunike',
     'Rashidi Yekini',
+    'Emmanuel Amunike',
     'Finidi George',
   ],
   answer: 'Rashidi Yekini',
@@ -236,16 +236,16 @@ export const questions = [
     'Julius Aghahowa',
     'Taribo West',
   ],
-  answer: 'Julius Aghahowa',
+  answer: 'Taribo West',
 },
 
 {
   id: 21,
   question: 'Which country hosted AFCON 1980 that Nigeria won?',
   options: [
+    'Nigeria',
     'Egypt',
     'Tunisia',
-    'Nigeria',
     'Morocco',
   ],
   answer: 'Nigeria',
@@ -256,8 +256,8 @@ export const questions = [
   question: 'Which Nigerian player was called The Bull?',
   options: [
     'Kanu',
-    'Yekini',
     'Daniel Amokachi',
+    'Yekini',
     'Musa',
   ],
   answer: 'Daniel Amokachi',
@@ -281,8 +281,8 @@ export const questions = [
   options: [
     'Okocha',
     'Kanu',
-    'Amunike',
     'Babayaro',
+    'Amunike',
   ],
   answer: 'Amunike',
 },
@@ -291,9 +291,9 @@ export const questions = [
   id: 25,
   question: 'Which Nigerian striker played for Villarreal?',
   options: [
+    'Ikechukwu Uche',
     'Musa',
     'Yakubu',
-    'Ikechukwu Uche',
     'Aghahowa',
   ],
   answer: 'Ikechukwu Uche',
@@ -304,8 +304,8 @@ export const questions = [
   question: 'Which Nigerian player was famous for colorful hairstyles and defending?',
   options: [
     'Ekong',
-    'Omeruo',
     'Taribo West',
+    'Omeruo',
     'Balogun',
   ],
   answer: 'Taribo West',
@@ -329,8 +329,8 @@ export const questions = [
   options: [
     'Kanu',
     'Yekini',
-    'Stephen Keshi',
     'Okocha',
+    'Stephen Keshi',
   ],
   answer: 'Stephen Keshi',
 },
@@ -339,9 +339,9 @@ export const questions = [
   id: 29,
   question: 'Which Nigerian player was known for long-range shots and midfield power?',
   options: [
+    'Sunday Oliseh',
     'Musa',
     'Yobo',
-    'Sunday Oliseh',
     'Ekong',
   ],
   answer: 'Sunday Oliseh',
@@ -352,8 +352,8 @@ export const questions = [
   question: 'Which country defeated Nigeria in the 2018 World Cup group stage?',
   options: [
     'Argentina',
-    'France',
     'Croatia',
+    'France',
     'Belgium',
   ],
   answer: 'Croatia',
@@ -376,8 +376,8 @@ export const questions = [
   question: 'Which Nigerian player played for Everton and Portsmouth?',
   options: [
     'Osimhen',
-    'Mikel',
     'Yakubu Aiyegbeni',
+    'Mikel',
     'Aghahowa',
   ],
   answer: 'Yakubu Aiyegbeni',
@@ -400,9 +400,9 @@ export const questions = [
   question: 'Which Super Eagles player played for Leicester City and Napoli?',
   options: [
     'Ahmed Musa',
-    'Mikel Obi',
-    'Wilfred Ndidi',
     'Victor Osimhen',
+    'Wilfred Ndidi',
+    'Mikel Obi',
   ],
   answer: 'Victor Osimhen',
 },
@@ -425,8 +425,8 @@ export const questions = [
   options: [
     'Taribo West',
     'Omeruo',
-    'Celestine Babayaro',
     'Troost-Ekong',
+    'Celestine Babayaro',
   ],
   answer: 'Celestine Babayaro',
 },
@@ -435,9 +435,9 @@ export const questions = [
   id: 37,
   question: 'Which Super Eagles player was famous for pace and wing play at Ajax?',
   options: [
+    'Finidi George',
     'Yekini',
     'Mikel',
-    'Finidi George',
     'Oliseh',
   ],
   answer: 'Finidi George',
@@ -448,8 +448,8 @@ export const questions = [
   question: 'Which Nigerian player played for CSKA Moscow?',
   options: [
     'Kanu',
-    'Mikel',
     'Ahmed Musa',
+    'Mikel',
     'Osimhen',
   ],
   answer: 'Ahmed Musa',
@@ -473,8 +473,8 @@ export const questions = [
   options: [
     'Victor Moses',
     'Ahmed Musa',
-    'Peter Odemwingie',
     'Mikel Obi',
+    'Peter Odemwingie',
   ],
   answer: 'Peter Odemwingie',
 },
@@ -483,9 +483,9 @@ export const questions = [
   id: 41,
   question: 'Which Nigerian midfielder played for Borussia Dortmund?',
   options: [
+    'Sunday Oliseh',
     'Yobo',
     'Musa',
-    'Sunday Oliseh',
     'Mikel Obi',
   ],
   answer: 'Sunday Oliseh',
@@ -496,8 +496,8 @@ export const questions = [
   question: 'Which Super Eagles player was known as The Headmaster?',
   options: [
     'Okocha',
-    'Oliseh',
     'Segun Odegbami',
+    'Oliseh',
     'Kanu',
   ],
   answer: 'Segun Odegbami',
@@ -521,19 +521,19 @@ export const questions = [
   options: [
     'Mikel',
     'Oliseh',
-    'Kanu',
     'Yekini',
+    'Kanu',
   ],
-  answer: 'Kanu',
+ answer: 'Kanu',
 },
 
 {
   id: 45,
   question: 'Which Nigerian player scored against Argentina at the 2018 World Cup?',
   options: [
+    'Ahmed Musa',
     'Ighalo',
     'Ekong',
-    'Ahmed Musa',
     'Balogun',
   ],
   answer: 'Ahmed Musa',
@@ -544,8 +544,8 @@ export const questions = [
   question: 'Which Super Eagles player played for Lille before Napoli?',
   options: [
     'Musa',
-    'Ndidi',
     'Victor Osimhen',
+    'Ndidi',
     'Boniface',
   ],
  answer: 'Victor Osimhen',
@@ -569,8 +569,8 @@ export const questions = [
   options: [
     'Yobo',
     'Ekong',
-    'Jay-Jay Okocha',
     'Musa',
+    'Jay-Jay Okocha',
   ],
   answer: 'Jay-Jay Okocha',
 },
@@ -579,9 +579,9 @@ export const questions = [
   id: 49,
   question: 'Which Nigerian striker won AFCON 2013 Golden Boot?',
   options: [
+    'Emmanuel Emenike',
     'Ighalo',
     'Musa',
-    'Emmanuel Emenike',
     'Osimhen',
   ],
   answer: 'Emmanuel Emenike',
@@ -592,8 +592,8 @@ export const questions = [
   question: 'Which Nigerian player played for Fulham and West Brom?',
   options: [
     'Osimhen',
-    'Mikel',
     'Sone Aluko',
+    'Mikel',
     'Ahmed Musa',
   ],
   answer: 'Sone Aluko',
