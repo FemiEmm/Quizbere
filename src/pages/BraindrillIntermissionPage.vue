@@ -32,10 +32,22 @@ const correctAnswers =
     ),
   ) || 0
 
+/* -----------------------------
+   USERNAME
+----------------------------- */
+
 const username =
-  localStorage.getItem(
-    'examinity_username',
-  ) || 'anonymous'
+  (
+    localStorage.getItem(
+      'examinity_username',
+    ) || 'anonymous'
+  )
+    .trim()
+    .toUpperCase()
+
+/* -----------------------------
+   LEVEL DATA
+----------------------------- */
 
 const currentLevel =
   braindrillLevels.find(
@@ -47,7 +59,7 @@ const unlocked =
   currentLevel.requiredCorrect
 
 /* -----------------------------
-   MASCOT MESSAGE
+   MESSAGES
 ----------------------------- */
 
 const passMessages = [
@@ -112,6 +124,36 @@ const saveBraindrillScore =
       return
     }
 
+    /* DUPLICATE PROTECTION */
+
+    const rewardClaimed =
+      localStorage.getItem(
+        'reward_claimed',
+      ) === 'true'
+
+    if (rewardClaimed) {
+      return
+    }
+
+    /* CURRENT UNLOCKED LEVEL */
+
+    const currentUnlockedLevel =
+      Number(
+        localStorage.getItem(
+          'braindrill_highest_level',
+        ),
+      ) || 1
+
+    /* PROTECTED LEVEL */
+
+    const updatedLevel =
+      Math.max(
+        currentUnlockedLevel,
+        level + 1,
+      )
+
+    /* FETCH EXISTING USER */
+
     const {
       data: existingUser,
     } = await supabase
@@ -125,66 +167,72 @@ const saveBraindrillScore =
       )
       .maybeSingle()
 
+    /* UPDATED SCORE */
+
     const updatedScore =
-      (existingUser?.best_run_score ||
-        0) +
+      (
+        existingUser?.best_run_score ||
+        0
+      ) +
       currentLevel.points
 
-    if (existingUser) {
-      await supabase
-        .from(
-          'examinity_leaderboard',
-        )
-        .update({
-          best_run_score:
-            updatedScore,
+    /* UPDATE LEADERBOARD */
 
-          highest_level:
-            Math.max(
-              existingUser.highest_level ||
-                1,
-              level + 1,
-            ),
-        })
-        .eq(
-          'username',
-          username,
-        )
-    } else {
-      await supabase
-        .from(
-          'examinity_leaderboard',
-        )
-        .insert([
-          {
-            username,
+    await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .update({
+        highest_level:
+          updatedLevel,
 
-            best_run_score:
-              currentLevel.points,
+        best_run_score:
+          updatedScore,
+      })
+      .eq(
+        'username',
+        username,
+      )
 
-            challenge_points: 0,
+    /* UPDATE USERS */
 
-            highest_level:
-              level + 1,
-          },
-        ])
-    }
+    await supabase
+      .from(
+        'examinity_users',
+      )
+      .update({
+        braindrill_level:
+          updatedLevel,
+      })
+      .eq(
+        'username',
+        username,
+      )
 
-    /* SAVE NEXT LEVEL */
+    /* SAVE LOCAL */
 
     localStorage.setItem(
       'braindrill_unlocked_level',
-      Math.max(
-        Number(
-          localStorage.getItem(
-            'braindrill_unlocked_level',
-          ),
-        ) || 1,
-        level + 1,
+      String(
+        updatedLevel,
       ),
     )
 
-    /* SYNC */
+    localStorage.setItem(
+      'braindrill_highest_level',
+      String(
+        updatedLevel,
+      ),
+    )
+
+    /* REWARD CLAIMED */
+
+    localStorage.setItem(
+      'reward_claimed',
+      'true',
+    )
+
+    /* SYNC USER */
 
     await syncUserData()
   }
@@ -193,36 +241,48 @@ const saveBraindrillScore =
    NEXT LEVEL
 ----------------------------- */
 
-const nextLevel = () => {
-  localStorage.setItem(
-    'braindrill_selected_level',
-    JSON.stringify({
-      level: level + 1,
-    }),
-  )
+const nextLevel =
+  () => {
+    localStorage.setItem(
+      'braindrill_selected_level',
+      JSON.stringify({
+        level:
+          level + 1,
+      }),
+    )
 
-  router.push(
-    '/braindrill/play',
-  )
-}
+    localStorage.setItem(
+      'braindrill_current_level',
+      String(
+        level + 1,
+      ),
+    )
+
+    router.push(
+      '/braindrill/play',
+    )
+  }
 
 /* -----------------------------
    BACK
 ----------------------------- */
 
-const backToDrill = () => {
-  router.push(
-    '/braindrill',
-  )
-}
+const backToDrill =
+  () => {
+    router.push(
+      '/braindrill',
+    )
+  }
 
 /* -----------------------------
    MOUNT
 ----------------------------- */
 
-onMounted(async () => {
-  await saveBraindrillScore()
-})
+onMounted(
+  async () => {
+    await saveBraindrillScore()
+  },
+)
 </script>
 
 <template>
@@ -261,18 +321,15 @@ onMounted(async () => {
         <div
           class="relative z-10 mt-4 flex items-center justify-center gap-2"
         >
-          <!-- CHARACTER -->
           <img
             src="/mascot/mascot_marking.png"
             alt="Mascot"
             class="w-16 h-24 object-contain shrink-0"
           />
 
-          <!-- MESSAGE -->
           <div
             class="w-full max-w-[180px] min-h-[66px] bg-white border-4 border-black rounded-[1.3rem] px-3 py-2 flex items-center justify-center relative"
           >
-            <!-- PAPER LINES -->
             <div
               class="absolute inset-0 overflow-hidden rounded-[1.3rem] opacity-10 pointer-events-none"
             >
@@ -363,15 +420,22 @@ onMounted(async () => {
           class="relative z-10 mt-4 flex gap-2"
         >
           <button
-            v-if="unlocked && level < 10"
-            @click="nextLevel"
+            v-if="
+              unlocked &&
+              level < 10
+            "
+            @click="
+              nextLevel
+            "
             class="flex-1 bg-[#03B5EC] text-black text-sm font-black py-2.5 rounded-xl border-4 border-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
           >
             NEXT LEVEL
           </button>
 
           <button
-            @click="backToDrill"
+            @click="
+              backToDrill
+            "
             class="flex-1 bg-[#FD9501] text-black text-sm font-black py-2.5 rounded-xl border-4 border-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
           >
             BACK

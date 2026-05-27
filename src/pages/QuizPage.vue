@@ -8,9 +8,24 @@ import {
 
 import { useRouter } from 'vue-router'
 
+import { supabase } from '../lib/supabase'
+
 import { playSound } from '../utils/playSound'
 
 const router = useRouter()
+
+/* -----------------------------
+   USERNAME
+----------------------------- */
+
+const username =
+  (
+    localStorage.getItem(
+      'examinity_username',
+    ) || 'anonymous'
+  )
+    .trim()
+    .toUpperCase()
 
 /* -----------------------------
    AUTO IMPORT QUESTION FILES
@@ -149,45 +164,112 @@ const selectAnswer = (
 }
 
 /* -----------------------------
+   SPIN TOKEN
+----------------------------- */
+
+const rewardSpinToken =
+  async () => {
+    try {
+      /* FETCH USER */
+
+      const {
+        data: user,
+        error,
+      } = await supabase
+        .from(
+          'examinity_users',
+        )
+        .select(
+          'spin_token',
+        )
+        .eq(
+          'username',
+          username,
+        )
+        .maybeSingle()
+
+      if (
+        error ||
+        !user
+      ) {
+        return
+      }
+
+      /* CURRENT TOKENS */
+
+      const currentTokens =
+        Number(
+          user.spin_token,
+        ) || 0
+
+      /* UPDATE */
+
+      await supabase
+        .from(
+          'examinity_users',
+        )
+        .update({
+          spin_token:
+            currentTokens +
+            1,
+        })
+        .eq(
+          'username',
+          username,
+        )
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+/* -----------------------------
    NEXT QUESTION
 ----------------------------- */
 
-const nextQuestion = () => {
-  playSound('button')
+const nextQuestion =
+  async () => {
+    playSound('button')
 
-  if (
-    currentQuestionIndex.value <
-    shuffledQuestions.length - 1
-  ) {
-    currentQuestionIndex.value++
+    if (
+      currentQuestionIndex.value <
+      shuffledQuestions.length - 1
+    ) {
+      currentQuestionIndex.value++
 
-    selectedAnswer.value =
-      ''
+      selectedAnswer.value =
+        ''
 
-    answered.value = false
+      answered.value = false
 
-    startTimer()
-  } else {
-    clearInterval(timer)
-
-    localStorage.setItem(
-      'quizbere_score',
-      score.value,
-    )
-
-    /* PASS / FAIL SOUND */
-
-    if (score.value >= 7) {
-      playSound('pass')
+      startTimer()
     } else {
-      playSound('fail')
-    }
+      clearInterval(timer)
 
-    setTimeout(() => {
-      router.push('/score')
-    }, 1200)
+      localStorage.setItem(
+        'quizbere_score',
+        score.value,
+      )
+
+      /* PASS / FAIL SOUND */
+
+      const passed =
+        score.value >= 7
+
+      if (passed) {
+        playSound('pass')
+
+        /* +1 SPIN TOKEN */
+
+        await rewardSpinToken()
+      } else {
+        playSound('fail')
+      }
+
+      setTimeout(() => {
+        router.push('/score')
+      }, 1200)
+    }
   }
-}
 
 /* -----------------------------
    BACK BUTTON
@@ -307,7 +389,9 @@ onBeforeUnmount(() => {
 
         <!-- NEXT -->
         <button
-          @click="nextQuestion"
+          @click="
+            nextQuestion
+          "
           :disabled="!answered"
           class="mt-5 w-full text-black text-xl font-black py-4 rounded-2xl border-4 border-black shadow-[0_6px_0_#000] transition-all duration-100"
           :class="[

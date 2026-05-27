@@ -21,9 +21,13 @@ const router = useRouter()
 ----------------------------- */
 
 const username =
-  localStorage.getItem(
-    'examinity_username',
-  ) || 'anonymous'
+  (
+    localStorage.getItem(
+      'examinity_username',
+    ) || 'anonymous'
+  )
+    .trim()
+    .toUpperCase()
 
 /* -----------------------------
    STATE
@@ -35,6 +39,84 @@ const selectedReward =
   ref('')
 
 const wheelRef = ref(null)
+
+/* -----------------------------
+   SPIN TOKEN
+----------------------------- */
+
+const consumeSpinToken =
+  async () => {
+    try {
+      /* FETCH USER */
+
+      const {
+        data: user,
+        error,
+      } = await supabase
+        .from(
+          'examinity_users',
+        )
+        .select(
+          'spin_token',
+        )
+        .eq(
+          'username',
+          username,
+        )
+        .maybeSingle()
+
+      if (
+        error ||
+        !user
+      ) {
+        return false
+      }
+
+      /* CURRENT TOKENS */
+
+      const currentTokens =
+        Number(
+          user.spin_token,
+        ) || 0
+
+      /* NO TOKENS */
+
+      if (
+        currentTokens <= 0
+      ) {
+        return false
+      }
+
+      /* UPDATE */
+
+      const {
+        error:
+          updateError,
+      } = await supabase
+        .from(
+          'examinity_users',
+        )
+        .update({
+          spin_token:
+            currentTokens -
+            1,
+        })
+        .eq(
+          'username',
+          username,
+        )
+
+      if (updateError) {
+        return false
+      }
+
+      return true
+    } catch (err) {
+      console.error(err)
+
+      return false
+    }
+  }
 
 /* -----------------------------
    HANDLE SPIN COMPLETE
@@ -62,41 +144,34 @@ const handleSpinComplete =
     } else {
       playSound('pass')
     }
-
-    /* SAVE WINNER */
-
-    const { error } =
-      await supabase
-        .from(
-          'examinity_winners',
-        )
-        .insert([
-          {
-            username,
-            reward:
-              reward.name,
-          },
-        ])
-
-    if (error) {
-      console.error(error)
-    }
   }
 
 /* -----------------------------
    START SPIN
 ----------------------------- */
 
-const startSpin = () => {
-  if (spinning.value)
-    return
+const startSpin =
+  async () => {
+    if (spinning.value)
+      return
 
-  playSound('button')
+    /* CONSUME TOKEN */
 
-  spinning.value = true
+    const allowed =
+      await consumeSpinToken()
 
-  wheelRef.value.spin()
-}
+    if (!allowed) {
+      playSound('fail')
+
+      return
+    }
+
+    playSound('button')
+
+    spinning.value = true
+
+    wheelRef.value.spin()
+  }
 
 /* -----------------------------
    CONTINUE

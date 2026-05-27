@@ -69,6 +69,16 @@ const gameType =
   currentLevel.gameType
 
 /* -----------------------------
+   MODALS
+----------------------------- */
+
+const showTimeUpModal =
+  ref(false)
+
+const showCompletedModal =
+  ref(false)
+
+/* -----------------------------
    DIFFICULTY MAP
 ----------------------------- */
 
@@ -304,9 +314,37 @@ const startTimer =
         ) {
           timeLeft.value--
         } else {
-          endGame()
+          timeUp()
         }
       }, 1000)
+  }
+
+/* -----------------------------
+   TIME UP
+----------------------------- */
+
+const timeUp =
+  () => {
+    clearInterval(
+      timer,
+    )
+
+    const passed =
+      correctAnswers.value >=
+      currentLevel.requiredCorrect
+
+    playSound(
+      passed
+        ? 'pass'
+        : 'fail',
+    )
+
+    showTimeUpModal.value =
+      true
+
+    setTimeout(() => {
+      endGame()
+    }, 1800)
   }
 
 /* -----------------------------
@@ -349,8 +387,36 @@ const nextQuestion =
     ) {
       currentQuestionIndex.value++
     } else {
-      endGame()
+      completeQuestions()
     }
+  }
+
+/* -----------------------------
+   QUESTIONS COMPLETE
+----------------------------- */
+
+const completeQuestions =
+  () => {
+    clearInterval(
+      timer,
+    )
+
+    const passed =
+      correctAnswers.value >=
+      currentLevel.requiredCorrect
+
+    playSound(
+      passed
+        ? 'pass'
+        : 'fail',
+    )
+
+    showCompletedModal.value =
+      true
+
+    setTimeout(() => {
+      endGame()
+    }, 1800)
   }
 
 /* -----------------------------
@@ -366,6 +432,13 @@ const endGame =
     const passed =
       correctAnswers.value >=
       currentLevel.requiredCorrect
+
+    /* REWARD RESET */
+
+    localStorage.setItem(
+      'reward_claimed',
+      'false',
+    )
 
     /* REWARD PLAYER */
 
@@ -390,22 +463,6 @@ const endGame =
       'braindrill_current_level',
       currentLevel.level,
     )
-
-    /* PASS SOUND */
-
-    if (passed) {
-      playSound(
-        'pass',
-      )
-    }
-
-    /* FAIL SOUND */
-
-    else {
-      playSound(
-        'fail',
-      )
-    }
 
     /* UNLOCK NEXT LEVEL */
 
@@ -640,6 +697,74 @@ onBeforeUnmount(() => {
         LEAVE DRILL
       </button>
     </section>
+
+    <!-- TIME UP MODAL -->
+    <div
+      v-if="
+        showTimeUpModal
+      "
+      class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-6"
+    >
+      <div
+        class="w-full max-w-[280px] bg-[#F3F400] border-4 border-black rounded-[2rem] p-6 text-center shadow-[0_10px_0_#000]"
+      >
+        <h2
+          class="text-3xl font-black text-black"
+        >
+          TIME UP!
+        </h2>
+
+        <p
+          class="mt-3 text-sm font-black text-black/70 leading-6"
+        >
+          The drill session has ended.
+        </p>
+
+        <div
+          class="mt-5 bg-[#FF2AA3] border-4 border-black rounded-2xl py-4 shadow-[0_6px_0_#000]"
+        >
+          <p
+            class="text-white text-xl font-black"
+          >
+            RETURNING...
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPLETED MODAL -->
+    <div
+      v-if="
+        showCompletedModal
+      "
+      class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-6"
+    >
+      <div
+        class="w-full max-w-[280px] bg-[#03B5EC] border-4 border-black rounded-[2rem] p-6 text-center shadow-[0_10px_0_#000]"
+      >
+        <h2
+          class="text-3xl font-black text-black"
+        >
+          DRILL COMPLETE!
+        </h2>
+
+        <p
+          class="mt-3 text-sm font-black text-black/70 leading-6"
+        >
+          All questions answered.
+        </p>
+
+        <div
+          class="mt-5 bg-[#FF2AA3] border-4 border-black rounded-2xl py-4 shadow-[0_6px_0_#000]"
+        >
+          <p
+            class="text-white text-xl font-black"
+          >
+            PROCESSING...
+          </p>
+        </div>
+      </div>
+    </div>
 
     <BottomNavbar />
   </main>

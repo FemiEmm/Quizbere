@@ -1,5 +1,8 @@
 <script setup>
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 
 import { useRouter } from 'vue-router'
 
@@ -10,6 +13,8 @@ import BottomNavbar from '../components/BottomNavbar.vue'
 import AppLoader from '../components/AppLoader.vue'
 
 import MorePage from '../components/MorePage.vue'
+
+import BereStore from '../components/BereStore.vue'
 
 import {
   playSound,
@@ -41,6 +46,9 @@ const muted =
     isSoundMuted(),
   )
 
+const showBereStore =
+  ref(false)
+
 /* -----------------------------
    FETCH USERNAME
 ----------------------------- */
@@ -64,6 +72,18 @@ const displayUsername =
 const isAdmin =
   username ===
   'ADMINDEVELOPER'
+
+/* -----------------------------
+   OPEN STORE
+----------------------------- */
+
+const openBereStore =
+  () => {
+    playSound('button')
+
+    showBereStore.value =
+      true
+  }
 
 /* -----------------------------
    REPORT FORM
@@ -296,6 +316,17 @@ const deleteAccount =
       <AppLoader />
     </div>
 
+    <!-- STORE -->
+    <BereStore
+      v-if="
+        showBereStore
+      "
+      @close="
+        showBereStore =
+          false
+      "
+    />
+
     <!-- DELETE MODAL -->
     <div
       v-if="showDeleteModal"
@@ -401,76 +432,53 @@ const deleteAccount =
         </div>
       </div>
 
-      <!-- GAME INFO -->
-      <div
-        class="mt-8 bg-white border-4 border-black rounded-[2rem] p-6"
+      <!-- STORE BUTTON -->
+      <button
+        @click="
+          openBereStore
+        "
+        class="mt-8 w-full bg-[#F3F400] border-4 border-black rounded-[2rem] py-7 px-6 shadow-[0_8px_0_#000] active:translate-y-[4px] active:shadow-[0_4px_0_#000] transition-all duration-100"
       >
-        <h2
-          class="text-2xl font-black text-center text-[#03B5EC]"
-        >
-          GAME MODES
-        </h2>
-
         <div
-          class="mt-6"
+          class="flex items-center justify-between"
         >
-          <h3
-            class="text-xl font-black text-[#FF2AA3]"
+          <div
+            class="text-left"
           >
-            Quizbere
-          </h3>
+            <h2
+              class="text-3xl font-black text-[#FF2AA3] leading-none"
+            >
+              MAMA NO
+            </h2>
 
-          <p
-            class="mt-2 text-sm font-bold text-black/70 leading-6"
-          >
-            A Christian quiz game where you
-            answer questions correctly for a
-            chance to win amazing prizes.
-          </p>
+            <h2
+              class="mt-1 text-3xl font-black text-black leading-none"
+            >
+              CREDIT STORE
+            </h2>
+
+            <p
+              class="mt-3 text-sm font-bold text-black/70"
+            >
+              Spend challenge points
+              on rewards and bonuses.
+            </p>
+          </div>
+
+          <img
+            src="/mascot/mamanocredit.png"
+            alt="Mama No Credit"
+            class="w-28 h-28 object-contain shrink-0"
+          />
         </div>
-
-        <div
-          class="mt-5"
-        >
-          <h3
-            class="text-xl font-black text-[#03B5EC]"
-          >
-            Braindrill
-          </h3>
-
-          <p
-            class="mt-2 text-sm font-bold text-black/70 leading-6"
-          >
-            Speed focused survival quiz mode.
-            Answer fast before time runs out.
-          </p>
-        </div>
-
-        <div
-          class="mt-5"
-        >
-          <h3
-            class="text-xl font-black text-[#FD9501]"
-          >
-            Challenge
-          </h3>
-
-          <p
-            class="mt-2 text-sm font-bold text-black/70 leading-6"
-          >
-            Special challenge modes where
-            players earn challenge points and
-            compete against others.
-          </p>
-        </div>
-      </div>
+      </button>
 
       <!-- EXPLAIN APP -->
       <button
         @click="
           explainApp
         "
-        class="mt-6 w-full bg-[#F3F400] border-4 border-black rounded-2xl py-5 text-black text-xl font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+        class="mt-6 w-full bg-white border-4 border-black rounded-2xl py-5 text-black text-xl font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
       >
         EXPLAIN APP
       </button>

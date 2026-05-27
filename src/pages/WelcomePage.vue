@@ -9,6 +9,8 @@ import { playSound } from '../utils/playSound'
 
 import { syncUserData } from '../utils/syncUserData'
 
+import AdModal from '../components/AdModal.vue'
+
 const router = useRouter()
 
 const username = ref('')
@@ -16,6 +18,13 @@ const username = ref('')
 const loading = ref(false)
 
 const errorMessage = ref('')
+
+/* -----------------------------
+   AD MODAL
+----------------------------- */
+
+const showAdModal =
+  ref(false)
 
 /* -----------------------------
    MODAL
@@ -108,6 +117,31 @@ const saveUserDataLocal =
       userData?.braindrill_level ||
         1,
     )
+  }
+
+/* -----------------------------
+   OPEN AD
+----------------------------- */
+
+const openAd =
+  () => {
+    showModal.value =
+      false
+
+    showAdModal.value =
+      true
+  }
+
+/* -----------------------------
+   COMPLETE AD
+----------------------------- */
+
+const completeAd =
+  () => {
+    showAdModal.value =
+      false
+
+    router.push('/home')
   }
 
 /* -----------------------------
@@ -251,7 +285,7 @@ const createNewUser =
 
     playSound('pass')
 
-    router.push('/home')
+    openAd()
   }
 
 /* -----------------------------
@@ -364,7 +398,7 @@ const loginUser =
 
     playSound('examinity')
 
-    router.push('/home')
+    openAd()
   }
 
 /* -----------------------------
@@ -446,7 +480,7 @@ const createFromMissing =
 
     playSound('pass')
 
-    router.push('/home')
+    openAd()
   }
 </script>
 
@@ -454,6 +488,16 @@ const createFromMissing =
   <main
     class="min-h-screen bg-[#F3F400] px-5 flex items-center justify-center relative overflow-hidden"
   >
+    <!-- AD MODAL -->
+    <AdModal
+      v-if="
+        showAdModal
+      "
+      @complete="
+        completeAd
+      "
+    />
+
     <!-- MODAL -->
     <div
       v-if="showModal"
