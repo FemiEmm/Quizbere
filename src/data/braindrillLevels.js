@@ -148,11 +148,11 @@ export const braindrillLevels = [
 
     gameType: 'truefalse',
 
-    questions: 100,
+    questions: 50,
 
     time: 300,
 
-    requiredCorrect: 80,
+    requiredCorrect: 40,
 
     points: 100,
 
