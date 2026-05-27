@@ -208,9 +208,6 @@ const router =
     scrollBehavior() {
       return {
         top: 0,
-
-        behavior:
-          'smooth',
       }
     },
   })

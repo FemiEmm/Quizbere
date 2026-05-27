@@ -8,10 +8,6 @@ import {
   ref,
 } from 'vue'
 
-import {
-  playSound,
-} from '../utils/playSound'
-
 const emit =
   defineEmits([
     'complete',
@@ -91,10 +87,6 @@ const finishAd =
       timer,
     )
 
-    playSound(
-      'button',
-    )
-
     emit(
       'complete',
     )
@@ -108,10 +100,6 @@ const closeAd =
   () => {
     clearInterval(
       timer,
-    )
-
-    playSound(
-      'button',
     )
 
     emit(
@@ -140,58 +128,23 @@ onBeforeUnmount(() => {
   <div
     class="fixed inset-0 z-[999] bg-black flex flex-col"
   >
-    <!-- TOP -->
-    <section
-      class="absolute top-0 left-0 w-full z-20 px-4 pt-5"
+    <!-- CLOSE -->
+    <button
+      @click="
+        closeAd
+      "
+      class="absolute top-5 right-4 z-30 w-14 h-14 bg-[#FF2AA3] border-4 border-black rounded-full flex items-center justify-center shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
     >
-      <div
-        class="flex items-center justify-between"
+      <span
+        class="text-white text-3xl font-black leading-none"
       >
-        <!-- COUNTDOWN -->
-        <div
-          class="bg-[#F3F400] border-4 border-black rounded-2xl px-5 py-3 shadow-[0_5px_0_#000]"
-        >
-          <p
-            class="text-black text-sm font-black"
-          >
-            {{
-              countdown
-            }}s
-          </p>
-        </div>
-
-        <!-- CLOSE -->
-        <button
-          @click="
-            closeAd
-          "
-          class="w-14 h-14 bg-[#FF2AA3] border-4 border-black rounded-full flex items-center justify-center shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
-        >
-          <span
-            class="text-white text-3xl font-black leading-none"
-          >
-            ×
-          </span>
-        </button>
-      </div>
-
-      <!-- PROGRESS -->
-      <div
-        class="mt-4 w-full h-5 bg-white border-4 border-black rounded-full overflow-hidden"
-      >
-        <div
-          class="h-full bg-[#F3F400] transition-all duration-1000"
-          :style="{
-            width:
-              progressWidth,
-          }"
-        />
-      </div>
-    </section>
+        ×
+      </span>
+    </button>
 
     <!-- IMAGE -->
     <section
-      class="flex-1 flex items-center justify-center px-4 py-20"
+      class="flex-1 flex items-center justify-center px-4 py-10"
     >
       <img
         :src="
@@ -202,17 +155,28 @@ onBeforeUnmount(() => {
       />
     </section>
 
-    <!-- FOOTER -->
+    <!-- BOTTOM -->
     <section
-      class="pb-10 px-6 text-center"
+      class="pb-8 px-4"
     >
-      <p
-        class="text-white text-lg font-black"
+      <!-- PROGRESS -->
+      <div
+        class="w-full max-w-md mx-auto h-5 bg-white border-4 border-black rounded-full overflow-hidden"
       >
-        CONTINUING IN
-        {{
-          countdown
-        }}s
+        <div
+          class="h-full bg-[#F3F400] transition-all duration-1000"
+          :style="{
+            width:
+              progressWidth,
+          }"
+        />
+      </div>
+
+      <!-- TEXT -->
+      <p
+        class="mt-4 text-center text-white text-lg font-black"
+      >
+        Logging in...
       </p>
     </section>
   </div>
