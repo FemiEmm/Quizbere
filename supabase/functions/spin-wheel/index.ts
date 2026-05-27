@@ -45,17 +45,17 @@ const rewards = [
   },
 
   {
-    name: '₦2,000',
+    name: '₦1,000',
     probability: 0,
   },
 
   {
-    name: '₦10,000',
+    name: '₦1,000',
     probability: 0,
   },
 
   {
-    name: '₦100,000',
+    name: '₦1,000',
     probability: 0,
   },
 ]
