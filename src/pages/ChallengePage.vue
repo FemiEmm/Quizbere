@@ -59,7 +59,7 @@ const challenges = [
 
     useTimer: false,
 
-    points: 50,
+    points: 30,
 
     pointsPerCorrect: 1,
 
@@ -90,7 +90,7 @@ const challenges = [
 
     useTimer: true,
 
-    points: 30,
+    points: 20,
 
     pointsPerCorrect: 1,
 
@@ -119,7 +119,7 @@ const challenges = [
 
     useTimer: true,
 
-    points: 100,
+    points: 50,
 
     pointsPerCorrect: 1,
 
