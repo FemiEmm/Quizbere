@@ -26,7 +26,7 @@ const rewards = [
 
   {
     name: '1GB DATA',
-    probability: 30,
+    probability: 35,
   },
 
   {
@@ -46,17 +46,17 @@ const rewards = [
 
   {
     name: '₦2,000',
-    probability: 3,
+    probability: 0,
   },
 
   {
     name: '₦10,000',
-    probability: 2,
+    probability: 0,
   },
 
   {
     name: '₦100,000',
-    probability: 1,
+    probability: 0,
   },
 ]
 
