@@ -43,6 +43,8 @@ import TopicResult from '../challenge/TopicResult.vue'
 
 import Onboarding from '../pages/OnBoarding.vue'
 
+import AdminUse from '@/pages/AdminUse.vue'
+
 const routes = [
   {
     path: '/',
@@ -192,6 +194,11 @@ const routes = [
     component:
       Onboarding,
   },
+
+  {
+    path: '/admin-use',
+    component: AdminUse,
+  }
 ]
 
 const router =

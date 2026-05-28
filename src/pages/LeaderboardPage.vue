@@ -1,6 +1,5 @@
 <script setup>
 import {
-  computed,
   onMounted,
   ref,
 } from 'vue'
@@ -17,9 +16,35 @@ import { playSound } from '../utils/playSound'
 
 import AppLoader from '../components/AppLoader.vue'
 
-const leaderboard = ref([])
+import TimeWatch from '../components/TimeWatch.vue'
 
-const loading = ref(true)
+import PointLeader from '../components/PointLeader.vue'
+
+import LeagueCalculator from '../components/LeagueCalculator.vue'
+
+const leaderboard =
+  ref([])
+
+const loading =
+  ref(true)
+
+const currentLeague =
+  ref('')
+
+const showWinnerModal =
+  ref(false)
+
+const weeklyWinner =
+  ref(null)
+
+/* -----------------------------
+   CURRENT USER
+----------------------------- */
+
+const username =
+  localStorage.getItem(
+    'examinity_username',
+  )
 
 /* -----------------------------
    FETCH LEADERBOARD
@@ -28,6 +53,28 @@ const loading = ref(true)
 const fetchLeaderboard =
   async () => {
     const {
+      data: currentUser,
+    } = await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .select(
+        'league',
+      )
+      .eq(
+        'username',
+        username,
+      )
+      .single()
+
+    if (
+      currentUser
+    ) {
+      currentLeague.value =
+        currentUser.league
+    }
+
+    const {
       data,
       error,
     } = await supabase
@@ -35,13 +82,15 @@ const fetchLeaderboard =
         'examinity_leaderboard',
       )
       .select('*')
+      .eq(
+        'league',
+        currentLeague.value,
+      )
 
     if (
       !error &&
       data
     ) {
-      /* COMBINE SCORES */
-
       const updatedData =
         data.map(
           (player) => ({
@@ -55,8 +104,6 @@ const fetchLeaderboard =
           }),
         )
 
-      /* SORT */
-
       updatedData.sort(
         (a, b) =>
           b.total_score -
@@ -64,13 +111,46 @@ const fetchLeaderboard =
       )
 
       leaderboard.value =
-        updatedData.slice(
-          0,
-          50,
-        )
+        updatedData
     }
 
-    loading.value = false
+    loading.value =
+      false
+  }
+
+/* -----------------------------
+   ANNOUNCE WINNER
+----------------------------- */
+
+const announceWinner =
+  async () => {
+    const {
+      data,
+    } = await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .select('*')
+      .eq(
+        'league',
+        currentLeague.value,
+      )
+      .order(
+        'challenge_points',
+        {
+          ascending: false,
+        },
+      )
+      .limit(1)
+      .single()
+
+    if (data) {
+      weeklyWinner.value =
+        data
+
+      showWinnerModal.value =
+        true
+    }
   }
 
 /* -----------------------------
@@ -86,22 +166,56 @@ onMounted(() => {
 
 <template>
   <main
-    class="min-h-screen bg-[#03B5EC] pb-28 px-4 pt-5"
+    class="min-h-screen bg-[#03B5EC] pb-28"
   >
-    <section
-      class="max-w-md mx-auto"
+    <!-- SILENT LEAGUE CALCULATOR -->
+    <LeagueCalculator />
+
+    <!-- HEADER BOX -->
+    <div
+      class="bg-[#F3F400] border-b-4 border-black px-4 pt-6 pb-5 text-center w-full"
     >
-      <!-- HEADER -->
-      <div
-        class="text-center"
+      <!-- TITLE -->
+      <h1
+        class="text-2xl font-black text-black leading-none"
       >
-        <h1
-          class="text-3xl font-black text-white"
+        LEADERBOARD
+      </h1>
+
+      <!-- LEAGUE -->
+      <div
+        class="mt-4"
+      >
+        <p
+          class="text-[10px] font-black text-black/50 uppercase"
         >
-          LEADERBOARD
-        </h1>
+          Current League
+        </p>
+
+        <h2
+          class="mt-1 text-[1rem] font-black text-black leading-tight"
+        >
+          {{
+            currentLeague
+          }}
+        </h2>
       </div>
 
+      <!-- TIMER -->
+      <div
+        class="mt-4"
+      >
+        <TimeWatch
+          @time-up="
+            announceWinner
+          "
+        />
+      </div>
+    </div>
+
+    <section
+      class="px-4 pt-5"
+    >
       <!-- LOADING -->
       <AppLoader
         v-if="loading"
@@ -112,7 +226,7 @@ onMounted(() => {
         v-else-if="
           leaderboard.length === 0
         "
-        class="mt-6 bg-white border-4 border-black rounded-[2rem] p-6 text-center"
+        class="mt-2 bg-white border-4 border-black rounded-[2rem] p-6 text-center"
       >
         <h2
           class="text-2xl font-black text-black"
@@ -124,14 +238,14 @@ onMounted(() => {
           class="mt-2 text-xs font-bold text-black/60"
         >
           Be the first to dominate
-          Quizbere.
+          QuizBere.
         </p>
       </div>
 
       <!-- LEADERBOARD -->
       <div
         v-else
-        class="mt-6 flex flex-col gap-3"
+        class="flex flex-col gap-3"
       >
         <!-- #1 PLAYER -->
         <div
@@ -219,7 +333,13 @@ onMounted(() => {
             index
           ) in leaderboard.slice(1)"
           :key="player.id"
-          class="bg-white border-4 border-black rounded-2xl pl-3 pr-5 py-3 grid grid-cols-[20%_80%] gap-2 items-center"
+          :class="[
+            index >= 6
+              ? 'bg-[#FF2AA3] text-white'
+              : 'bg-white',
+
+            'border-4 border-black rounded-2xl pl-3 pr-5 py-3 grid grid-cols-[20%_80%] gap-2 items-center',
+          ]"
         >
           <!-- POSITION -->
           <div
@@ -244,32 +364,50 @@ onMounted(() => {
           >
             <!-- NAME -->
             <h2
-              class="text-base font-black text-black truncate"
+              :class="[
+                index >= 6
+                  ? 'text-white'
+                  : 'text-black',
+
+                'text-base font-black truncate',
+              ]"
             >
               {{
                 player.username
               }}
             </h2>
 
-            <!-- SCORE + LEVEL -->
+            <!-- LEVEL + SCORE -->
             <div
               class="mt-1 flex items-center justify-between gap-4"
             >
               <p
-                class="text-[12px] font-black text-[#FF2AA3]"
-              >
-                SCORE
-                {{
-                  player.total_score
-                }}
-              </p>
+                :class="[
+                  index >= 6
+                    ? 'text-white/80'
+                    : 'text-black/60',
 
-              <p
-                class="text-[12px] font-black text-black/60 shrink-0"
+                  'text-[12px] font-black',
+                ]"
               >
                 LEVEL
                 {{
                   player.highest_level
+                }}
+              </p>
+
+              <p
+                :class="[
+                  index >= 6
+                    ? 'text-white'
+                    : 'text-[#FF2AA3]',
+
+                  'text-[12px] font-black shrink-0',
+                ]"
+              >
+                SCORE
+                {{
+                  player.total_score
                 }}
               </p>
             </div>
@@ -277,6 +415,19 @@ onMounted(() => {
         </div>
       </div>
     </section>
+
+    <!-- WINNER MODAL -->
+<PointLeader
+  :show="
+    showWinnerModal
+  "
+  :winner="
+    weeklyWinner
+  "
+  @close="
+    showWinnerModal = false
+  "
+/>
 
     <!-- NAVBAR -->
     <BottomNavbar />

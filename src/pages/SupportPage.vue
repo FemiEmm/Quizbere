@@ -186,6 +186,19 @@ const resetApp =
   }
 
 /* -----------------------------
+   OPEN ADMIN PAGE
+----------------------------- */
+
+const openAdminPage =
+  () => {
+    playSound('button')
+
+    router.push(
+      '/admin-use',
+    )
+  }
+
+/* -----------------------------
    LOGOUT
 ----------------------------- */
 
@@ -504,7 +517,7 @@ const deleteAccount =
         </button>
       </div>
 
-      <!-- RESET CARD -->
+      <!-- ADMIN TOOLS -->
       <div
         v-if="isAdmin"
         class="mt-6 bg-white border-4 border-black rounded-[2rem] p-6"
@@ -515,16 +528,17 @@ const deleteAccount =
           <h2
             class="text-2xl font-black text-black"
           >
-            RESET APP
+            ADMIN TOOLS
           </h2>
 
           <p
             class="mt-3 text-sm font-bold text-black/60 leading-6"
           >
-            Clears all quiz progress, unlocked
-            levels, scores and saved data.
+            Reset app storage or open the
+            admin backend page.
           </p>
 
+          <!-- RESET -->
           <button
             @click="
               resetApp
@@ -532,6 +546,16 @@ const deleteAccount =
             class="mt-6 w-full bg-[#FD9501] border-4 border-black rounded-2xl py-5 text-black text-xl font-black shadow-[0_6px_0_#000]"
           >
             RESET EVERYTHING
+          </button>
+
+          <!-- ADMIN PAGE -->
+          <button
+            @click="
+              openAdminPage
+            "
+            class="mt-4 w-full bg-black border-4 border-black rounded-2xl py-5 text-white text-xl font-black shadow-[0_6px_0_#000]"
+          >
+            ADMIN PAGE
           </button>
         </div>
       </div>
