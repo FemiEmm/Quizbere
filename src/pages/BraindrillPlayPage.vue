@@ -124,6 +124,66 @@ const difficultyMap = {
 
   20: ['easy', 'mid', 'hard', 'extreme'],
 
+  21: ['mid', 'hard', 'extreme'],
+
+  22: ['mid', 'hard', 'extreme'],
+
+  23: ['mid', 'hard', 'extreme'],
+
+  24: ['mid', 'hard', 'extreme'],
+
+  25: ['mid', 'hard', 'extreme'],
+
+  26: ['easy', 'mid', 'hard', 'extreme'],
+
+  27: ['easy', 'mid', 'hard', 'extreme'],
+
+  28: ['easy', 'mid', 'hard', 'extreme'],
+
+  29: ['easy', 'mid', 'hard', 'extreme'],
+
+  30: ['easy', 'mid', 'hard', 'extreme'],
+
+  31: ['easy', 'mid', 'hard', 'extreme'],
+
+  32: ['easy', 'mid', 'hard', 'extreme'],
+
+  33: ['easy', 'mid', 'hard', 'extreme'],
+
+  34: ['easy', 'mid', 'hard', 'extreme'],
+
+  35: ['easy', 'mid', 'hard', 'extreme'],
+
+  36: ['easy', 'mid', 'hard', 'extreme'],
+
+  37: ['easy', 'mid', 'hard', 'extreme'],
+
+  38: ['easy', 'mid', 'hard', 'extreme'],
+
+  39: ['easy', 'mid', 'hard', 'extreme'],
+
+  40: ['easy', 'mid', 'hard', 'extreme'],
+
+  41: ['easy', 'mid', 'hard', 'extreme'],
+
+  42: ['easy', 'mid', 'hard', 'extreme'],
+
+  43: ['easy', 'mid', 'hard', 'extreme'],
+
+  44: ['easy', 'mid', 'hard', 'extreme'],
+
+  45: ['easy', 'mid', 'hard', 'extreme'],
+
+  46: ['easy', 'mid', 'hard', 'extreme'],
+
+  47: ['easy', 'mid', 'hard', 'extreme'],
+
+  48: ['easy', 'mid', 'hard', 'extreme'],
+
+  49: ['easy', 'mid', 'hard', 'extreme'],
+
+  50: ['easy', 'mid', 'hard', 'extreme'],
+
 }
 
 const difficulties =
