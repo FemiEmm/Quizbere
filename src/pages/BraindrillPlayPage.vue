@@ -83,25 +83,47 @@ const showCompletedModal =
 ----------------------------- */
 
 const difficultyMap = {
+
   1: ['easy'],
 
-  2: ['easy', 'mid'],
+  2: ['easy'],
 
-  3: ['easy', 'mid'],
+  3: ['easy'],
 
   4: ['easy', 'mid'],
 
-  5: ['easy'],
+  5: ['easy', 'mid'],
 
-  6: ['easy'],
+  6: ['easy', 'mid'],
 
-  7: ['easy'],
+  7: ['easy', 'mid'],
 
   8: ['easy', 'mid'],
 
   9: ['easy', 'mid'],
 
-  10: ['easy'],
+  10: ['easy', 'mid', 'hard'],
+
+  11: ['easy', 'mid', 'hard'],
+
+  12: ['easy', 'mid', 'hard'],
+
+  13: ['easy', 'mid', 'hard'],
+
+  14: ['easy', 'mid', 'hard'],
+
+  15: ['easy', 'mid', 'hard', 'extreme'],
+
+  16: ['easy', 'mid', 'hard', 'extreme'],
+
+  17: ['easy', 'mid', 'hard', 'extreme'],
+
+  18: ['easy', 'mid', 'hard', 'extreme'],
+
+  19: ['easy', 'mid', 'hard', 'extreme'],
+
+  20: ['easy', 'mid', 'hard', 'extreme'],
+
 }
 
 const difficulties =

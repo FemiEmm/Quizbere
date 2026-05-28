@@ -2,6 +2,30 @@ import {
   serve,
 } from 'https://deno.land/std@0.168.0/http/server.ts'
 
+import {
+  createClient,
+} from 'https://esm.sh/@supabase/supabase-js@2'
+
+/* -----------------------------
+   ENV
+----------------------------- */
+
+const supabaseUrl =
+  Deno.env.get(
+    'SUPABASE_URL',
+  ) || ''
+
+const supabaseServiceKey =
+  Deno.env.get(
+    'SUPABASE_SERVICE_ROLE_KEY',
+  ) || ''
+
+const supabase =
+  createClient(
+    supabaseUrl,
+    supabaseServiceKey,
+  )
+
 /* -----------------------------
    CORS
 ----------------------------- */
@@ -21,12 +45,12 @@ const corsHeaders = {
 const rewards = [
   {
     name: 'TRY AGAIN',
-    probability: 80,
+    probability: 30,
   },
 
   {
     name: '1GB DATA',
-    probability: 20,
+    probability: 10,
   },
 
   {
@@ -40,22 +64,22 @@ const rewards = [
   },
 
   {
-    name: '₦1,000',
-    probability: 0,
+    name: '100 POINTS',
+    probability: 30,
   },
 
   {
-    name: '₦1,000',
-    probability: 0,
+    name: '500 POINTS',
+    probability: 20,
   },
 
   {
-    name: '₦1,000',
-    probability: 0,
+    name: '1000 POINTS',
+    probability: 10,
   },
 
   {
-    name: '₦1,000',
+    name: '₦100,000',
     probability: 0,
   },
 ]
@@ -79,11 +103,61 @@ serve(async (req) => {
   }
 
   /* -----------------------------
+     CHECK TOTAL WINNERS
+  ----------------------------- */
+
+  const {
+    count,
+  } = await supabase
+    .from(
+      'examinity_winners',
+    )
+    .select('*', {
+      count: 'exact',
+      head: true,
+    })
+
+  /* -----------------------------
+     FORCE TRY AGAIN
+  ----------------------------- */
+
+  if (
+    (count || 0) >=
+    10
+  ) {
+    return new Response(
+      JSON.stringify({
+        reward:
+          'TRY AGAIN',
+      }),
+      {
+        headers: {
+          ...corsHeaders,
+
+          'Content-Type':
+            'application/json',
+        },
+      },
+    )
+  }
+
+  /* -----------------------------
+     FILTER ACTIVE REWARDS
+  ----------------------------- */
+
+  const activeRewards =
+    rewards.filter(
+      (reward) =>
+        reward.probability >
+        0,
+    )
+
+  /* -----------------------------
      TOTAL
   ----------------------------- */
 
   const total =
-    rewards.reduce(
+    activeRewards.reduce(
       (
         sum,
         reward,
@@ -105,7 +179,7 @@ serve(async (req) => {
      PICK
   ----------------------------- */
 
-  for (const reward of rewards) {
+  for (const reward of activeRewards) {
     random -=
       reward.probability
 
@@ -127,7 +201,9 @@ serve(async (req) => {
     }
   }
 
-  /* FALLBACK */
+  /* -----------------------------
+     FALLBACK
+  ----------------------------- */
 
   return new Response(
     JSON.stringify({

@@ -27,9 +27,7 @@ const username =
     localStorage.getItem(
       'examinity_username',
     ) || 'anonymous'
-  )
-    .trim()
-    .toUpperCase()
+  ).trim()
 
 /* -----------------------------
    STATE
@@ -42,8 +40,36 @@ const selectedReward =
 
 const wheelRef = ref(null)
 
-const forcedTryAgain =
-  ref(false)
+/* -----------------------------
+   CLAIM CODE GENERATOR
+----------------------------- */
+
+const generateClaimCode =
+  () => {
+    const cleanUsername =
+      username.replace(
+        /\s+/g,
+        '',
+      )
+
+    const firstLetters =
+      cleanUsername.slice(
+        0,
+        2,
+      )
+
+    const lastLetters =
+      cleanUsername.slice(-2)
+
+    const randomNumber =
+      Math.floor(
+        1000 +
+          Math.random() *
+            9000,
+      )
+
+    return `${firstLetters}${lastLetters}EXA${randomNumber}`
+  }
 
 /* -----------------------------
    SPIN TOKEN
@@ -124,63 +150,45 @@ const consumeSpinToken =
   }
 
 /* -----------------------------
-   CHECK WINNER LIMIT
------------------------------ */
-
-const shouldForceTryAgain =
-  async () => {
-    try {
-      const {
-        count,
-        error,
-      } = await supabase
-        .from(
-          'examinity_winners',
-        )
-        .select('*', {
-          count: 'exact',
-          head: true,
-        })
-
-      if (error) {
-        return false
-      }
-
-      return count >= 10
-    } catch (err) {
-      console.error(err)
-
-      return false
-    }
-  }
-
-/* -----------------------------
    HANDLE SPIN COMPLETE
 ----------------------------- */
 
 const handleSpinComplete =
   async (reward) => {
-    let finalReward =
+    const finalReward =
       reward.name
-
-    /* FORCE TRY AGAIN */
-
-    if (
-      forcedTryAgain.value
-    ) {
-      finalReward =
-        'TRY AGAIN'
-    }
 
     selectedReward.value =
       finalReward
 
     spinning.value = false
 
+    /* SAVE REWARD */
+
     localStorage.setItem(
       'examinity_reward',
       finalReward,
     )
+
+    /* GENERATE CLAIM CODE ONCE */
+
+    if (
+      finalReward !==
+      'TRY AGAIN'
+    ) {
+      const claimCode =
+        generateClaimCode()
+
+      localStorage.setItem(
+        'examinity_claim_code',
+        claimCode,
+      )
+
+      localStorage.setItem(
+        'examinity_claimed',
+        'false',
+      )
+    }
 
     /* WIN / FAIL SOUND */
 
@@ -191,26 +199,6 @@ const handleSpinComplete =
       playSound('fail')
     } else {
       playSound('pass')
-    }
-
-    /* SAVE WINNER */
-
-    if (
-      finalReward !==
-      'TRY AGAIN'
-    ) {
-      await supabase
-        .from(
-          'examinity_winners',
-        )
-        .insert([
-          {
-            username,
-
-            reward:
-              finalReward,
-          },
-        ])
     }
   }
 
@@ -223,6 +211,16 @@ const startSpin =
     if (spinning.value)
       return
 
+    /* RESET OLD CLAIM DATA */
+
+    localStorage.removeItem(
+      'examinity_claim_code',
+    )
+
+    localStorage.removeItem(
+      'examinity_claimed',
+    )
+
     /* CONSUME TOKEN */
 
     const allowed =
@@ -233,11 +231,6 @@ const startSpin =
 
       return
     }
-
-    /* CHECK LIMIT */
-
-    forcedTryAgain.value =
-      await shouldForceTryAgain()
 
     playSound('button')
 

@@ -104,13 +104,14 @@ const chooseAnswer =
 <template>
   <div
     v-if="question"
+    class="w-full"
   >
     <!-- TOP -->
     <div
       class="text-center"
     >
       <p
-        class="text-[11px] font-black text-black/50"
+        class="text-[9px] font-black text-black/50"
       >
         TRUE OR FALSE
         {{
@@ -120,7 +121,7 @@ const chooseAnswer =
       </p>
 
       <h1
-        class="mt-4 text-3xl font-black text-black leading-tight"
+        class="mt-2 text-[1.35rem] font-black text-black leading-snug"
       >
         {{
           question?.statement
@@ -130,7 +131,7 @@ const chooseAnswer =
 
     <!-- BUTTONS -->
     <div
-      class="mt-8 flex flex-col gap-4"
+      class="mt-5 flex flex-col gap-2"
     >
       <!-- TRUE -->
       <button
@@ -139,7 +140,7 @@ const chooseAnswer =
             true,
           )
         "
-        class="w-full border-4 border-black rounded-[2rem] py-8 text-3xl font-black transition-all duration-150"
+        class="w-full border-[3px] border-black rounded-[1.2rem] py-3 text-xl font-black transition-all duration-150"
         :class="[
           answered &&
           question?.answer ===
@@ -164,7 +165,7 @@ const chooseAnswer =
             false,
           )
         "
-        class="w-full border-4 border-black rounded-[2rem] py-8 text-3xl font-black transition-all duration-150"
+        class="w-full border-[3px] border-black rounded-[1.2rem] py-3 text-xl font-black transition-all duration-150"
         :class="[
           answered &&
           question?.answer ===

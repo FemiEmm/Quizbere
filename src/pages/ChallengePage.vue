@@ -55,18 +55,18 @@ const challenges = [
 
     questionCount: 20,
 
-    passMark: 10,
+    passMark: 20,
 
     useTimer: false,
 
-    points: 30,
+    points: 70,
 
     pointsPerCorrect: 1,
 
     questionFolders: ['easy'],
 
     description:
-      'One wrong answer instantly ends your run. Get 10 correct answers to PASS.',
+      'One wrong answer instantly ends your run. Get 20 correct answers to PASS.',
 
     color: 'bg-[#FF2AA3]',
 
@@ -86,18 +86,18 @@ const challenges = [
 
     timeReward: 3,
 
-    passMark: 10,
+    passMark: 15,
 
     useTimer: true,
 
-    points: 20,
+    points: 50,
 
     pointsPerCorrect: 1,
 
     questionFolders: ['football'],
 
     description:
-      'Football-only questions. No mercy. Get 10 correct answers before timer runs out.',
+      'Football-only questions. No mercy. Get 15 correct answers before timer runs out.',
 
     color: 'bg-[#03B5EC]',
 

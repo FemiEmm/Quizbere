@@ -2,13 +2,13 @@ export const braindrillLevels = [
   {
     level: 1,
 
-    gameType: 'quiz',
+    gameType: 'truefalse',
 
     questions: 10,
 
-    time: 60,
+    time: 90,
 
-    requiredCorrect: 5,
+    requiredCorrect: 6,
 
     points: 5,
 
@@ -18,15 +18,15 @@ export const braindrillLevels = [
   {
     level: 2,
 
-    gameType: 'tap',
+    gameType: 'quiz',
 
-    questions: 10,
+    questions: 12,
 
     time: 90,
 
-    requiredCorrect: 6,
+    requiredCorrect: 7,
 
-    points: 10,
+    points: 6,
 
     color: 'bg-white',
   },
@@ -34,15 +34,15 @@ export const braindrillLevels = [
   {
     level: 3,
 
-    gameType: 'match',
+    gameType: 'tap',
 
-    questions: 5,
+    questions: 8,
 
-    time: 120,
+    time: 100,
 
-    requiredCorrect: 15,
+    requiredCorrect: 5,
 
-    points: 20,
+    points: 8,
 
     color: 'bg-white',
   },
@@ -50,15 +50,15 @@ export const braindrillLevels = [
   {
     level: 4,
 
-    gameType: 'quiz',
+    gameType: 'match',
 
-    questions: 45,
+    questions: 6,
 
-    time: 180,
+    time: 110,
 
-    requiredCorrect: 20,
+    requiredCorrect: 12,
 
-    points: 15,
+    points: 10,
 
     color: 'bg-white',
   },
@@ -66,15 +66,15 @@ export const braindrillLevels = [
   {
     level: 5,
 
-    gameType: 'truefalse',
+    gameType: 'quiz',
 
-    questions: 25,
+    questions: 15,
 
-    time: 90,
+    time: 120,
 
-    requiredCorrect: 18,
+    requiredCorrect: 10,
 
-    points: 50,
+    points: 25,
 
     color: 'bg-[#F3F400]',
   },
@@ -82,15 +82,15 @@ export const braindrillLevels = [
   {
     level: 6,
 
-    gameType: 'quiz',
+    gameType: 'truefalse',
 
-    questions: 30,
+    questions: 18,
 
-    time: 200,
+    time: 120,
 
-    requiredCorrect: 25,
+    requiredCorrect: 12,
 
-    points: 20,
+    points: 14,
 
     color: 'bg-white',
   },
@@ -102,11 +102,11 @@ export const braindrillLevels = [
 
     questions: 10,
 
-    time: 260,
+    time: 130,
 
-    requiredCorrect: 8,
+    requiredCorrect: 7,
 
-    points: 25,
+    points: 16,
 
     color: 'bg-white',
   },
@@ -114,15 +114,15 @@ export const braindrillLevels = [
   {
     level: 8,
 
-    gameType: 'truefalse',
+    gameType: 'quiz',
 
-    questions: 40,
+    questions: 20,
 
-    time: 200,
+    time: 140,
 
-    requiredCorrect: 30,
+    requiredCorrect: 14,
 
-    points: 30,
+    points: 18,
 
     color: 'bg-white',
   },
@@ -130,17 +130,17 @@ export const braindrillLevels = [
   {
     level: 9,
 
-    gameType: 'quiz',
+    gameType: 'match',
 
-    questions: 50,
+    questions: 8,
 
-    time: 300,
+    time: 150,
 
-    requiredCorrect: 40,
+    requiredCorrect: 18,
 
-    points: 50,
+    points: 20,
 
-    color: 'bg-[#FD9501]',
+    color: 'bg-white',
   },
 
   {
@@ -148,15 +148,174 @@ export const braindrillLevels = [
 
     gameType: 'truefalse',
 
-    questions: 100,
+    questions: 25,
 
-    time: 300,
+    time: 100,
 
-    requiredCorrect: 90,
+    requiredCorrect: 20,
 
     points: 100,
 
     color: 'bg-[#F3F400]',
+  },
 
+  {
+    level: 11,
+
+    gameType: 'quiz',
+
+    questions: 28,
+
+    time: 170,
+
+    requiredCorrect: 20,
+
+    points: 25,
+
+    color: 'bg-white',
+  },
+
+  {
+    level: 12,
+
+    gameType: 'tap',
+
+    questions: 12,
+
+    time: 180,
+
+    requiredCorrect: 9,
+
+    points: 28,
+
+    color: 'bg-white',
+  },
+
+  {
+    level: 13,
+
+    gameType: 'match',
+
+    questions: 10,
+
+    time: 190,
+
+    requiredCorrect: 24,
+
+    points: 30,
+
+    color: 'bg-white',
+  },
+
+  {
+    level: 14,
+
+    gameType: 'quiz',
+
+    questions: 35,
+
+    time: 200,
+
+    requiredCorrect: 26,
+
+    points: 35,
+
+    color: 'bg-white',
+  },
+
+  {
+    level: 15,
+
+    gameType: 'truefalse',
+
+    questions: 40,
+
+    time: 210,
+
+    requiredCorrect: 30,
+
+    points: 100,
+
+    color: 'bg-[#F3F400]',
+  },
+
+  {
+    level: 16,
+
+    gameType: 'tap',
+
+    questions: 14,
+
+    time: 220,
+
+    requiredCorrect: 11,
+
+    points: 45,
+
+    color: 'bg-white',
+  },
+
+  {
+    level: 17,
+
+    gameType: 'quiz',
+
+    questions: 45,
+
+    time: 230,
+
+    requiredCorrect: 35,
+
+    points: 50,
+
+    color: 'bg-white',
+  },
+
+  {
+    level: 18,
+
+    gameType: 'match',
+
+    questions: 12,
+
+    time: 240,
+
+    requiredCorrect: 30,
+
+    points: 60,
+
+    color: 'bg-white',
+  },
+
+  {
+    level: 19,
+
+    gameType: 'truefalse',
+
+    questions: 50,
+
+    time: 260,
+
+    requiredCorrect: 40,
+
+    points: 75,
+
+    color: 'bg-white',
+  },
+
+  {
+    level: 20,
+
+    gameType: 'quiz',
+
+    questions: 60,
+
+    time: 300,
+
+    requiredCorrect: 50,
+
+    points: 150,
+
+    color: 'bg-[#F3F400]',
   },
 ]

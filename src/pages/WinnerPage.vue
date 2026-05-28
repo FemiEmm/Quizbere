@@ -1,4 +1,3 @@
-```vue id="n6t2qy"
 <!-- src/pages/WinnerPage.vue -->
 
 <script setup>
@@ -27,9 +26,11 @@ const router = useRouter()
 ----------------------------- */
 
 const username =
-  localStorage.getItem(
-    'quiz_temp_name',
-  ) || 'PLAYER'
+  (
+    localStorage.getItem(
+      'examinity_username',
+    ) || 'PLAYER'
+  ).trim()
 
 const reward =
   localStorage.getItem(
@@ -37,15 +38,53 @@ const reward =
   ) || 'TRY AGAIN'
 
 /* -----------------------------
+   CLAIM DATA
+----------------------------- */
+
+const savedClaimCode =
+  localStorage.getItem(
+    'examinity_claim_code',
+  )
+
+const alreadyClaimed =
+  localStorage.getItem(
+    'examinity_claimed',
+  ) === 'true'
+
+/* -----------------------------
    STATE
 ----------------------------- */
 
 const loading = ref(false)
 
+const creditedMessage =
+  ref('')
+
 const claimActivated =
   ref(
     reward === 'TRY AGAIN'
+      ? true
+      : alreadyClaimed
   )
+
+/* -----------------------------
+   CLAIM CODE
+----------------------------- */
+
+const generatedClaimCode =
+  ref(
+    reward === 'TRY AGAIN'
+      ? 'NO CODE'
+      : savedClaimCode ||
+          'NO CODE'
+  )
+
+const claimCode =
+  computed(() => {
+    return (
+      generatedClaimCode.value
+    )
+  })
 
 /* -----------------------------
    LEAVE MODAL
@@ -73,52 +112,108 @@ const isWinningReward =
   })
 
 /* -----------------------------
-   CLAIM CODE GENERATOR
+   POINTS CHECK
 ----------------------------- */
 
-const generateClaimCode =
-  () => {
-    const cleanUsername =
-      username
-        .replace(/\s+/g, '')
-        .toUpperCase()
-
-    const firstLetters =
-      cleanUsername.slice(
-        0,
-        2,
-      )
-
-    const lastLetters =
-      cleanUsername.slice(-2)
-
-    const randomNumber =
-      Math.floor(
-        1000 +
-          Math.random() *
-            9000,
-      )
-
-    return `${firstLetters}${lastLetters}EXA${randomNumber}`
-  }
-
-/* -----------------------------
-   CLAIM CODE
------------------------------ */
-
-const generatedClaimCode =
-  ref(
-    reward === 'TRY AGAIN'
-      ? 'NO CODE'
-      : generateClaimCode()
-  )
-
-const claimCode =
+const isPointsReward =
   computed(() => {
     return (
-      generatedClaimCode.value
+      reward.toUpperCase() ===
+        '100 POINTS' ||
+      reward.toUpperCase() ===
+        '500 POINTS' ||
+      reward.toUpperCase() ===
+        '1000 POINTS'
     )
   })
+
+/* -----------------------------
+   POINT VALUE
+----------------------------- */
+
+const rewardPoints =
+  computed(() => {
+    if (
+      reward.toUpperCase() ===
+      '100 POINTS'
+    ) {
+      return 100
+    }
+
+    if (
+      reward.toUpperCase() ===
+      '500 POINTS'
+    ) {
+      return 500
+    }
+
+    if (
+      reward.toUpperCase() ===
+      '1000 POINTS'
+    ) {
+      return 1000
+    }
+
+    return 0
+  })
+
+/* -----------------------------
+   CREDIT CHALLENGE POINTS
+----------------------------- */
+
+const creditChallengePoints =
+  async () => {
+    const {
+      data: user,
+      error,
+    } = await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .select(
+        'challenge_points',
+      )
+      .eq(
+        'username',
+        username,
+      )
+      .maybeSingle()
+
+    if (
+      error ||
+      !user
+    ) {
+      return false
+    }
+
+    const currentPoints =
+      Number(
+        user.challenge_points,
+      ) || 0
+
+    const {
+      error:
+        updateError,
+    } = await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .update({
+        challenge_points:
+          currentPoints +
+          rewardPoints.value,
+      })
+      .eq(
+        'username',
+        username,
+      )
+
+    if (updateError) {
+      return false
+    }
+
+    return true
+  }
 
 /* -----------------------------
    ACTIVATE CLAIM
@@ -140,6 +235,25 @@ const handleClaimCode =
     playSound('button')
 
     loading.value = true
+
+    /* -----------------------------
+       CREDIT POINTS
+    ----------------------------- */
+
+    if (
+      isPointsReward.value
+    ) {
+      const success =
+        await creditChallengePoints()
+
+      if (success) {
+        creditedMessage.value = `You have been credited with ${rewardPoints.value} challenge points.`
+      }
+    }
+
+    /* -----------------------------
+       SAVE WINNER
+    ----------------------------- */
 
     const { error } =
       await supabase
@@ -169,6 +283,15 @@ const handleClaimCode =
 
       return
     }
+
+    /* -----------------------------
+       SAVE CLAIM STATUS
+    ----------------------------- */
+
+    localStorage.setItem(
+      'examinity_claimed',
+      'true',
+    )
 
     claimActivated.value =
       true
@@ -365,14 +488,14 @@ const stayPage = () => {
         >
           <button
             @click="stayPage"
-            class="flex-1 bg-[#03B5EC] text-black text-xl font-black py-4 rounded-3xl border-4 border-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+            class="flex-1 bg-[#03B5EC] text-black text-xl font-black py-4 rounded-3xl border-4 border-black shadow-[0_6px_0_#000]"
           >
             STAY
           </button>
 
           <button
             @click="leavePage"
-            class="flex-1 bg-[#FF2AA3] text-black text-xl font-black py-4 rounded-3xl border-4 border-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+            class="flex-1 bg-[#FF2AA3] text-black text-xl font-black py-4 rounded-3xl border-4 border-black shadow-[0_6px_0_#000]"
           >
             LEAVE
           </button>
@@ -414,6 +537,22 @@ const stayPage = () => {
           {{ reward }}
         </h2>
 
+        <!-- CREDITED MESSAGE -->
+        <div
+          v-if="
+            creditedMessage
+          "
+          class="mt-6 bg-[#03B5EC] border-4 border-black rounded-3xl p-5"
+        >
+          <p
+            class="text-black text-base font-black leading-7"
+          >
+            {{
+              creditedMessage
+            }}
+          </p>
+        </div>
+
         <!-- CLAIM CODE -->
         <button
           v-if="
@@ -423,18 +562,25 @@ const stayPage = () => {
           @click="
             handleClaimCode
           "
-          :disabled="loading"
-          class="mt-8 w-full min-h-[120px] bg-[#FD9501] border-4 border-black rounded-3xl px-6 py-5 shadow-[0_6px_0_#000] flex flex-col items-center justify-center transition-all duration-100"
+          :disabled="
+            loading ||
+            claimActivated
+          "
+          class="mt-8 w-full min-h-[120px] border-4 border-black rounded-3xl px-6 py-5 shadow-[0_6px_0_#000] flex flex-col items-center justify-center transition-all duration-100"
           :class="[
-            !claimActivated
-              ? 'active:translate-y-[4px] active:shadow-[0_2px_0_#000]'
-              : '',
+            claimActivated
+              ? 'bg-[#03B5EC]'
+              : 'bg-[#FD9501]',
           ]"
         >
           <p
             class="text-black text-sm font-black"
           >
-            CLAIM CODE
+            {{
+              claimActivated
+                ? 'CODE CLAIMED'
+                : 'CLAIM CODE'
+            }}
           </p>
 
           <h3
@@ -466,8 +612,11 @@ const stayPage = () => {
               claimActivated
             "
           >
-            Screenshot this page and send it to
-            HEBS13V16 to claim your reward.
+            CODE CLAIMED.
+
+            <br /><br />
+
+            Tap the SAVE SCREENSHOT button next.
           </template>
 
           <template
@@ -486,7 +635,7 @@ const stayPage = () => {
           'TRY AGAIN'
         "
         @click="giveUp"
-        class="mt-8 w-full bg-[#FF2AA3] text-black text-2xl font-black py-5 rounded-3xl border-4 border-black shadow-[0_8px_0_#000] active:translate-y-[4px] active:shadow-[0_4px_0_#000] transition-all duration-100"
+        class="mt-8 w-full bg-[#FF2AA3] text-black text-2xl font-black py-5 rounded-3xl border-4 border-black shadow-[0_8px_0_#000]"
       >
         GIVE UP?
       </button>
@@ -498,12 +647,12 @@ const stayPage = () => {
           isWinningReward &&
           !claimActivated
         "
-        class="mt-8 w-full bg-[#03B5EC] text-black text-2xl font-black py-5 rounded-3xl border-4 border-black shadow-[0_8px_0_#000] transition-all duration-100"
+        class="mt-8 w-full bg-[#03B5EC] text-black text-2xl font-black py-5 rounded-3xl border-4 border-black shadow-[0_8px_0_#000]"
         :class="[
           isWinningReward &&
           !claimActivated
             ? 'opacity-50 cursor-not-allowed'
-            : 'active:translate-y-[4px] active:shadow-[0_4px_0_#000]',
+            : '',
         ]"
       >
         SAVE SCREENSHOT
@@ -512,7 +661,7 @@ const stayPage = () => {
       <!-- PLAY AGAIN -->
       <button
         @click="playAgain"
-        class="mt-5 w-full bg-[#FD9501] text-black text-2xl font-black py-5 rounded-3xl border-4 border-black shadow-[0_8px_0_#000] active:translate-y-[4px] active:shadow-[0_4px_0_#000] transition-all duration-100"
+        class="mt-5 w-full bg-[#FD9501] text-black text-2xl font-black py-5 rounded-3xl border-4 border-black shadow-[0_8px_0_#000]"
       >
         PLAY AGAIN
       </button>
@@ -521,4 +670,3 @@ const stayPage = () => {
     <BottomNavbar />
   </main>
 </template>
-```
