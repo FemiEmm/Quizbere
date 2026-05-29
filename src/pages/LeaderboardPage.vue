@@ -38,41 +38,119 @@ const weeklyWinner =
   ref(null)
 
 /* -----------------------------
+   LEAGUES
+----------------------------- */
+
+const leagues =
+  [
+    'QuizBere Premier League',
+
+    '2nd Division QuizBere Championship',
+
+    '3rd Division QuizBere League One',
+
+    '4th Division QuizBere League Two',
+
+    '5th Division QuizBere Amateur Division',
+  ]
+
+const currentLeagueIndex =
+  ref(0)
+
+/* -----------------------------
    CURRENT USER
 ----------------------------- */
 
 const username =
-  localStorage.getItem(
-    'examinity_username',
+  (
+    localStorage.getItem(
+      'examinity_username',
+    ) || ''
   )
+    .trim()
+    .toUpperCase()
+
+/* -----------------------------
+   ADMIN CHECK
+----------------------------- */
+
+const isAdmin =
+  username ===
+  'ADMINDEVELOPER'
+
+/* -----------------------------
+   SET LEAGUE INDEX
+----------------------------- */
+
+const setLeagueIndex =
+  (
+    league,
+  ) => {
+
+    const index =
+      leagues.indexOf(
+        league,
+      )
+
+    currentLeagueIndex.value =
+      index >= 0
+        ? index
+        : 0
+  }
 
 /* -----------------------------
    FETCH LEADERBOARD
 ----------------------------- */
 
 const fetchLeaderboard =
-  async () => {
-    const {
-      data: currentUser,
-    } = await supabase
-      .from(
-        'examinity_leaderboard',
-      )
-      .select(
-        'league',
-      )
-      .eq(
-        'username',
-        username,
-      )
-      .single()
+  async (
+    selectedLeague = null,
+  ) => {
+
+    loading.value =
+      true
+
+    let leagueToFetch =
+      selectedLeague
 
     if (
-      currentUser
+      !leagueToFetch
     ) {
-      currentLeague.value =
-        currentUser.league
+
+      const {
+        data: currentUser,
+      } = await supabase
+        .from(
+          'examinity_leaderboard',
+        )
+        .select(
+          'league',
+        )
+        .eq(
+          'username',
+          username,
+        )
+        .maybeSingle()
+
+      if (
+        currentUser?.league
+      ) {
+        leagueToFetch =
+          currentUser.league
+      }
+
+      else {
+        leagueToFetch =
+          leagues[0]
+      }
     }
+
+    currentLeague.value =
+      leagueToFetch
+
+    setLeagueIndex(
+      leagueToFetch,
+    )
 
     const {
       data,
@@ -118,8 +196,74 @@ const fetchLeaderboard =
         updatedData
     }
 
+    else {
+      leaderboard.value =
+        []
+    }
+
     loading.value =
       false
+  }
+
+/* -----------------------------
+   ADMIN LEAGUE NAVIGATION
+----------------------------- */
+
+const goPreviousLeague =
+  () => {
+
+    if (
+      !isAdmin
+    ) {
+      return
+    }
+
+    playSound(
+      'button',
+    )
+
+    const previousIndex =
+      currentLeagueIndex.value <= 0
+        ? leagues.length - 1
+        : currentLeagueIndex.value - 1
+
+    currentLeagueIndex.value =
+      previousIndex
+
+    fetchLeaderboard(
+      leagues[
+        previousIndex
+      ],
+    )
+  }
+
+const goNextLeague =
+  () => {
+
+    if (
+      !isAdmin
+    ) {
+      return
+    }
+
+    playSound(
+      'button',
+    )
+
+    const nextIndex =
+      currentLeagueIndex.value >=
+      leagues.length - 1
+        ? 0
+        : currentLeagueIndex.value + 1
+
+    currentLeagueIndex.value =
+      nextIndex
+
+    fetchLeaderboard(
+      leagues[
+        nextIndex
+      ],
+    )
   }
 
 /* -----------------------------
@@ -184,7 +328,9 @@ const announceWinner =
 ----------------------------- */
 
 onMounted(() => {
-  playSound('pass')
+  playSound(
+    'pass',
+  )
 
   fetchLeaderboard()
 })
@@ -222,7 +368,44 @@ onMounted(() => {
             Current League
           </p>
 
+          <div
+            v-if="
+              isAdmin
+            "
+            class="mt-2 grid grid-cols-[44px_1fr_44px] gap-2 items-center"
+          >
+            <!-- PREVIOUS -->
+            <button
+              @click="
+                goPreviousLeague
+              "
+              class="h-11 bg-white border-4 border-black rounded-xl text-xl font-black text-black shadow-[0_4px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+            >
+              ‹
+            </button>
+
+            <!-- CURRENT LEAGUE -->
+            <h2
+              class="min-h-[44px] bg-[#F3F400] border-4 border-black rounded-xl px-2 py-2 text-[0.8rem] font-black text-black leading-tight flex items-center justify-center"
+            >
+              {{
+                currentLeague
+              }}
+            </h2>
+
+            <!-- NEXT -->
+            <button
+              @click="
+                goNextLeague
+              "
+              class="h-11 bg-white border-4 border-black rounded-xl text-xl font-black text-black shadow-[0_4px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+            >
+              ›
+            </button>
+          </div>
+
           <h2
+            v-else
             class="mt-1 text-[1rem] font-black text-black leading-tight"
           >
             {{
@@ -279,7 +462,9 @@ onMounted(() => {
         >
           <!-- #1 PLAYER -->
           <div
-            v-if="leaderboard[0]"
+            v-if="
+              leaderboard[0]
+            "
             class="bg-[#F3F400] border-4 border-black rounded-[2rem] px-4 py-4 shadow-[0_6px_0_#000]"
           >
             <div
@@ -293,8 +478,12 @@ onMounted(() => {
                   :animationData="
                     winnerBadge
                   "
-                  :height="70"
-                  :width="70"
+                  :height="
+                    70
+                  "
+                  :width="
+                    70
+                  "
                 />
               </div>
 
@@ -362,7 +551,9 @@ onMounted(() => {
               player,
               index
             ) in leaderboard.slice(1)"
-            :key="player.id"
+            :key="
+              player.id
+            "
             :class="[
               index >= 6
                 ? 'bg-[#FF2AA3] text-white'
