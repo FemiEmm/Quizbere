@@ -1,27 +1,29 @@
 export default [
-  {
-    task:
-      'Tap all books in the Bible with fewer than 30 chapters',
+ {
+  task:
+    'Tap all books in the Bible with fewer than 30 chapters',
 
-    options: [
-      'Joel',
-      'Amos',
-      'Jonah',
-      'Romans',
-      'Nahum',
-      'Titus',
-      'Genesis',
-      'Micah',
-    ],
+  options: [
+    'Joel',
+    'Amos',
+    'Jonah',
+    'Romans',
+    'Nahum',
+    'Titus',
+    'Genesis',
+    'Micah',
+  ],
 
-    answers: [
-      'Joel',
-      'Jonah',
-      'Nahum',
-      'Titus',
-      'Micah',
-    ],
-  },
+  answers: [
+    'Joel',
+    'Amos',
+    'Jonah',
+    'Romans',
+    'Nahum',
+    'Titus',
+    'Micah',
+  ],
+},
 
   {
     task:
