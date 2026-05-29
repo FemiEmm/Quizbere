@@ -7,10 +7,6 @@ import { supabase } from '../lib/supabase'
 
 import { playSound } from '../utils/playSound'
 
-import {
-  syncUserData,
-} from '../utils/syncUserData'
-
 const router =
   useRouter()
 
@@ -171,6 +167,76 @@ const rollMysteryReward =
   }
 
 /* -----------------------------
+   UPDATE LOCAL SCORE
+----------------------------- */
+
+const updateLocalScores =
+  ({
+    challengePoints,
+    brainDrillPoints,
+    brainDrillLevel,
+  } = {}) => {
+
+    if (
+      challengePoints !== undefined
+    ) {
+
+      localStorage.setItem(
+        'challenge_total_points',
+        String(
+          challengePoints,
+        ),
+      )
+    }
+
+    if (
+      brainDrillPoints !== undefined
+    ) {
+
+      localStorage.setItem(
+        'braindrill_total_points',
+        String(
+          brainDrillPoints,
+        ),
+      )
+    }
+
+    if (
+      brainDrillLevel !== undefined
+    ) {
+
+      localStorage.setItem(
+        'braindrill_unlocked_level',
+        String(
+          brainDrillLevel,
+        ),
+      )
+    }
+
+    const localChallenge =
+      Number(
+        localStorage.getItem(
+          'challenge_total_points',
+        ),
+      ) || 0
+
+    const localBrainDrill =
+      Number(
+        localStorage.getItem(
+          'braindrill_total_points',
+        ),
+      ) || 0
+
+    localStorage.setItem(
+      'total_score',
+      String(
+        localChallenge +
+        localBrainDrill,
+      ),
+    )
+  }
+
+/* -----------------------------
    PURCHASE
 ----------------------------- */
 
@@ -234,6 +300,11 @@ const purchaseOffer =
       const currentPoints =
         Number(
           leaderboardUser.challenge_points,
+        ) || 0
+
+      const currentBrainDrillScore =
+        Number(
+          leaderboardUser.best_run_score,
         ) || 0
 
       /* -----------------------------
@@ -328,7 +399,14 @@ const purchaseOffer =
             username,
           )
 
-        await syncUserData()
+        updateLocalScores({
+          challengePoints:
+            currentPoints -
+            1000,
+
+          brainDrillPoints:
+            currentBrainDrillScore,
+        })
 
         playSound(
           'pass',
@@ -378,14 +456,17 @@ const purchaseOffer =
         const reward =
           rollMysteryReward()
 
+        const newChallengePoints =
+          currentPoints -
+          500
+
         await supabase
           .from(
             'examinity_leaderboard',
           )
           .update({
             challenge_points:
-              currentPoints -
-              500,
+              newChallengePoints,
           })
           .eq(
             'username',
@@ -397,23 +478,30 @@ const purchaseOffer =
           'score'
         ) {
 
+          const newBrainDrillScore =
+            currentBrainDrillScore +
+            reward.amount
+
           await supabase
             .from(
               'examinity_leaderboard',
             )
             .update({
               best_run_score:
-                (
-                  Number(
-                    leaderboardUser.best_run_score,
-                  ) || 0
-                ) +
-                reward.amount,
+                newBrainDrillScore,
             })
             .eq(
               'username',
               username,
             )
+
+          updateLocalScores({
+            challengePoints:
+              newChallengePoints,
+
+            brainDrillPoints:
+              newBrainDrillScore,
+          })
         }
 
         else {
@@ -433,26 +521,38 @@ const purchaseOffer =
             )
             .maybeSingle()
 
+          const newBrainDrillLevel =
+            (
+              Number(
+                userData?.braindrill_level,
+              ) || 0
+            ) +
+            reward.amount
+
           await supabase
             .from(
               'examinity_users',
             )
             .update({
               braindrill_level:
-                (
-                  Number(
-                    userData?.braindrill_level,
-                  ) || 0
-                ) +
-                reward.amount,
+                newBrainDrillLevel,
             })
             .eq(
               'username',
               username,
             )
-        }
 
-        await syncUserData()
+          updateLocalScores({
+            challengePoints:
+              newChallengePoints,
+
+            brainDrillPoints:
+              currentBrainDrillScore,
+
+            brainDrillLevel:
+              newBrainDrillLevel,
+          })
+        }
 
         rewardMessage.value =
           `${reward.text} Refresh the page if your reward has not appeared.`
@@ -509,14 +609,24 @@ const purchaseOffer =
           )
           .maybeSingle()
 
+        const newChallengePoints =
+          currentPoints -
+          1000
+
+        const newBrainDrillLevel =
+          (
+            Number(
+              userData?.braindrill_level,
+            ) || 0
+          ) + 1
+
         await supabase
           .from(
             'examinity_leaderboard',
           )
           .update({
             challenge_points:
-              currentPoints -
-              1000,
+              newChallengePoints,
           })
           .eq(
             'username',
@@ -529,18 +639,23 @@ const purchaseOffer =
           )
           .update({
             braindrill_level:
-              (
-                Number(
-                  userData?.braindrill_level,
-                ) || 0
-              ) + 1,
+              newBrainDrillLevel,
           })
           .eq(
             'username',
             username,
           )
 
-        await syncUserData()
+        updateLocalScores({
+          challengePoints:
+            newChallengePoints,
+
+          brainDrillPoints:
+            currentBrainDrillScore,
+
+          brainDrillLevel:
+            newBrainDrillLevel,
+        })
 
         rewardMessage.value =
           'NEXT BRAIN DRILL LEVEL UNLOCKED! Refresh the page if your reward has not appeared.'
@@ -574,6 +689,7 @@ const purchaseOffer =
     }
   }
 </script>
+
 
 <template>
   <div
