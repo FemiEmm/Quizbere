@@ -404,11 +404,11 @@ export const braindrillLevels = [
 
     gameType: 'tap',
 
-    questions: 20,
+    questions: 30,
 
-    time: 75,
+    time: 100,
 
-    requiredCorrect: 16,
+    requiredCorrect: 25,
 
     points: 185,
 

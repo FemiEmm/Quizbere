@@ -15,15 +15,24 @@ const emit =
   ])
 
 const username =
-  localStorage.getItem(
-    'examinity_username',
-  ) || 'anonymous'
+  (
+    localStorage.getItem(
+      'examinity_username',
+    ) || 'anonymous'
+  )
+    .trim()
+    .toUpperCase()
 
 const opponent =
   ref('')
 
-const duration =
-  ref(3)
+const selectedChallenge =
+  ref({
+    label: '6 HOURS',
+    hours: 6,
+    cost: 500,
+    reward: 1000,
+  })
 
 const loading =
   ref(false)
@@ -37,18 +46,38 @@ const showDropdown =
 const durationOptions =
   [
     {
+      label: '6 HOURS',
+      hours: 6,
+      cost: 500,
+      reward: 1000,
+    },
+
+    {
+      label: '12 HOURS',
+      hours: 12,
+      cost: 750,
+      reward: 1500,
+    },
+
+    {
+      label: '18 HOURS',
+      hours: 18,
+      cost: 1000,
+      reward: 2500,
+    },
+
+    {
       label: '1 DAY',
-      value: 1,
+      hours: 24,
+      cost: 1500,
+      reward: 3500,
     },
 
     {
       label: '3 DAYS',
-      value: 3,
-    },
-
-    {
-      label: '7 DAYS',
-      value: 7,
+      hours: 72,
+      cost: 2000,
+      reward: 5000,
     },
   ]
 
@@ -58,17 +87,21 @@ const durationOptions =
 
 const currentDurationLabel =
   () => {
-    const found =
-      durationOptions.find(
-        (item) =>
-          item.value ===
-          duration.value,
-      )
+    return `${selectedChallenge.value.label} • ${selectedChallenge.value.cost} CP`
+  }
 
-    return (
-      found?.label ||
-      '3 DAYS'
+/* -----------------------------
+   TOGGLE DROPDOWN
+----------------------------- */
+
+const toggleDropdown =
+  () => {
+    playSound(
+      'navclick',
     )
+
+    showDropdown.value =
+      !showDropdown.value
   }
 
 /* -----------------------------
@@ -77,17 +110,81 @@ const currentDurationLabel =
 
 const selectDuration =
   (
-    value,
+    item,
   ) => {
     playSound(
       'navclick',
     )
 
-    duration.value =
-      value
+    selectedChallenge.value =
+      item
 
     showDropdown.value =
       false
+  }
+
+/* -----------------------------
+   FETCH USER
+----------------------------- */
+
+const fetchUserByUsername =
+  async (
+    targetUsername,
+  ) => {
+    const {
+      data,
+      error,
+    } = await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .select(
+        'id, username, challenge_points',
+      )
+      .eq(
+        'username',
+        targetUsername,
+      )
+      .maybeSingle()
+
+    if (
+      error
+    ) {
+      throw error
+    }
+
+    return data
+  }
+
+/* -----------------------------
+   UPDATE CP
+----------------------------- */
+
+const updateUserCp =
+  async (
+    userId,
+    newCp,
+  ) => {
+    const {
+      error,
+    } = await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .update({
+        challenge_points:
+          newCp,
+      })
+      .eq(
+        'id',
+        userId,
+      )
+
+    if (
+      error
+    ) {
+      throw error
+    }
   }
 
 /* -----------------------------
@@ -101,16 +198,149 @@ const createMatch =
     loading.value =
       true
 
-    const endDate =
-      new Date()
+    message.value =
+      ''
 
-    endDate.setDate(
-      endDate.getDate() +
-        duration.value,
-    )
+    try {
+      const cleanChallenger =
+        challenger
+          .trim()
+          .toUpperCase()
 
-    const { error } =
-      await supabase
+      const challenge =
+        selectedChallenge.value
+
+      const entryCost =
+        Number(
+          challenge.cost,
+        )
+
+      const rewardCp =
+        Number(
+          challenge.reward,
+        )
+
+      /* CURRENT USER */
+
+      const currentUser =
+        await fetchUserByUsername(
+          username,
+        )
+
+      if (
+        !currentUser
+      ) {
+        message.value =
+          'Your account was not found.'
+
+        playSound(
+          'fail',
+        )
+
+        return
+      }
+
+      /* OPPONENT */
+
+      const targetUser =
+        await fetchUserByUsername(
+          cleanChallenger,
+        )
+
+      if (
+        !targetUser
+      ) {
+        message.value =
+          'Opponent not found.'
+
+        playSound(
+          'fail',
+        )
+
+        return
+      }
+
+      if (
+        cleanChallenger ===
+        username
+      ) {
+        message.value =
+          'You cannot challenge yourself.'
+
+        playSound(
+          'fail',
+        )
+
+        return
+      }
+
+      const currentUserCp =
+        Number(
+          currentUser.challenge_points,
+        ) || 0
+
+      const opponentCp =
+        Number(
+          targetUser.challenge_points,
+        ) || 0
+
+      if (
+        currentUserCp <
+        entryCost
+      ) {
+        message.value =
+          `You need ${entryCost} CP to start this challenge.`
+
+        playSound(
+          'fail',
+        )
+
+        return
+      }
+
+      if (
+        opponentCp <
+        entryCost
+      ) {
+        message.value =
+          `${targetUser.username} does not have enough CP for this challenge.`
+
+        playSound(
+          'fail',
+        )
+
+        return
+      }
+
+      /* DEDUCT BOTH PLAYERS */
+
+      await updateUserCp(
+        currentUser.id,
+        currentUserCp -
+          entryCost,
+      )
+
+      await updateUserCp(
+        targetUser.id,
+        opponentCp -
+          entryCost,
+      )
+
+      /* END TIME */
+
+      const endDate =
+        new Date()
+
+      endDate.setHours(
+        endDate.getHours() +
+          challenge.hours,
+      )
+
+      /* CREATE MATCH */
+
+      const {
+        error,
+      } = await supabase
         .from(
           'versus_matches',
         )
@@ -120,34 +350,80 @@ const createMatch =
               username,
 
             player_two:
-              challenger,
+              cleanChallenger,
 
             duration_days:
-              duration.value,
+              Math.ceil(
+                challenge.hours / 24,
+              ),
+
+            duration_hours:
+              challenge.hours,
+
+            entry_cost:
+              entryCost,
+
+            reward_cp:
+              rewardCp,
 
             ends_at:
               endDate.toISOString(),
+
+            player_one_paid:
+              true,
+
+            player_two_paid:
+              true,
 
             status:
               'active',
           },
         ])
 
-    loading.value =
-      false
+      if (
+        error
+      ) {
+        /* REFUND BOTH USERS IF MATCH CREATION FAILS */
 
-    if (error) {
+        await updateUserCp(
+          currentUser.id,
+          currentUserCp,
+        )
+
+        await updateUserCp(
+          targetUser.id,
+          opponentCp,
+        )
+
+        throw error
+      }
+
+      playSound(
+        'pass',
+      )
+
+      emit(
+        'refresh',
+      )
+    }
+
+    catch (error) {
+      console.error(
+        error,
+      )
+
       message.value =
         'Could not create challenge.'
 
-      playSound('fail')
-
-      return
+      playSound(
+        'fail',
+      )
     }
 
-    playSound('pass')
-
-    emit('refresh')
+    finally {
+      loading.value =
+        false
+    }
   }
 
 /* -----------------------------
@@ -156,8 +432,11 @@ const createMatch =
 
 const findRandom =
   async () => {
-    if (loading.value)
+    if (
+      loading.value
+    ) {
       return
+    }
 
     playSound(
       'button',
@@ -169,32 +448,58 @@ const findRandom =
     loading.value =
       true
 
-    /* GET USERS */
+    const entryCost =
+      selectedChallenge.value.cost
 
-    const { data } =
-      await supabase
-        .from(
-          'examinity_leaderboard',
-        )
-        .select(
-          'username',
-        )
-        .neq(
-          'username',
-          username,
-        )
+    const {
+      data,
+      error,
+    } = await supabase
+      .from(
+        'examinity_leaderboard',
+      )
+      .select(
+        'username, challenge_points',
+      )
+      .neq(
+        'username',
+        username,
+      )
+      .gte(
+        'challenge_points',
+        entryCost,
+      )
 
     loading.value =
       false
+
+    if (
+      error
+    ) {
+      console.error(
+        error,
+      )
+
+      message.value =
+        'Could not find random player.'
+
+      playSound(
+        'fail',
+      )
+
+      return
+    }
 
     if (
       !data ||
       !data.length
     ) {
       message.value =
-        'No players found.'
+        `No random players found with at least ${entryCost} CP.`
 
-      playSound('fail')
+      playSound(
+        'fail',
+      )
 
       return
     }
@@ -218,8 +523,11 @@ const findRandom =
 
 const challengeUser =
   async () => {
-    if (loading.value)
+    if (
+      loading.value
+    ) {
       return
+    }
 
     playSound(
       'button',
@@ -234,54 +542,17 @@ const challengeUser =
       message.value =
         'Enter a username.'
 
-      playSound('fail')
+      playSound(
+        'fail',
+      )
 
       return
     }
 
     const clean =
-      opponent.value.trim()
-
-    loading.value =
-      true
-
-    const { data } =
-      await supabase
-        .from(
-          'examinity_leaderboard',
-        )
-        .select(
-          'username',
-        )
-        .eq(
-          'username',
-          clean,
-        )
-        .maybeSingle()
-
-    loading.value =
-      false
-
-    if (!data) {
-      message.value =
-        'User not found.'
-
-      playSound('fail')
-
-      return
-    }
-
-    if (
-      clean ===
-      username
-    ) {
-      message.value =
-        'You cannot challenge yourself.'
-
-      playSound('fail')
-
-      return
-    }
+      opponent.value
+        .trim()
+        .toUpperCase()
 
     createMatch(
       clean,
@@ -295,13 +566,17 @@ const challengeUser =
   >
     <!-- LOADING -->
     <div
-      v-if="loading"
+      v-if="
+        loading
+      "
       class="w-full max-w-md min-h-[60vh] flex items-center justify-center"
     >
       <AppLoader />
     </div>
 
-    <template v-else>
+    <template
+      v-else
+    >
       <!-- WRAPPER -->
       <div
         class="w-full max-w-md flex flex-col items-center justify-center"
@@ -334,25 +609,18 @@ const challengeUser =
             <p
               class="text-center text-xs font-black text-black/60"
             >
-              DURATION
+              CHALLENGE TYPE
             </p>
 
             <!-- CUSTOM DROPDOWN -->
             <button
               @click="
-                () => {
-                  playSound(
-                    'navclick',
-                  )
-
-                  showDropdown =
-                    !showDropdown
-                }
+                toggleDropdown
               "
               class="mt-2 w-full bg-[#F3F400] border-4 border-black rounded-2xl px-4 py-4 flex items-center justify-between shadow-[0_5px_0_#000] active:translate-y-[3px] active:shadow-[0_2px_0_#000] transition-all duration-100"
             >
               <span
-                class="text-lg font-black text-black"
+                class="text-sm font-black text-black text-left"
               >
                 {{
                   currentDurationLabel()
@@ -375,17 +643,37 @@ const challengeUser =
             >
               <button
                 v-for="item in durationOptions"
-                :key="item.value"
+                :key="
+                  item.label
+                "
                 @click="
                   selectDuration(
-                    item.value,
+                    item,
                   )
                 "
-                class="w-full px-4 py-4 text-center text-base font-black border-b-4 border-black last:border-b-0 hover:bg-[#F3F400] transition-all duration-100"
+                class="w-full px-4 py-4 text-left border-b-4 border-black last:border-b-0 hover:bg-[#F3F400] transition-all duration-100"
               >
-                {{
-                  item.label
-                }}
+                <p
+                  class="text-base font-black text-black"
+                >
+                  {{
+                    item.label
+                  }}
+                </p>
+
+                <p
+                  class="mt-1 text-xs font-black text-black/60"
+                >
+                  Cost:
+                  {{
+                    item.cost
+                  }}
+                  CP • Win:
+                  {{
+                    item.reward
+                  }}
+                  CP
+                </p>
               </button>
             </div>
           </div>
@@ -403,22 +691,54 @@ const challengeUser =
             <p
               class="mt-2 text-xs font-bold text-black/70 leading-5"
             >
-              Enter the username of the user
+              Enter the username of the player
               you want to challenge.
             </p>
           </div>
 
           <!-- INPUT -->
           <input
-            v-model="opponent"
-              @input="
-                opponent =
-                  opponent.toUpperCase()
-              "
+            v-model="
+              opponent
+            "
+            @input="
+              opponent =
+                opponent.toUpperCase()
+            "
             type="text"
             placeholder="Username..."
             class="mt-4 w-full bg-[#F5F5F5] border-4 border-black rounded-2xl px-4 py-4 text-lg font-black text-center outline-none"
           />
+
+          <!-- SELECTED STAKE -->
+          <div
+            class="mt-4 bg-black border-4 border-black rounded-2xl px-4 py-3 text-center"
+          >
+            <p
+              class="text-[10px] font-black text-white/50"
+            >
+              CURRENT STAKE
+            </p>
+
+            <h3
+              class="mt-1 text-lg font-black text-[#F3F400]"
+            >
+              {{
+                selectedChallenge.cost
+              }}
+              CP FROM BOTH PLAYERS
+            </h3>
+
+            <p
+              class="mt-1 text-xs font-black text-green-400"
+            >
+              Winner gets
+              {{
+                selectedChallenge.reward
+              }}
+              CP
+            </p>
+          </div>
 
           <!-- BUTTON -->
           <button
@@ -451,15 +771,58 @@ const challengeUser =
             RANDOM CHALLENGER
           </button>
 
+          <!-- RULES -->
+          <div
+            class="mt-5 bg-[#F5F5F5] border-4 border-black rounded-2xl px-4 py-4"
+          >
+            <h3
+              class="text-sm font-black text-black"
+            >
+              VERSUS RULES
+            </h3>
+
+            <div
+              class="mt-3 text-xs font-bold text-black/70 leading-5 text-left space-y-2"
+            >
+              <p>
+                • Starting a challenge costs CP from both players.
+              </p>
+
+              <p>
+                • Your CP is deducted once the challenge is created.
+              </p>
+
+              <p>
+                • The opponent’s CP is also deducted immediately if they have enough CP.
+              </p>
+
+              <p>
+                • If the opponent does not have enough CP, the challenge will not start.
+              </p>
+
+              <p>
+                • The challenge starts immediately after both players are charged.
+              </p>
+
+              <p>
+                • The winner receives the listed CP reward.
+              </p>
+            </div>
+          </div>
+
           <!-- MESSAGE -->
           <div
-            v-if="message"
+            v-if="
+              message
+            "
             class="mt-4 bg-red-100 border-4 border-black rounded-2xl px-4 py-3"
           >
             <p
               class="text-center text-red-500 text-sm font-black"
             >
-              {{ message }}
+              {{
+                message
+              }}
             </p>
           </div>
         </div>

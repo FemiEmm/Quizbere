@@ -21,7 +21,6 @@ const emit =
   defineEmits([
     'success',
     'fail',
-    'complete',
   ])
 
 /* -----------------------------
@@ -39,7 +38,8 @@ const locked =
 ----------------------------- */
 
 watch(
-  () => props.question,
+  () =>
+    props.question,
   () => {
     selectedItems.value =
       []
@@ -94,20 +94,8 @@ const tapOption =
       option,
     )
 
-    /* CHECK COMPLETE */
-
     const correctAnswers =
       props.question.answers
-
-    const allCorrect =
-      correctAnswers.every(
-        (
-          answer,
-        ) =>
-          selectedItems.value.includes(
-            answer,
-          ),
-      )
 
     const wrongTap =
       !correctAnswers.includes(
@@ -126,14 +114,18 @@ const tapOption =
         'fail',
       )
 
-      setTimeout(() => {
-        emit(
-          'complete',
-        )
-      }, 700)
-
       return
     }
+
+    const allCorrect =
+      correctAnswers.every(
+        (
+          answer,
+        ) =>
+          selectedItems.value.includes(
+            answer,
+          ),
+      )
 
     /* SUCCESS */
 
@@ -146,12 +138,6 @@ const tapOption =
       emit(
         'success',
       )
-
-      setTimeout(() => {
-        emit(
-          'complete',
-        )
-      }, 700)
     }
   }
 
@@ -183,7 +169,9 @@ const getButtonClass =
 
 <template>
   <div
-    v-if="question"
+    v-if="
+      question
+    "
   >
     <!-- TOP -->
     <div
@@ -213,21 +201,33 @@ const getButtonClass =
       class="mt-7 grid grid-cols-2 gap-3"
     >
       <button
-        v-for="option in shuffledOptions"
-        :key="option"
+        v-for="
+          option in shuffledOptions
+        "
+        :key="
+          option
+        "
         @click="
           tapOption(
             option,
           )
         "
-        class="border-4 border-black rounded-2xl py-5 px-3 text-base font-black text-black transition-all duration-150"
+        :disabled="
+          locked ||
+          selectedItems.includes(
+            option,
+          )
+        "
+        class="border-4 border-black rounded-2xl py-5 px-3 text-base font-black text-black transition-all duration-150 disabled:opacity-80"
         :class="
           getButtonClass(
             option,
           )
         "
       >
-        {{ option }}
+        {{
+          option
+        }}
       </button>
     </div>
   </div>

@@ -13,6 +13,8 @@ import {
 
 import BottomNavbar from '../components/BottomNavbar.vue'
 
+import NotifyModal from '../components/NotifyModal.vue'
+
 import landingAnimation from '../assets/lottie/landing_mation.json'
 
 import TopNav from '../components/TopNav.vue'
@@ -25,14 +27,17 @@ import {
   trackGame,
 } from '../utils/trackGame'
 
-const router = useRouter()
+const router =
+  useRouter()
 
 /* -----------------------------
    MOUNT
 ----------------------------- */
 
 onMounted(() => {
-  playSound('Quizbere')
+  playSound(
+    'Quizbere',
+  )
 })
 
 /* -----------------------------
@@ -41,7 +46,9 @@ onMounted(() => {
 
 const goToNamePage =
   async () => {
-    playSound('button')
+    playSound(
+      'button',
+    )
 
     await trackGame(
       'quizbere',
@@ -93,9 +100,15 @@ const goToNamePage =
         class="-mt-1"
       >
         <Vue3Lottie
-          :animationData="landingAnimation"
-          :height="125"
-          :width="125"
+          :animationData="
+            landingAnimation
+          "
+          :height="
+            125
+          "
+          :width="
+            125
+          "
         />
       </div>
 
@@ -136,7 +149,9 @@ const goToNamePage =
 
       <!-- CTA -->
       <button
-        @click="goToNamePage"
+        @click="
+          goToNamePage
+        "
         class="mt-5 w-full bg-[#FD9501] text-black text-lg font-black py-4 rounded-2xl border-4 border-black shadow-[0_7px_0_#000] active:translate-y-[4px] active:shadow-[0_3px_0_#000] transition-all duration-100"
       >
         START QUIZ
@@ -149,6 +164,9 @@ const goToNamePage =
         Answer. Spin. Win.
       </p>
     </section>
+
+    <!-- CHALLENGE NOTIFICATION -->
+    <NotifyModal />
 
     <BottomNavbar />
   </main>

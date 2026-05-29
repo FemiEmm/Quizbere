@@ -28,9 +28,13 @@ const router =
   useRouter()
 
 const username =
-  localStorage.getItem(
-    'examinity_username',
-  ) || 'anonymous'
+  (
+    localStorage.getItem(
+      'examinity_username',
+    ) || 'anonymous'
+  )
+    .trim()
+    .toUpperCase()
 
 const loading =
   ref(false)
@@ -41,7 +45,8 @@ const playerOnePoints =
 const playerTwoPoints =
   ref(0)
 
-let interval = null
+let interval =
+  null
 
 /* -----------------------------
    OPPONENT
@@ -75,70 +80,107 @@ const timeLeft =
     const diff =
       end - now
 
-    if (diff <= 0) {
+    if (
+      diff <= 0
+    ) {
       return 'MATCH OVER'
     }
 
     const hours =
       Math.floor(
         diff /
-          (1000 *
+          (
+            1000 *
             60 *
-            60),
+            60
+          ),
       )
 
     const minutes =
       Math.floor(
-        (diff %
-          (1000 *
+        (
+          diff %
+          (
+            1000 *
             60 *
-            60)) /
-          (1000 * 60),
+            60
+          )
+        ) /
+          (
+            1000 *
+            60
+          ),
       )
 
     return `${hours}H ${minutes}M`
   })
 
 /* -----------------------------
-   FETCH SCORES
+   FETCH MATCH SCORE
 ----------------------------- */
 
 const fetchScores =
   async () => {
-    const { data } =
-      await supabase
-        .from(
-          'examinity_leaderboard',
-        )
-        .select(
-          'username, challenge_points',
-        )
+    const {
+      data,
+      error,
+    } = await supabase
+      .from(
+        'versus_matches',
+      )
+      .select(
+        'id, status, player_one_score, player_two_score, ends_at, winner',
+      )
+      .eq(
+        'id',
+        props.match.id,
+      )
+      .maybeSingle()
 
-    const p1 = data.find(
-      (item) =>
-        item.username ===
-        props.match
-          .player_one,
-    )
+    if (
+      error
+    ) {
+      console.error(
+        error,
+      )
 
-    const p2 = data.find(
-      (item) =>
-        item.username ===
-        props.match
-          .player_two,
-    )
+      return
+    }
+
+    if (
+      !data
+    ) {
+      emit(
+        'refresh',
+      )
+
+      return
+    }
 
     playerOnePoints.value =
-      p1
-        ?.challenge_points ||
-      0
+      Number(
+        data.player_one_score,
+      ) || 0
 
     playerTwoPoints.value =
-      p2
-        ?.challenge_points ||
-      0
+      Number(
+        data.player_two_score,
+      ) || 0
 
-    checkWinner()
+    if (
+      data.status !==
+      'active'
+    ) {
+      emit(
+        'refresh',
+      )
+
+      return
+    }
+
+    await checkWinner(
+      data,
+    )
   }
 
 /* -----------------------------
@@ -146,17 +188,22 @@ const fetchScores =
 ----------------------------- */
 
 const checkWinner =
-  async () => {
+  async (
+    matchData,
+  ) => {
     const now =
       new Date()
 
     const end =
       new Date(
-        props.match.ends_at,
+        matchData.ends_at,
       )
 
-    if (now < end)
+    if (
+      now < end
+    ) {
       return
+    }
 
     let winner =
       'draw'
@@ -179,7 +226,9 @@ const checkWinner =
           .player_two
     }
 
-    await supabase
+    const {
+      error,
+    } = await supabase
       .from(
         'versus_matches',
       )
@@ -194,7 +243,19 @@ const checkWinner =
         props.match.id,
       )
 
-    emit('refresh')
+    if (
+      error
+    ) {
+      console.error(
+        error,
+      )
+
+      return
+    }
+
+    emit(
+      'refresh',
+    )
   }
 
 /* -----------------------------
@@ -203,7 +264,9 @@ const checkWinner =
 
 const earnPoints =
   () => {
-    playSound('button')
+    playSound(
+      'button',
+    )
 
     router.push(
       '/challenge',
@@ -216,11 +279,22 @@ const earnPoints =
 
 const giveUp =
   async () => {
-    playSound('fail')
+    if (
+      loading.value
+    ) {
+      return
+    }
 
-    loading.value = true
+    playSound(
+      'fail',
+    )
 
-    await supabase
+    loading.value =
+      true
+
+    const {
+      error,
+    } = await supabase
       .from(
         'versus_matches',
       )
@@ -236,9 +310,22 @@ const giveUp =
         props.match.id,
       )
 
-    loading.value = false
+    loading.value =
+      false
 
-    emit('refresh')
+    if (
+      error
+    ) {
+      console.error(
+        error,
+      )
+
+      return
+    }
+
+    emit(
+      'refresh',
+    )
   }
 
 /* -----------------------------
@@ -255,7 +342,9 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  clearInterval(interval)
+  clearInterval(
+    interval,
+  )
 })
 </script>
 
@@ -337,7 +426,7 @@ onBeforeUnmount(() => {
 
           <!-- SCORE -->
           <div
-            class="w-[88px] h-[88px] rounded-3xl bg-[#222222] flex flex-col items-center justify-center shrink-0"
+            class="w-[88px] h-[88px] rounded-3xl bg-[#222222] flex flex-col items-center justify-center shrink-0 px-2"
           >
             <p
               class="text-[9px] uppercase text-white/40 font-bold"
@@ -346,7 +435,7 @@ onBeforeUnmount(() => {
             </p>
 
             <h3
-              class="mt-1 text-4xl font-black text-[#67E8F9]"
+              class="mt-1 max-w-full overflow-hidden text-ellipsis text-2xl font-black text-[#67E8F9] leading-none"
             >
               {{
                 playerOnePoints
@@ -392,7 +481,7 @@ onBeforeUnmount(() => {
 
           <!-- SCORE -->
           <div
-            class="w-[88px] h-[88px] rounded-3xl bg-[#222222] flex flex-col items-center justify-center shrink-0"
+            class="w-[88px] h-[88px] rounded-3xl bg-[#222222] flex flex-col items-center justify-center shrink-0 px-2"
           >
             <p
               class="text-[9px] uppercase text-white/40 font-bold"
@@ -401,7 +490,7 @@ onBeforeUnmount(() => {
             </p>
 
             <h3
-              class="mt-1 text-4xl font-black text-[#FF82D8]"
+              class="mt-1 max-w-full overflow-hidden text-ellipsis text-2xl font-black text-[#FF82D8] leading-none"
             >
               {{
                 playerTwoPoints
@@ -417,7 +506,9 @@ onBeforeUnmount(() => {
       >
         <!-- EARN -->
         <button
-          @click="earnPoints"
+          @click="
+            earnPoints
+          "
           class="h-[56px] rounded-2xl bg-white text-black text-base font-black active:scale-[0.98] transition-all duration-100"
         >
           Earn More Points
@@ -425,13 +516,17 @@ onBeforeUnmount(() => {
 
         <!-- GIVE UP -->
         <button
-          @click="giveUp"
-          :disabled="loading"
-          class="h-[56px] rounded-2xl bg-[#262626] border border-white/10 text-white text-base font-black active:scale-[0.98] transition-all duration-100"
+          @click="
+            giveUp
+          "
+          :disabled="
+            loading
+          "
+          class="h-[56px] rounded-2xl bg-[#262626] border border-white/10 text-white text-base font-black active:scale-[0.98] transition-all duration-100 disabled:opacity-50"
         >
           {{
             loading
-              ? 'Leaving Match...'
+              ? 'Opening Result...'
               : 'Give Up'
           }}
         </button>

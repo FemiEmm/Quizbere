@@ -14,56 +14,69 @@ import { playSound } from '../utils/playSound'
 
 import { syncUserData } from '../utils/syncUserData'
 
-const router = useRouter()
+const router =
+  useRouter()
 
 /* -----------------------------
    RESULT DATA
 ----------------------------- */
 
-const result = JSON.parse(
-  localStorage.getItem(
-    'challenge_result',
-  ),
-)
+const result =
+  JSON.parse(
+    localStorage.getItem(
+      'challenge_result',
+    ),
+  )
 
-if (!result) {
-  router.push('/challenge')
+if (
+  !result
+) {
+  router.push(
+    '/challenge',
+  )
 }
 
 const username =
-  localStorage.getItem(
-    'examinity_username',
-  ) || 'anonymous'
+  (
+    localStorage.getItem(
+      'examinity_username',
+    ) || 'anonymous'
+  )
+    .trim()
+    .toUpperCase()
 
 /* -----------------------------
    RANDOM HEADMASTER LINES
 ----------------------------- */
 
-const failLines = [
-  'Is that all you got?',
+const failLines =
+  [
+    'Is that all you got?',
 
-  'I expected more.',
+    'I expected more.',
 
-  'You folded under pressure.',
+    'You folded under pressure.',
 
-  'That was painful to watch.',
-]
+    'That was painful to watch.',
+  ]
 
-const passLines = [
-  'Well... how long will you celebrate next?',
+const passLines =
+  [
+    'Well... how long will you celebrate next?',
 
-  'Not bad. Don’t get comfortable.',
+    'Not bad. Don’t get comfortable.',
 
-  'You actually impressed me.',
+    'You actually impressed me.',
 
-  'You survived. Barely.',
-]
+    'You survived. Barely.',
+  ]
 
 const randomLine =
   computed(() => {
-    const lines = result.won
-      ? passLines
-      : failLines
+    const lines =
+      result.won
+        ? passLines
+        : failLines
 
     return lines[
       Math.floor(
@@ -85,6 +98,143 @@ const mascotImage =
   })
 
 /* -----------------------------
+   UPDATE VERSUS SCORE
+----------------------------- */
+
+const updateVersusScore =
+  async (
+    reward,
+  ) => {
+    const {
+      data,
+      error,
+    } = await supabase
+      .from(
+        'versus_matches',
+      )
+      .select(
+        '*',
+      )
+      .eq(
+        'status',
+        'active',
+      )
+      .or(
+        `player_one.eq.${username},player_two.eq.${username}`,
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false,
+        },
+      )
+      .limit(1)
+
+    if (
+      error
+    ) {
+      console.error(
+        error,
+      )
+
+      return
+    }
+
+    const activeMatch =
+      data?.[0]
+
+    if (
+      !activeMatch
+    ) {
+      return
+    }
+
+    const playerOne =
+      String(
+        activeMatch.player_one || '',
+      )
+        .trim()
+        .toUpperCase()
+
+    const playerTwo =
+      String(
+        activeMatch.player_two || '',
+      )
+        .trim()
+        .toUpperCase()
+
+    if (
+      playerOne ===
+      username
+    ) {
+      const currentScore =
+        Number(
+          activeMatch.player_one_score,
+        ) || 0
+
+      const {
+        error: updateError,
+      } = await supabase
+        .from(
+          'versus_matches',
+        )
+        .update({
+          player_one_score:
+            currentScore +
+            reward,
+        })
+        .eq(
+          'id',
+          activeMatch.id,
+        )
+
+      if (
+        updateError
+      ) {
+        console.error(
+          updateError,
+        )
+      }
+
+      return
+    }
+
+    if (
+      playerTwo ===
+      username
+    ) {
+      const currentScore =
+        Number(
+          activeMatch.player_two_score,
+        ) || 0
+
+      const {
+        error: updateError,
+      } = await supabase
+        .from(
+          'versus_matches',
+        )
+        .update({
+          player_two_score:
+            currentScore +
+            reward,
+        })
+        .eq(
+          'id',
+          activeMatch.id,
+        )
+
+      if (
+        updateError
+      ) {
+        console.error(
+          updateError,
+        )
+      }
+    }
+  }
+
+/* -----------------------------
    SAVE CHALLENGE POINTS
 ----------------------------- */
 
@@ -93,6 +243,17 @@ const saveChallengePoints =
     if (
       !result.won ||
       result.reward <= 0
+    ) {
+      return
+    }
+
+    const reward =
+      Number(
+        result.reward,
+      ) || 0
+
+    if (
+      reward <= 0
     ) {
       return
     }
@@ -110,7 +271,9 @@ const saveChallengePoints =
       )
       .maybeSingle()
 
-    if (existingUser) {
+    if (
+      existingUser
+    ) {
       await supabase
         .from(
           'examinity_leaderboard',
@@ -119,13 +282,15 @@ const saveChallengePoints =
           challenge_points:
             (existingUser.challenge_points ||
               0) +
-            result.reward,
+            reward,
         })
         .eq(
           'username',
           username,
         )
-    } else {
+    }
+
+    else {
       await supabase
         .from(
           'examinity_leaderboard',
@@ -134,17 +299,29 @@ const saveChallengePoints =
           {
             username,
 
-            best_run_score: 0,
+            best_run_score:
+              0,
 
-            highest_level: 1,
+            highest_level:
+              1,
 
             challenge_points:
-              result.reward,
+              reward,
           },
         ])
     }
 
-    /* SYNC LOCAL DATA */
+    /* -----------------------------
+       ADD TO ACTIVE VERSUS SCORE
+    ----------------------------- */
+
+    await updateVersusScore(
+      reward,
+    )
+
+    /* -----------------------------
+       SYNC LOCAL DATA
+    ----------------------------- */
 
     await syncUserData()
   }
@@ -155,7 +332,9 @@ const saveChallengePoints =
 
 const replayChallenge =
   () => {
-    playSound('button')
+    playSound(
+      'button',
+    )
 
     router.push(
       '/challenge/play',
@@ -164,9 +343,13 @@ const replayChallenge =
 
 const backToChallenges =
   () => {
-    playSound('button')
+    playSound(
+      'button',
+    )
 
-    router.push('/challenge')
+    router.push(
+      '/challenge',
+    )
   }
 
 /* -----------------------------
@@ -174,10 +357,18 @@ const backToChallenges =
 ----------------------------- */
 
 onMounted(async () => {
-  if (result.won) {
-    playSound('pass')
-  } else {
-    playSound('fail')
+  if (
+    result.won
+  ) {
+    playSound(
+      'pass',
+    )
+  }
+
+  else {
+    playSound(
+      'fail',
+    )
   }
 
   await saveChallengePoints()

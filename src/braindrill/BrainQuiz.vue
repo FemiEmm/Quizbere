@@ -18,7 +18,6 @@ const emit =
   defineEmits([
     'success',
     'fail',
-    'complete',
   ])
 
 /* -----------------------------
@@ -60,23 +59,15 @@ const selectAnswer =
       emit(
         'success',
       )
+
+      return
     }
 
     /* FAIL */
 
-    else {
-      emit(
-        'fail',
-      )
-    }
-
-    /* COMPLETE */
-
-    setTimeout(() => {
-      emit(
-        'complete',
-      )
-    }, 600)
+    emit(
+      'fail',
+    )
   }
 
 /* -----------------------------
@@ -84,7 +75,8 @@ const selectAnswer =
 ----------------------------- */
 
 watch(
-  () => props.question,
+  () =>
+    props.question,
   () => {
     answered.value =
       false
@@ -146,7 +138,9 @@ watch(
               : 'bg-[#03B5EC]',
         ]"
       >
-        {{ option }}
+        {{
+          option
+        }}
       </button>
     </div>
   </div>

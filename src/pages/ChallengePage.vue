@@ -126,7 +126,7 @@ const challenges = [
     questionFolders: ['easy', 'mid'],
 
     description:
-      'Answer as many questions as possible before time explodes. Get 15 correct answers before 60 seconds ends.',
+      'Answer as many questions as possible before time explodes. Get 20 correct answers before 60 seconds ends.',
 
     color: 'bg-[#FD9501]',
 
@@ -232,9 +232,9 @@ const playChallenge =
             <p
               class="mt-3 text-sm font-bold text-black/80 leading-6"
             >
-              Go head to head against another
-              player for days. Highest challenge
-              points wins.
+              For Up to 5000 CP. Go head to head against another
+              player. Highest challenge
+              points wins. READ RULES. 
             </p>
           </div>
 
