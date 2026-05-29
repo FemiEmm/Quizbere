@@ -127,7 +127,6 @@ export default [
 
     answers: [
       'Mali',
-      'Benin',
       'Ethiopia',
       'Ghana',
     ],
