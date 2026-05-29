@@ -822,7 +822,9 @@ const handleSuccess =
 
     if (
       gameType ===
-      'spell'
+        'spell' ||
+      gameType ===
+        'match'
     ) {
       return
     }
@@ -853,6 +855,15 @@ const handleFail =
     playSound(
       'wrong',
     )
+
+    if (
+      gameType ===
+      'match'
+    ) {
+      correctAnswers.value--
+
+      return
+    }
 
     if (
       gameType ===
