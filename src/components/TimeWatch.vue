@@ -13,7 +13,8 @@ const emit =
 const timeLeft =
   ref('')
 
-let interval = null
+let interval =
+  null
 
 /* -----------------------------
    USERNAME
@@ -38,19 +39,25 @@ const isAdmin =
 
 const triggerWinner =
   () => {
-    if (!isAdmin) {
+
+    if (
+      !isAdmin
+    ) {
       return
     }
 
-    emit('time-up')
+    emit(
+      'time-up',
+    )
   }
 
 /* -----------------------------
-   GET NEXT SUNDAY 8PM WAT
+   GET NEXT SATURDAY 8PM WAT
 ----------------------------- */
 
 const getNextReset =
   () => {
+
     const now =
       new Date()
 
@@ -75,16 +82,22 @@ const getNextReset =
       )
 
     const next =
-      new Date(watNow)
+      new Date(
+        watNow,
+      )
 
-    const daysUntilSunday =
-      (7 -
-        watNow.getDay()) %
-      7
+    /* SATURDAY = 6 */
+
+    const daysUntilSaturday =
+      (
+        6 -
+        watNow.getDay() +
+        7
+      ) % 7
 
     next.setDate(
       watNow.getDate() +
-        daysUntilSunday,
+        daysUntilSaturday,
     )
 
     /* 8PM WAT */
@@ -96,11 +109,12 @@ const getNextReset =
       0,
     )
 
-    /* IF ALREADY PAST */
+    /* IF ALREADY PAST SATURDAY 8PM */
 
     if (
       next <= watNow
     ) {
+
       next.setDate(
         next.getDate() +
           7,
@@ -116,10 +130,11 @@ const getNextReset =
 
 const updateTimer =
   () => {
+
     const now =
       new Date()
 
-    /* UTC */
+    /* CONVERT TO UTC */
 
     const utcNow =
       new Date(
@@ -128,7 +143,7 @@ const updateTimer =
             60000,
       )
 
-    /* WAT */
+    /* WAT = UTC+1 */
 
     const watNow =
       new Date(
@@ -143,13 +158,19 @@ const updateTimer =
       getNextReset()
 
     const diff =
-      resetDate - watNow
+      resetDate -
+      watNow
 
-    if (diff <= 0) {
+    if (
+      diff <= 0
+    ) {
+
       timeLeft.value =
         '00:00:00'
 
-      emit('time-up')
+      emit(
+        'time-up',
+      )
 
       clearInterval(
         interval,
@@ -161,32 +182,45 @@ const updateTimer =
     const days =
       Math.floor(
         diff /
-          (1000 *
+          (
+            1000 *
             60 *
             60 *
-            24),
+            24
+          ),
       )
 
     const hours =
       Math.floor(
-        (diff /
-          (1000 *
+        (
+          diff /
+          (
+            1000 *
             60 *
-            60)) %
+            60
+          )
+        ) %
           24,
       )
 
     const minutes =
       Math.floor(
-        (diff /
-          (1000 *
-            60)) %
+        (
+          diff /
+          (
+            1000 *
+            60
+          )
+        ) %
           60,
       )
 
     const seconds =
       Math.floor(
-        (diff / 1000) %
+        (
+          diff /
+          1000
+        ) %
           60,
       )
 
@@ -194,7 +228,12 @@ const updateTimer =
       `${days}D ${hours}H ${minutes}M ${seconds}S`
   }
 
+/* -----------------------------
+   MOUNT
+----------------------------- */
+
 onMounted(() => {
+
   updateTimer()
 
   interval =
@@ -204,7 +243,12 @@ onMounted(() => {
     )
 })
 
+/* -----------------------------
+   UNMOUNT
+----------------------------- */
+
 onUnmounted(() => {
+
   clearInterval(
     interval,
   )
@@ -227,7 +271,9 @@ onUnmounted(() => {
     <h2
       class="mt-1 text-sm font-black text-[#FF2AA3] leading-none"
     >
-      {{ timeLeft }}
+      {{
+        timeLeft
+      }}
     </h2>
   </button>
 </template>

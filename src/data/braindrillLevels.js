@@ -82,13 +82,13 @@ export const braindrillLevels = [
   {
     level: 6,
 
-    gameType: 'truefalse',
+    gameType: 'spell',
 
-    questions: 18,
+    questions: 4,
 
-    time: 120,
+    time: 150,
 
-    requiredCorrect: 12,
+    requiredCorrect: 4,
 
     points: 14,
 
@@ -242,13 +242,13 @@ export const braindrillLevels = [
   {
     level: 16,
 
-    gameType: 'tap',
+    gameType: 'spell',
 
-    questions: 14,
+    questions: 4,
 
-    time: 220,
+    time: 170,
 
-    requiredCorrect: 11,
+    requiredCorrect: 4,
 
     points: 45,
 
@@ -319,7 +319,7 @@ export const braindrillLevels = [
     color: 'bg-[#F3F400]',
   },
 
-    {
+  {
     level: 21,
 
     gameType: 'tap',
@@ -482,13 +482,13 @@ export const braindrillLevels = [
   {
     level: 31,
 
-    gameType: 'tap',
+    gameType: 'spell',
 
-    questions: 22,
+    questions: 4,
 
-    time: 68,
+    time: 190,
 
-    requiredCorrect: 18,
+    requiredCorrect: 4,
 
     points: 215,
 
@@ -690,13 +690,13 @@ export const braindrillLevels = [
   {
     level: 44,
 
-    gameType: 'truefalse',
+    gameType: 'spell',
 
-    questions: 56,
+    questions: 4,
 
-    time: 55,
+    time: 210,
 
-    requiredCorrect: 51,
+    requiredCorrect: 4,
 
     points: 290,
 

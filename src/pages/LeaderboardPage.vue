@@ -87,9 +87,9 @@ const fetchLeaderboard =
         currentLeague.value,
       )
       .neq(
-          'username',
-          'ADMINDEVELOPER',
-        )
+        'username',
+        'ADMINDEVELOPER',
+      )
 
     if (
       !error &&
@@ -130,6 +130,7 @@ const announceWinner =
   async () => {
     const {
       data,
+      error,
     } = await supabase
       .from(
         'examinity_leaderboard',
@@ -140,25 +141,42 @@ const announceWinner =
         currentLeague.value,
       )
       .neq(
-    'username',
-    'ADMINDEVELOPER',
-  )
-      .order(
-        'challenge_points',
-        {
-          ascending: false,
-        },
+        'username',
+        'ADMINDEVELOPER',
       )
-      .limit(1)
-      .single()
 
-    if (data) {
-      weeklyWinner.value =
-        data
-
-      showWinnerModal.value =
-        true
+    if (
+      error ||
+      !data ||
+      data.length === 0
+    ) {
+      return
     }
+
+    const rankedPlayers =
+      data.map(
+        (player) => ({
+          ...player,
+
+          total_score:
+            (player.best_run_score ||
+              0) +
+            (player.challenge_points ||
+              0),
+        }),
+      )
+
+    rankedPlayers.sort(
+      (a, b) =>
+        b.total_score -
+        a.total_score,
+    )
+
+    weeklyWinner.value =
+      rankedPlayers[0]
+
+    showWinnerModal.value =
+      true
   }
 
 /* -----------------------------
@@ -183,13 +201,13 @@ onMounted(() => {
       <!-- SILENT LEAGUE CALCULATOR -->
       <LeagueCalculator />
 
-      <!-- HEADER BOX -->
+      <!-- HEADER -->
       <div
-        class="bg-[#F3F400] border-b-4 border-black px-4 pt-6 pb-5 text-center w-full"
+        class="px-4 pt-6 pb-5 text-center w-full"
       >
         <!-- TITLE -->
         <h1
-          class="text-2xl font-black text-black leading-none"
+          class="text-2xl font-black text-white leading-none"
         >
           LEADERBOARD
         </h1>

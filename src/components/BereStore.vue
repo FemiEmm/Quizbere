@@ -7,6 +7,8 @@ import { supabase } from '../lib/supabase'
 
 import { playSound } from '../utils/playSound'
 
+import StoreActionModal from './StoreActionModal.vue'
+
 const router =
   useRouter()
 
@@ -35,14 +37,75 @@ const username =
 const loading =
   ref(false)
 
-const errorMessage =
-  ref('')
+const actionModal =
+  ref({
+    show: false,
 
-const rewardMessage =
-  ref('')
+    status: 'loading',
+
+    message: '',
+  })
 
 /* -----------------------------
-   CLOSE
+   ACTION MODAL
+----------------------------- */
+
+const showActionLoading =
+  (
+    message =
+      'Processing your purchase...',
+  ) => {
+
+    actionModal.value =
+      {
+        show: true,
+
+        status: 'loading',
+
+        message,
+      }
+  }
+
+const showActionSuccess =
+  (
+    message,
+  ) => {
+
+    actionModal.value =
+      {
+        show: true,
+
+        status: 'success',
+
+        message,
+      }
+  }
+
+const showActionError =
+  (
+    message =
+      'Transfer unsuccessful. Try again.',
+  ) => {
+
+    actionModal.value =
+      {
+        show: true,
+
+        status: 'error',
+
+        message,
+      }
+  }
+
+const closeActionModal =
+  () => {
+
+    actionModal.value.show =
+      false
+  }
+
+/* -----------------------------
+   CLOSE STORE
 ----------------------------- */
 
 const closeStore =
@@ -85,7 +148,7 @@ const rollMysteryReward =
           100,
 
         text:
-          'YOU WON 100 BP!',
+          'You won 100 BP!',
       }
     }
 
@@ -101,7 +164,7 @@ const rollMysteryReward =
           250,
 
         text:
-          'YOU WON 250 BP!',
+          'You won 250 BP!',
       }
     }
 
@@ -117,7 +180,7 @@ const rollMysteryReward =
           500,
 
         text:
-          'YOU WON 500 BP!',
+          'You won 500 BP!',
       }
     }
 
@@ -133,7 +196,7 @@ const rollMysteryReward =
           1000,
 
         text:
-          'YOU WON 1000 BP!',
+          'You won 1000 BP!',
       }
     }
 
@@ -149,7 +212,7 @@ const rollMysteryReward =
           1,
 
         text:
-          'YOU UNLOCKED 1 LEVEL!',
+          'You unlocked 1 level!',
       }
     }
 
@@ -162,7 +225,7 @@ const rollMysteryReward =
         5,
 
       text:
-        'YOU UNLOCKED 5 LEVELS!',
+        'You unlocked 5 levels!',
     }
   }
 
@@ -253,11 +316,7 @@ const purchaseOffer =
     loading.value =
       true
 
-    errorMessage.value =
-      ''
-
-    rewardMessage.value =
-      ''
+    showActionLoading()
 
     try {
 
@@ -288,8 +347,13 @@ const purchaseOffer =
         !leaderboardUser
       ) {
 
-        errorMessage.value =
-          'USER NOT FOUND'
+        playSound(
+          'fail',
+        )
+
+        showActionError(
+          'User not found. Try again.',
+        )
 
         loading.value =
           false
@@ -325,8 +389,9 @@ const purchaseOffer =
             'fail',
           )
 
-          errorMessage.value =
-            'NOT ENOUGH CP'
+          showActionError(
+            'Not enough CP.',
+          )
 
           loading.value =
             false
@@ -357,8 +422,13 @@ const purchaseOffer =
           !userData
         ) {
 
-          errorMessage.value =
-            'USER ERROR'
+          playSound(
+            'fail',
+          )
+
+          showActionError(
+            'User error. Try again.',
+          )
 
           loading.value =
             false
@@ -371,7 +441,10 @@ const purchaseOffer =
             userData.spin_token,
           ) || 0
 
-        await supabase
+        const {
+          error:
+            tokenUpdateError,
+        } = await supabase
           .from(
             'examinity_users',
           )
@@ -385,7 +458,26 @@ const purchaseOffer =
             username,
           )
 
-        await supabase
+        if (
+          tokenUpdateError
+        ) {
+
+          playSound(
+            'fail',
+          )
+
+          showActionError()
+
+          loading.value =
+            false
+
+          return
+        }
+
+        const {
+          error:
+            pointsUpdateError,
+        } = await supabase
           .from(
             'examinity_leaderboard',
           )
@@ -398,6 +490,22 @@ const purchaseOffer =
             'username',
             username,
           )
+
+        if (
+          pointsUpdateError
+        ) {
+
+          playSound(
+            'fail',
+          )
+
+          showActionError()
+
+          loading.value =
+            false
+
+          return
+        }
 
         updateLocalScores({
           challengePoints:
@@ -444,8 +552,9 @@ const purchaseOffer =
             'fail',
           )
 
-          errorMessage.value =
-            'NOT ENOUGH CP'
+          showActionError(
+            'Not enough CP.',
+          )
 
           loading.value =
             false
@@ -460,7 +569,10 @@ const purchaseOffer =
           currentPoints -
           500
 
-        await supabase
+        const {
+          error:
+            challengeUpdateError,
+        } = await supabase
           .from(
             'examinity_leaderboard',
           )
@@ -474,6 +586,22 @@ const purchaseOffer =
           )
 
         if (
+          challengeUpdateError
+        ) {
+
+          playSound(
+            'fail',
+          )
+
+          showActionError()
+
+          loading.value =
+            false
+
+          return
+        }
+
+        if (
           reward.type ===
           'score'
         ) {
@@ -482,7 +610,10 @@ const purchaseOffer =
             currentBrainDrillScore +
             reward.amount
 
-          await supabase
+          const {
+            error:
+              scoreUpdateError,
+          } = await supabase
             .from(
               'examinity_leaderboard',
             )
@@ -494,6 +625,22 @@ const purchaseOffer =
               'username',
               username,
             )
+
+          if (
+            scoreUpdateError
+          ) {
+
+            playSound(
+              'fail',
+            )
+
+            showActionError()
+
+            loading.value =
+              false
+
+            return
+          }
 
           updateLocalScores({
             challengePoints:
@@ -508,6 +655,9 @@ const purchaseOffer =
 
           const {
             data: userData,
+
+            error:
+              levelFetchError,
           } = await supabase
             .from(
               'examinity_users',
@@ -521,15 +671,35 @@ const purchaseOffer =
             )
             .maybeSingle()
 
+          if (
+            levelFetchError ||
+            !userData
+          ) {
+
+            playSound(
+              'fail',
+            )
+
+            showActionError()
+
+            loading.value =
+              false
+
+            return
+          }
+
           const newBrainDrillLevel =
             (
               Number(
-                userData?.braindrill_level,
+                userData.braindrill_level,
               ) || 0
             ) +
             reward.amount
 
-          await supabase
+          const {
+            error:
+              levelUpdateError,
+          } = await supabase
             .from(
               'examinity_users',
             )
@@ -541,6 +711,22 @@ const purchaseOffer =
               'username',
               username,
             )
+
+          if (
+            levelUpdateError
+          ) {
+
+            playSound(
+              'fail',
+            )
+
+            showActionError()
+
+            loading.value =
+              false
+
+            return
+          }
 
           updateLocalScores({
             challengePoints:
@@ -554,11 +740,12 @@ const purchaseOffer =
           })
         }
 
-        rewardMessage.value =
-          `${reward.text} Refresh the page if your reward has not appeared.`
-
         playSound(
           'pass',
+        )
+
+        showActionSuccess(
+          `${reward.text} Refresh the page if your reward has not appeared.`,
         )
 
         loading.value =
@@ -585,8 +772,9 @@ const purchaseOffer =
             'fail',
           )
 
-          errorMessage.value =
-            'NOT ENOUGH CP'
+          showActionError(
+            'Not enough CP.',
+          )
 
           loading.value =
             false
@@ -596,6 +784,9 @@ const purchaseOffer =
 
         const {
           data: userData,
+
+          error:
+            levelFetchError,
         } = await supabase
           .from(
             'examinity_users',
@@ -609,6 +800,23 @@ const purchaseOffer =
           )
           .maybeSingle()
 
+        if (
+          levelFetchError ||
+          !userData
+        ) {
+
+          playSound(
+            'fail',
+          )
+
+          showActionError()
+
+          loading.value =
+            false
+
+          return
+        }
+
         const newChallengePoints =
           currentPoints -
           1000
@@ -616,11 +824,14 @@ const purchaseOffer =
         const newBrainDrillLevel =
           (
             Number(
-              userData?.braindrill_level,
+              userData.braindrill_level,
             ) || 0
           ) + 1
 
-        await supabase
+        const {
+          error:
+            challengeUpdateError,
+        } = await supabase
           .from(
             'examinity_leaderboard',
           )
@@ -633,7 +844,26 @@ const purchaseOffer =
             username,
           )
 
-        await supabase
+        if (
+          challengeUpdateError
+        ) {
+
+          playSound(
+            'fail',
+          )
+
+          showActionError()
+
+          loading.value =
+            false
+
+          return
+        }
+
+        const {
+          error:
+            levelUpdateError,
+        } = await supabase
           .from(
             'examinity_users',
           )
@@ -646,6 +876,22 @@ const purchaseOffer =
             username,
           )
 
+        if (
+          levelUpdateError
+        ) {
+
+          playSound(
+            'fail',
+          )
+
+          showActionError()
+
+          loading.value =
+            false
+
+          return
+        }
+
         updateLocalScores({
           challengePoints:
             newChallengePoints,
@@ -657,11 +903,12 @@ const purchaseOffer =
             newBrainDrillLevel,
         })
 
-        rewardMessage.value =
-          'NEXT BRAIN DRILL LEVEL UNLOCKED! Refresh the page if your reward has not appeared.'
-
         playSound(
           'pass',
+        )
+
+        showActionSuccess(
+          'Next Brain Drill level unlocked. Refresh the page if your reward has not appeared.',
         )
 
         loading.value =
@@ -681,15 +928,13 @@ const purchaseOffer =
         'fail',
       )
 
-      errorMessage.value =
-        'SOMETHING WENT WRONG'
+      showActionError()
 
       loading.value =
         false
     }
   }
 </script>
-
 
 <template>
   <div
@@ -883,38 +1128,22 @@ const purchaseOffer =
           </button>
         </div>
       </div>
-
-      <!-- REWARD MESSAGE -->
-      <div
-        v-if="
-          rewardMessage
-        "
-        class="mt-4 bg-[#03B5EC] border-4 border-black rounded-2xl px-4 py-3 shadow-[0_5px_0_#000]"
-      >
-        <p
-          class="text-center text-black text-sm font-black"
-        >
-          {{
-            rewardMessage
-          }}
-        </p>
-      </div>
-
-      <!-- ERROR -->
-      <div
-        v-if="
-          errorMessage
-        "
-        class="mt-4 bg-[#FF2AA3] border-4 border-black rounded-2xl px-4 py-3 shadow-[0_5px_0_#000]"
-      >
-        <p
-          class="text-center text-white text-sm font-black"
-        >
-          {{
-            errorMessage
-          }}
-        </p>
-      </div>
     </section>
+
+    <!-- ACTION MODAL -->
+    <StoreActionModal
+      :show="
+        actionModal.show
+      "
+      :status="
+        actionModal.status
+      "
+      :message="
+        actionModal.message
+      "
+      @close="
+        closeActionModal
+      "
+    />
   </div>
 </template>

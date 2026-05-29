@@ -10,6 +10,10 @@ import {
   useRouter,
 } from 'vue-router'
 
+import {
+  Vue3Lottie,
+} from 'vue3-lottie'
+
 import BottomNavbar from '../components/BottomNavbar.vue'
 
 import BrainQuiz from '../braindrill/BrainQuiz.vue'
@@ -20,7 +24,11 @@ import BrainTrueFalse from '../braindrill/BrainTrueFalse.vue'
 
 import BrainTap from '../braindrill/BrainTap.vue'
 
+import BrainSpell from '../braindrill/BrainSpell.vue'
+
 import BereStoreIngame from '../components/BereStoreIngame.vue'
+
+import loadingMotion from '../assets/lottie/loading_motion.json'
 
 import {
   braindrillLevels,
@@ -118,24 +126,41 @@ let answerTimeout =
 ----------------------------- */
 
 const difficultyMap = {
-
   1: ['easy'],
 
   2: ['easy'],
 
   3: ['easy'],
 
-  4: ['easy', 'mid'],
+  4: [
+    'easy',
+    'mid',
+  ],
 
-  5: ['easy', 'mid'],
+  5: [
+    'easy',
+    'mid',
+  ],
 
-  6: ['easy', 'mid'],
+  6: [
+    'easy',
+    'mid',
+  ],
 
-  7: ['easy', 'mid'],
+  7: [
+    'easy',
+    'mid',
+  ],
 
-  8: ['easy', 'mid'],
+  8: [
+    'easy',
+    'mid',
+  ],
 
-  9: ['easy', 'mid'],
+  9: [
+    'easy',
+    'mid',
+  ],
 
   10: [
     'easy',
@@ -210,10 +235,19 @@ const difficultyMap = {
   ],
 }
 
+/* -----------------------------
+   DIFFICULTIES
+----------------------------- */
+
 const difficulties =
-  difficultyMap[
-    currentLevel.level
-  ] || ['easy']
+  gameType === 'spell'
+    ? [
+        'easy',
+        'mid',
+      ]
+    : difficultyMap[
+        currentLevel.level
+      ] || ['easy']
 
 /* -----------------------------
    IMPORT MODULES
@@ -318,6 +352,27 @@ if (
     )
 }
 
+if (
+  gameType ===
+  'spell'
+) {
+
+  filteredModules =
+    Object.entries(
+      allModules,
+    ).filter(
+      ([path]) =>
+        difficulties.some(
+          (
+            difficulty,
+          ) =>
+            path.includes(
+              `/data/othergames/spell/${difficulty}/`,
+            ),
+        ),
+    )
+}
+
 /* -----------------------------
    QUESTIONS
 ----------------------------- */
@@ -364,7 +419,7 @@ if (
 }
 
 /* -----------------------------
-   STATE
+   QUESTION STATE
 ----------------------------- */
 
 const currentQuestionIndex =
@@ -444,7 +499,8 @@ const openBereStore =
    TIMER
 ----------------------------- */
 
-let timer = null
+let timer =
+  null
 
 const startTimer =
   () => {
@@ -468,55 +524,49 @@ const startTimer =
         ) {
 
           timeLeft.value--
+
+          return
         }
 
-      else {
+        const passed =
+          correctAnswers.value >=
+          currentLevel.requiredCorrect
 
-  const passed =
-    correctAnswers.value >=
-    currentLevel.requiredCorrect
+        if (
+          passed
+        ) {
 
-  if (
-    passed
-  ) {
+          clearInterval(
+            timer,
+          )
 
-    clearInterval(
-      timer,
-    )
+          gameFrozen.value =
+            true
 
-    gameFrozen.value =
-      true
+          passedRound.value =
+            true
 
-    passedRound.value =
-      true
+          showCompletedModal.value =
+            true
 
-    showCompletedModal.value =
-      true
+          setTimeout(() => {
 
-    setTimeout(() => {
+            endGame()
 
-      endGame()
+          }, 1800)
 
-    }, 1800)
+          return
+        }
 
-    return
-  }
+        openBereStore({
+          completed:
+            false,
 
-  openBereStore({
-    completed:
-      false,
-
-    passed:
-      false,
-  })
-}
-
+          passed:
+            false,
+        })
       }, 1000)
   }
-
-/* -----------------------------
-   COMPLETE QUESTIONS
------------------------------ */
 
 /* -----------------------------
    COMPLETE QUESTIONS
@@ -558,6 +608,7 @@ const completeQuestions =
 
     }, 1800)
   }
+
 /* -----------------------------
    BUY TIME
 ----------------------------- */
@@ -769,6 +820,13 @@ const handleSuccess =
       'correct',
     )
 
+    if (
+      gameType ===
+      'spell'
+    ) {
+      return
+    }
+
     answerTimeout =
       setTimeout(() => {
 
@@ -796,6 +854,13 @@ const handleFail =
       'wrong',
     )
 
+    if (
+      gameType ===
+      'spell'
+    ) {
+      return
+    }
+
     answerTimeout =
       setTimeout(() => {
 
@@ -808,6 +873,18 @@ const handleFail =
         nextQuestion()
 
       }, 600)
+  }
+
+const handleComplete =
+  () => {
+
+    if (
+      gameFrozen.value
+    ) {
+      return
+    }
+
+    nextQuestion()
   }
 
 /* -----------------------------
@@ -896,6 +973,13 @@ const currentComponent =
       return BrainTap
     }
 
+    if (
+      gameType ===
+      'spell'
+    ) {
+      return BrainSpell
+    }
+
     return BrainQuiz
   })
 
@@ -919,6 +1003,7 @@ onBeforeUnmount(() => {
   )
 })
 </script>
+
 <template>
   <main
     class="min-h-screen bg-[#FF2AA3] pb-24 px-4 pt-4 overflow-hidden"
@@ -1034,6 +1119,9 @@ onBeforeUnmount(() => {
           @fail="
             handleFail
           "
+          @complete="
+            handleComplete
+          "
         />
       </div>
 
@@ -1083,14 +1171,21 @@ onBeforeUnmount(() => {
           The drill session has ended.
         </p>
 
+        <!-- LOADING ANIMATION -->
         <div
-          class="mt-5 bg-[#FF2AA3] border-4 border-black rounded-2xl py-4"
+          class="mt-4 flex justify-center"
         >
-          <p
-            class="text-white text-xl font-black"
-          >
-            LOADING...
-          </p>
+          <Vue3Lottie
+            :animationData="
+              loadingMotion
+            "
+            :height="
+              110
+            "
+            :width="
+              110
+            "
+          />
         </div>
       </div>
     </div>
@@ -1117,14 +1212,21 @@ onBeforeUnmount(() => {
           All questions answered.
         </p>
 
+        <!-- LOADING ANIMATION -->
         <div
-          class="mt-5 bg-[#FF2AA3] border-4 border-black rounded-2xl py-4"
+          class="mt-4 flex justify-center"
         >
-          <p
-            class="text-white text-xl font-black"
-          >
-            LOADING...
-          </p>
+          <Vue3Lottie
+            :animationData="
+              loadingMotion
+            "
+            :height="
+              110
+            "
+            :width="
+              110
+            "
+          />
         </div>
       </div>
     </div>
