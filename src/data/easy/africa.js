@@ -43,17 +43,20 @@ export const questions = [
     ],
     answer: 'Nile River',
   },
-  {
-    id: 5,
-    question: 'Which African country won the first FIFA World Cup for Africa?',
-    options: [
-      'Nigeria',
-      'Ghana',
-      'South Africa',
-      'Morocco',
-    ],
-    answer: 'South Africa',
-  },
+{
+  id: 5,
+
+  question: 'Who scored the first goal of the 2010 FIFA World Cup in South Africa?',
+
+  options: [
+    'Didier Drogba',
+    'Siphiwe Tshabalala',
+    'Samuel Eto’o',
+    'Asamoah Gyan',
+  ],
+
+  answer: 'Siphiwe Tshabalala',
+},
   {
     id: 6,
     question: 'Which African country is famous for safari tourism?',

@@ -1,5 +1,3 @@
-<!-- src/components/BereStore.vue -->
-
 <script setup>
 import { ref } from 'vue'
 
@@ -13,7 +11,8 @@ import {
   syncUserData,
 } from '../utils/syncUserData'
 
-const router = useRouter()
+const router =
+  useRouter()
 
 const emit =
   defineEmits([
@@ -43,18 +42,132 @@ const loading =
 const errorMessage =
   ref('')
 
+const rewardMessage =
+  ref('')
+
 /* -----------------------------
    CLOSE
 ----------------------------- */
 
 const closeStore =
   () => {
-    if (loading.value)
+
+    if (
+      loading.value
+    )
       return
 
-    playSound('button')
+    playSound(
+      'button',
+    )
 
-    emit('close')
+    emit(
+      'close',
+    )
+  }
+
+/* -----------------------------
+   MYSTERY REWARDS
+----------------------------- */
+
+const rollMysteryReward =
+  () => {
+
+    const roll =
+      Math.random() *
+      100
+
+    if (
+      roll < 40
+    ) {
+
+      return {
+        type:
+          'score',
+
+        amount:
+          100,
+
+        text:
+          'YOU WON 100 BP!',
+      }
+    }
+
+    if (
+      roll < 65
+    ) {
+
+      return {
+        type:
+          'score',
+
+        amount:
+          250,
+
+        text:
+          'YOU WON 250 BP!',
+      }
+    }
+
+    if (
+      roll < 80
+    ) {
+
+      return {
+        type:
+          'score',
+
+        amount:
+          500,
+
+        text:
+          'YOU WON 500 BP!',
+      }
+    }
+
+    if (
+      roll < 90
+    ) {
+
+      return {
+        type:
+          'score',
+
+        amount:
+          1000,
+
+        text:
+          'YOU WON 1000 BP!',
+      }
+    }
+
+    if (
+      roll < 98
+    ) {
+
+      return {
+        type:
+          'level',
+
+        amount:
+          1,
+
+        text:
+          'YOU UNLOCKED 1 LEVEL!',
+      }
+    }
+
+    return {
+
+      type:
+        'level',
+
+      amount:
+        5,
+
+      text:
+        'YOU UNLOCKED 5 LEVELS!',
+    }
   }
 
 /* -----------------------------
@@ -62,20 +175,30 @@ const closeStore =
 ----------------------------- */
 
 const purchaseOffer =
-  async (type) => {
-    if (loading.value)
+  async (
+    type,
+  ) => {
+
+    if (
+      loading.value
+    )
       return
 
-    loading.value = true
+    loading.value =
+      true
 
     errorMessage.value =
       ''
 
+    rewardMessage.value =
+      ''
+
     try {
-      /* FETCH USER */
 
       const {
-        data: leaderboardUser,
+        data:
+          leaderboardUser,
+
         error:
           leaderboardError,
       } = await supabase
@@ -83,7 +206,10 @@ const purchaseOffer =
           'examinity_leaderboard',
         )
         .select(
-          'challenge_points',
+          `
+          challenge_points,
+          best_run_score
+          `,
         )
         .eq(
           'username',
@@ -95,6 +221,7 @@ const purchaseOffer =
         leaderboardError ||
         !leaderboardUser
       ) {
+
         errorMessage.value =
           'USER NOT FOUND'
 
@@ -117,16 +244,18 @@ const purchaseOffer =
         type ===
         'spin'
       ) {
+
         if (
           currentPoints <
           1000
         ) {
+
           playSound(
             'fail',
           )
 
           errorMessage.value =
-            'NOT ENOUGH POINTS'
+            'NOT ENOUGH CP'
 
           loading.value =
             false
@@ -134,10 +263,9 @@ const purchaseOffer =
           return
         }
 
-        /* FETCH TOKENS */
-
         const {
           data: userData,
+
           error:
             userError,
         } = await supabase
@@ -157,6 +285,7 @@ const purchaseOffer =
           userError ||
           !userData
         ) {
+
           errorMessage.value =
             'USER ERROR'
 
@@ -170,8 +299,6 @@ const purchaseOffer =
           Number(
             userData.spin_token,
           ) || 0
-
-        /* UPDATE USERS */
 
         await supabase
           .from(
@@ -187,7 +314,200 @@ const purchaseOffer =
             username,
           )
 
-        /* UPDATE LEADERBOARD */
+        await supabase
+          .from(
+            'examinity_leaderboard',
+          )
+          .update({
+            challenge_points:
+              currentPoints -
+              1000,
+          })
+          .eq(
+            'username',
+            username,
+          )
+
+        await syncUserData()
+
+        playSound(
+          'pass',
+        )
+
+        loading.value =
+          false
+
+        emit(
+          'close',
+        )
+
+        router.push(
+          '/reward',
+        )
+
+        return
+      }
+
+      /* -----------------------------
+         MYSTERY REWARD
+      ----------------------------- */
+
+      if (
+        type ===
+        'mystery'
+      ) {
+
+        if (
+          currentPoints <
+          500
+        ) {
+
+          playSound(
+            'fail',
+          )
+
+          errorMessage.value =
+            'NOT ENOUGH CP'
+
+          loading.value =
+            false
+
+          return
+        }
+
+        const reward =
+          rollMysteryReward()
+
+        await supabase
+          .from(
+            'examinity_leaderboard',
+          )
+          .update({
+            challenge_points:
+              currentPoints -
+              500,
+          })
+          .eq(
+            'username',
+            username,
+          )
+
+        if (
+          reward.type ===
+          'score'
+        ) {
+
+          await supabase
+            .from(
+              'examinity_leaderboard',
+            )
+            .update({
+              best_run_score:
+                (
+                  Number(
+                    leaderboardUser.best_run_score,
+                  ) || 0
+                ) +
+                reward.amount,
+            })
+            .eq(
+              'username',
+              username,
+            )
+        }
+
+        else {
+
+          const {
+            data: userData,
+          } = await supabase
+            .from(
+              'examinity_users',
+            )
+            .select(
+              'braindrill_level',
+            )
+            .eq(
+              'username',
+              username,
+            )
+            .maybeSingle()
+
+          await supabase
+            .from(
+              'examinity_users',
+            )
+            .update({
+              braindrill_level:
+                (
+                  Number(
+                    userData?.braindrill_level,
+                  ) || 0
+                ) +
+                reward.amount,
+            })
+            .eq(
+              'username',
+              username,
+            )
+        }
+
+        await syncUserData()
+
+        rewardMessage.value =
+          `${reward.text} Refresh the page if your reward has not appeared.`
+
+        playSound(
+          'pass',
+        )
+
+        loading.value =
+          false
+
+        return
+      }
+
+      /* -----------------------------
+         NEXT LEVEL
+      ----------------------------- */
+
+      if (
+        type ===
+        'level'
+      ) {
+
+        if (
+          currentPoints <
+          1000
+        ) {
+
+          playSound(
+            'fail',
+          )
+
+          errorMessage.value =
+            'NOT ENOUGH CP'
+
+          loading.value =
+            false
+
+          return
+        }
+
+        const {
+          data: userData,
+        } = await supabase
+          .from(
+            'examinity_users',
+          )
+          .select(
+            'braindrill_level',
+          )
+          .eq(
+            'username',
+            username,
+          )
+          .maybeSingle()
 
         await supabase
           .from(
@@ -203,100 +523,27 @@ const purchaseOffer =
             username,
           )
 
-        /* SYNC DATA */
-
-        await syncUserData()
-
-        playSound(
-          'pass',
-        )
-
-        loading.value =
-          false
-
-        emit('close')
-
-        router.push(
-          '/reward',
-        )
-
-        return
-      }
-
-      /* -----------------------------
-         1GB DATA
-      ----------------------------- */
-
-      if (
-        type === 'data'
-      ) {
-        if (
-          currentPoints <
-          2000
-        ) {
-          playSound(
-            'fail',
-          )
-
-          errorMessage.value =
-            'NOT ENOUGH POINTS'
-
-          loading.value =
-            false
-
-          return
-        }
-
-        /* UPDATE LEADERBOARD */
-
         await supabase
           .from(
-            'examinity_leaderboard',
+            'examinity_users',
           )
           .update({
-            challenge_points:
-              currentPoints -
-              2000,
+            braindrill_level:
+              (
+                Number(
+                  userData?.braindrill_level,
+                ) || 0
+              ) + 1,
           })
           .eq(
             'username',
             username,
           )
 
-        /* SAVE WINNER */
-
-        await supabase
-          .from(
-            'examinity_winners',
-          )
-          .insert([
-            {
-              username,
-
-              reward:
-                '1GB DATA',
-
-              claim_code:
-                'MamaNCbuy',
-
-              screenshot_claimed:
-                false,
-
-              claim_status:
-                'pending',
-            },
-          ])
-
-        /* SAVE LOCAL */
-
-        localStorage.setItem(
-          'examinity_reward',
-          '1GB DATA',
-        )
-
-        /* SYNC DATA */
-
         await syncUserData()
+
+        rewardMessage.value =
+          'NEXT BRAIN DRILL LEVEL UNLOCKED! Refresh the page if your reward has not appeared.'
 
         playSound(
           'pass',
@@ -305,14 +552,15 @@ const purchaseOffer =
         loading.value =
           false
 
-        emit('close')
-
-        router.push(
-          '/winner',
-        )
+        return
       }
-    } catch (err) {
-      console.error(err)
+    }
+
+    catch (err) {
+
+      console.error(
+        err,
+      )
 
       playSound(
         'fail',
@@ -360,43 +608,35 @@ const purchaseOffer =
 
         <div>
           <h1
-            class="text-[1.8rem] leading-none font-black text-[#FF2AA3]"
+            class="text-[1.25rem] leading-none font-black text-[#FF2AA3]"
           >
-            MAMA NO
-          </h1>
-
-          <h1
-            class="text-[1.8rem] leading-none font-black text-black"
-          >
-            CREDIT
+            MAMA NO CREDIT
           </h1>
 
           <p
-            class="mt-1 text-xs font-black text-black/70"
+            class="mt-1 text-xs font-black text-black"
           >
             STORE
+          </p>
+
+          <p
+            class="mt-1 text-[10px] font-bold text-black/70"
+          >
+            CP = Challenge Points
           </p>
         </div>
       </div>
 
-      <!-- SUBTEXT -->
-      <p
-        class="mt-3 text-black text-sm font-bold leading-6"
-      >
-        Spend challenge points on
-        rewards and bonuses.
-      </p>
-
-      <!-- OFFER 1 -->
+      <!-- FREE SPIN -->
       <div
         class="mt-4 bg-white border-4 border-black rounded-[1.5rem] p-4 shadow-[0_5px_0_#000]"
       >
         <div
-          class="flex items-center justify-between"
+          class="flex items-center justify-between gap-3"
         >
           <div>
             <h2
-              class="text-2xl font-black text-[#03B5EC]"
+              class="text-xl font-black text-[#FD9501]"
             >
               FREE SPIN
             </h2>
@@ -404,7 +644,13 @@ const purchaseOffer =
             <p
               class="mt-1 text-sm font-black text-black"
             >
-              1000 Points
+              1000 CP
+            </p>
+
+            <p
+              class="mt-1 text-[10px] font-bold text-black/70"
+            >
+              Gain 1 spin token.
             </p>
           </div>
 
@@ -414,47 +660,128 @@ const purchaseOffer =
                 'spin',
               )
             "
-            :disabled="loading"
-            class="bg-[#FD9501] border-4 border-black rounded-2xl px-4 py-3 text-sm font-black text-black shadow-[0_4px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+            :disabled="
+              loading
+            "
+            class="bg-[#FD9501] border-4 border-black rounded-2xl px-4 py-3 text-sm font-black text-black shadow-[0_4px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] disabled:opacity-70"
           >
-            BUY
+            {{
+              loading
+                ? 'WAIT'
+                : 'BUY'
+            }}
           </button>
         </div>
       </div>
 
-      <!-- OFFER 2 -->
+      <!-- MYSTERY REWARD -->
       <div
         class="mt-4 bg-white border-4 border-black rounded-[1.5rem] p-4 shadow-[0_5px_0_#000]"
       >
         <div
-          class="flex items-center justify-between"
+          class="flex items-center justify-between gap-3"
         >
           <div>
             <h2
-              class="text-2xl font-black text-[#FF2AA3]"
+              class="text-xl font-black text-[#FF2AA3]"
             >
-              1GB DATA
+              MYSTERY REWARD
             </h2>
 
             <p
               class="mt-1 text-sm font-black text-black"
             >
-              2000 Points
+              500 CP
+            </p>
+
+            <p
+              class="mt-1 text-[10px] font-bold text-black/70"
+            >
+              Open to reveal a surprise reward.
             </p>
           </div>
 
           <button
             @click="
               purchaseOffer(
-                'data',
+                'mystery',
               )
             "
-            :disabled="loading"
-            class="bg-[#03B5EC] border-4 border-black rounded-2xl px-4 py-3 text-sm font-black text-black shadow-[0_4px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+            :disabled="
+              loading
+            "
+            class="bg-[#FF2AA3] border-4 border-black rounded-2xl px-4 py-3 text-sm font-black text-white shadow-[0_4px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] disabled:opacity-70"
           >
-            BUY
+            {{
+              loading
+                ? 'WAIT'
+                : 'BUY'
+            }}
           </button>
         </div>
+      </div>
+
+      <!-- NEXT LEVEL -->
+      <div
+        class="mt-4 bg-white border-4 border-black rounded-[1.5rem] p-4 shadow-[0_5px_0_#000]"
+      >
+        <div
+          class="flex items-center justify-between gap-3"
+        >
+          <div>
+            <h2
+              class="text-xl font-black text-[#03B5EC]"
+            >
+              NEXT LEVEL
+            </h2>
+
+            <p
+              class="mt-1 text-sm font-black text-black"
+            >
+              1000 CP
+            </p>
+
+            <p
+              class="mt-1 text-[10px] font-bold text-black/70"
+            >
+              Unlock the next Brain Drill level.
+            </p>
+          </div>
+
+          <button
+            @click="
+              purchaseOffer(
+                'level',
+              )
+            "
+            :disabled="
+              loading
+            "
+            class="bg-[#03B5EC] border-4 border-black rounded-2xl px-4 py-3 text-sm font-black text-black shadow-[0_4px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] disabled:opacity-70"
+          >
+            {{
+              loading
+                ? 'WAIT'
+                : 'BUY'
+            }}
+          </button>
+        </div>
+      </div>
+
+      <!-- REWARD MESSAGE -->
+      <div
+        v-if="
+          rewardMessage
+        "
+        class="mt-4 bg-[#03B5EC] border-4 border-black rounded-2xl px-4 py-3 shadow-[0_5px_0_#000]"
+      >
+        <p
+          class="text-center text-black text-sm font-black"
+        >
+          {{
+            rewardMessage
+          }}
+        </p>
       </div>
 
       <!-- ERROR -->
@@ -462,10 +789,10 @@ const purchaseOffer =
         v-if="
           errorMessage
         "
-        class="mt-4 bg-[#FF2AA3] border-4 border-black rounded-2xl px-4 py-3 text-center shadow-[0_5px_0_#000]"
+        class="mt-4 bg-[#FF2AA3] border-4 border-black rounded-2xl px-4 py-3 shadow-[0_5px_0_#000]"
       >
         <p
-          class="text-white text-sm font-black"
+          class="text-center text-white text-sm font-black"
         >
           {{
             errorMessage

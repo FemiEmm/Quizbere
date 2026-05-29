@@ -6,7 +6,7 @@ export const braindrillLevels = [
 
     questions: 10,
 
-    time: 90,
+    time: 30,
 
     requiredCorrect: 6,
 

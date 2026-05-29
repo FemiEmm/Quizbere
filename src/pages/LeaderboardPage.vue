@@ -86,6 +86,10 @@ const fetchLeaderboard =
         'league',
         currentLeague.value,
       )
+      .neq(
+          'username',
+          'ADMINDEVELOPER',
+        )
 
     if (
       !error &&
@@ -135,6 +139,10 @@ const announceWinner =
         'league',
         currentLeague.value,
       )
+      .neq(
+    'username',
+    'ADMINDEVELOPER',
+  )
       .order(
         'challenge_points',
         {

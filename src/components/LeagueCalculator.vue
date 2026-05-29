@@ -38,14 +38,18 @@ const assignLeagues =
   async () => {
     /* FETCH USERS */
 
-    const {
-      data,
-      error,
-    } = await supabase
-      .from(
-        'examinity_leaderboard',
-      )
-      .select('*')
+   const {
+  data,
+  error,
+} = await supabase
+  .from(
+    'examinity_leaderboard',
+  )
+  .select('*')
+  .neq(
+    'username',
+    'ADMINDEVELOPER',
+  )
 
     if (
       error ||

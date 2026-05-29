@@ -1,5 +1,3 @@
-<!-- src/pages/BraindrillPlayPage.vue -->
-
 <script setup>
 import {
   computed,
@@ -22,6 +20,8 @@ import BrainTrueFalse from '../braindrill/BrainTrueFalse.vue'
 
 import BrainTap from '../braindrill/BrainTap.vue'
 
+import BereStoreIngame from '../components/BereStoreIngame.vue'
+
 import {
   braindrillLevels,
 } from '../data/braindrillLevels'
@@ -30,19 +30,24 @@ import {
   playSound,
 } from '../utils/playSound'
 
-const router = useRouter()
+const router =
+  useRouter()
 
 /* -----------------------------
    LEVEL DATA
 ----------------------------- */
 
-const levelData = JSON.parse(
-  localStorage.getItem(
-    'braindrill_selected_level',
-  ),
-)
+const levelData =
+  JSON.parse(
+    localStorage.getItem(
+      'braindrill_selected_level',
+    ),
+  )
 
-if (!levelData) {
+if (
+  !levelData
+) {
+
   router.push(
     '/braindrill',
   )
@@ -55,7 +60,10 @@ const currentLevel =
       levelData.level,
   )
 
-if (!currentLevel) {
+if (
+  !currentLevel
+) {
+
   router.push(
     '/braindrill',
   )
@@ -69,7 +77,20 @@ const gameType =
   currentLevel.gameType
 
 /* -----------------------------
-   MODALS
+   STORE STATE
+----------------------------- */
+
+const showBereStore =
+  ref(false)
+
+const questionsComplete =
+  ref(false)
+
+const passedRound =
+  ref(false)
+
+/* -----------------------------
+   RESULT MODALS
 ----------------------------- */
 
 const showTimeUpModal =
@@ -77,6 +98,20 @@ const showTimeUpModal =
 
 const showCompletedModal =
   ref(false)
+
+/* -----------------------------
+   GAME STATE
+----------------------------- */
+
+const gameFrozen =
+  ref(false)
+
+/* -----------------------------
+   ANSWER TIMEOUT
+----------------------------- */
+
+let answerTimeout =
+  null
 
 /* -----------------------------
    DIFFICULTY MAP
@@ -102,88 +137,77 @@ const difficultyMap = {
 
   9: ['easy', 'mid'],
 
-  10: ['easy', 'mid', 'hard'],
+  10: [
+    'easy',
+    'mid',
+    'hard',
+  ],
 
-  11: ['easy', 'mid', 'hard'],
+  11: [
+    'easy',
+    'mid',
+    'hard',
+  ],
 
-  12: ['easy', 'mid', 'hard'],
+  12: [
+    'easy',
+    'mid',
+    'hard',
+  ],
 
-  13: ['easy', 'mid', 'hard'],
+  13: [
+    'easy',
+    'mid',
+    'hard',
+  ],
 
-  14: ['easy', 'mid', 'hard'],
+  14: [
+    'easy',
+    'mid',
+    'hard',
+  ],
 
-  15: ['easy', 'mid', 'hard', 'extreme'],
+  15: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-  16: ['easy', 'mid', 'hard', 'extreme'],
+  16: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-  17: ['easy', 'mid', 'hard', 'extreme'],
+  17: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-  18: ['easy', 'mid', 'hard', 'extreme'],
+  18: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-  19: ['easy', 'mid', 'hard', 'extreme'],
+  19: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-  20: ['easy', 'mid', 'hard', 'extreme'],
-
-  21: ['mid', 'hard', 'extreme'],
-
-  22: ['mid', 'hard', 'extreme'],
-
-  23: ['mid', 'hard', 'extreme'],
-
-  24: ['mid', 'hard', 'extreme'],
-
-  25: ['mid', 'hard', 'extreme'],
-
-  26: ['easy', 'mid', 'hard', 'extreme'],
-
-  27: ['easy', 'mid', 'hard', 'extreme'],
-
-  28: ['easy', 'mid', 'hard', 'extreme'],
-
-  29: ['easy', 'mid', 'hard', 'extreme'],
-
-  30: ['easy', 'mid', 'hard', 'extreme'],
-
-  31: ['easy', 'mid', 'hard', 'extreme'],
-
-  32: ['easy', 'mid', 'hard', 'extreme'],
-
-  33: ['easy', 'mid', 'hard', 'extreme'],
-
-  34: ['easy', 'mid', 'hard', 'extreme'],
-
-  35: ['easy', 'mid', 'hard', 'extreme'],
-
-  36: ['easy', 'mid', 'hard', 'extreme'],
-
-  37: ['easy', 'mid', 'hard', 'extreme'],
-
-  38: ['easy', 'mid', 'hard', 'extreme'],
-
-  39: ['easy', 'mid', 'hard', 'extreme'],
-
-  40: ['easy', 'mid', 'hard', 'extreme'],
-
-  41: ['easy', 'mid', 'hard', 'extreme'],
-
-  42: ['easy', 'mid', 'hard', 'extreme'],
-
-  43: ['easy', 'mid', 'hard', 'extreme'],
-
-  44: ['easy', 'mid', 'hard', 'extreme'],
-
-  45: ['easy', 'mid', 'hard', 'extreme'],
-
-  46: ['easy', 'mid', 'hard', 'extreme'],
-
-  47: ['easy', 'mid', 'hard', 'extreme'],
-
-  48: ['easy', 'mid', 'hard', 'extreme'],
-
-  49: ['easy', 'mid', 'hard', 'extreme'],
-
-  50: ['easy', 'mid', 'hard', 'extreme'],
-
+  20: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 }
 
 const difficulties =
@@ -207,14 +231,14 @@ const allModules =
    FILTER MODULES
 ----------------------------- */
 
-let filteredModules = []
-
-/* QUIZ */
+let filteredModules =
+  []
 
 if (
   gameType ===
   'quiz'
 ) {
+
   filteredModules =
     Object.entries(
       allModules,
@@ -231,12 +255,11 @@ if (
     )
 }
 
-/* MATCH */
-
 if (
   gameType ===
   'match'
 ) {
+
   filteredModules =
     Object.entries(
       allModules,
@@ -253,12 +276,11 @@ if (
     )
 }
 
-/* TRUE FALSE */
-
 if (
   gameType ===
   'truefalse'
 ) {
+
   filteredModules =
     Object.entries(
       allModules,
@@ -275,12 +297,11 @@ if (
     )
 }
 
-/* TAP */
-
 if (
   gameType ===
   'tap'
 ) {
+
   filteredModules =
     Object.entries(
       allModules,
@@ -304,6 +325,7 @@ if (
 const allQuestions =
   filteredModules.flatMap(
     ([, module]) => {
+
       if (
         module.default
       ) {
@@ -335,6 +357,7 @@ if (
   shuffledQuestions.length ===
   0
 ) {
+
   router.push(
     '/braindrill',
   )
@@ -349,6 +372,7 @@ const currentQuestionIndex =
 
 const currentQuestion =
   computed(() => {
+
     return (
       shuffledQuestions[
         currentQuestionIndex
@@ -364,21 +388,57 @@ const currentQuestion =
 const correctAnswers =
   ref(0)
 
-const timeLeft = ref(
-  currentLevel.time,
-)
+const timeLeft =
+  ref(
+    currentLevel.time,
+  )
 
 /* -----------------------------
-   REWARD SCORE
+   RUN SCORE
 ----------------------------- */
 
-const runScore = ref(
-  Number(
-    localStorage.getItem(
-      'braindrill_run_score',
-    ),
-  ) || 0,
-)
+const runScore =
+  ref(
+    Number(
+      localStorage.getItem(
+        'braindrill_run_score',
+      ),
+    ) || 0,
+  )
+
+/* -----------------------------
+   OPEN STORE
+----------------------------- */
+
+const openBereStore =
+  ({
+    completed =
+      false,
+
+    passed =
+      false,
+  } = {}) => {
+
+    clearInterval(
+      timer,
+    )
+
+    clearTimeout(
+      answerTimeout,
+    )
+
+    gameFrozen.value =
+      true
+
+    questionsComplete.value =
+      completed
+
+    passedRound.value =
+      passed
+
+    showBereStore.value =
+      true
+  }
 
 /* -----------------------------
    TIMER
@@ -388,104 +448,100 @@ let timer = null
 
 const startTimer =
   () => {
+
+    clearInterval(
+      timer,
+    )
+
     timer =
       setInterval(() => {
+
+        if (
+          gameFrozen.value
+        ) {
+          return
+        }
+
         if (
           timeLeft.value >
           0
         ) {
+
           timeLeft.value--
-        } else {
-          timeUp()
         }
+
+      else {
+
+  const passed =
+    correctAnswers.value >=
+    currentLevel.requiredCorrect
+
+  if (
+    passed
+  ) {
+
+    clearInterval(
+      timer,
+    )
+
+    gameFrozen.value =
+      true
+
+    passedRound.value =
+      true
+
+    showCompletedModal.value =
+      true
+
+    setTimeout(() => {
+
+      endGame()
+
+    }, 1800)
+
+    return
+  }
+
+  openBereStore({
+    completed:
+      false,
+
+    passed:
+      false,
+  })
+}
+
       }, 1000)
   }
 
 /* -----------------------------
-   TIME UP
+   COMPLETE QUESTIONS
 ----------------------------- */
 
-const timeUp =
-  () => {
-    clearInterval(
-      timer,
-    )
-
-    const passed =
-      correctAnswers.value >=
-      currentLevel.requiredCorrect
-
-    playSound(
-      passed
-        ? 'pass'
-        : 'fail',
-    )
-
-    showTimeUpModal.value =
-      true
-
-    setTimeout(() => {
-      endGame()
-    }, 1800)
-  }
-
 /* -----------------------------
-   EVENTS
------------------------------ */
-
-const handleSuccess =
-  () => {
-    correctAnswers.value++
-
-    playSound(
-      'correct',
-    )
-  }
-
-const handleFail =
-  () => {
-    playSound(
-      'wrong',
-    )
-  }
-
-const handleComplete =
-  () => {
-    setTimeout(() => {
-      nextQuestion()
-    }, 600)
-  }
-
-/* -----------------------------
-   NEXT QUESTION
------------------------------ */
-
-const nextQuestion =
-  () => {
-    if (
-      currentQuestionIndex.value <
-      shuffledQuestions.length -
-        1
-    ) {
-      currentQuestionIndex.value++
-    } else {
-      completeQuestions()
-    }
-  }
-
-/* -----------------------------
-   QUESTIONS COMPLETE
+   COMPLETE QUESTIONS
 ----------------------------- */
 
 const completeQuestions =
   () => {
+
     clearInterval(
       timer,
     )
 
+    clearTimeout(
+      answerTimeout,
+    )
+
+    gameFrozen.value =
+      true
+
     const passed =
       correctAnswers.value >=
       currentLevel.requiredCorrect
+
+    passedRound.value =
+      passed
 
     playSound(
       passed
@@ -497,8 +553,40 @@ const completeQuestions =
       true
 
     setTimeout(() => {
+
       endGame()
+
     }, 1800)
+  }
+/* -----------------------------
+   BUY TIME
+----------------------------- */
+
+const addExtraTime =
+  (
+    seconds,
+  ) => {
+
+    showBereStore.value =
+      false
+
+    gameFrozen.value =
+      false
+
+    questionsComplete.value =
+      false
+
+    passedRound.value =
+      false
+
+    timeLeft.value +=
+      seconds
+
+    playSound(
+      'pass',
+    )
+
+    startTimer()
   }
 
 /* -----------------------------
@@ -507,24 +595,32 @@ const completeQuestions =
 
 const endGame =
   () => {
+
     clearInterval(
       timer,
+    )
+
+    clearTimeout(
+      answerTimeout,
     )
 
     const passed =
       correctAnswers.value >=
       currentLevel.requiredCorrect
 
-    /* REWARD RESET */
+    /* RESET CLAIM */
 
     localStorage.setItem(
       'reward_claimed',
       'false',
     )
 
-    /* REWARD PLAYER */
+    /* REWARD */
 
-    if (passed) {
+    if (
+      passed
+    ) {
+
       runScore.value +=
         currentLevel.points
     }
@@ -546,9 +642,12 @@ const endGame =
       currentLevel.level,
     )
 
-    /* UNLOCK NEXT LEVEL */
+    /* UNLOCK NEXT */
 
-    if (passed) {
+    if (
+      passed
+    ) {
+
       const unlockedLevel =
         Number(
           localStorage.getItem(
@@ -560,6 +659,7 @@ const endGame =
         currentLevel.level >=
         unlockedLevel
       ) {
+
         localStorage.setItem(
           'braindrill_unlocked_level',
           currentLevel.level +
@@ -568,13 +668,173 @@ const endGame =
       }
     }
 
-    /* GO RESULT */
+    /* GO INTERMISSION */
 
     setTimeout(() => {
+
       router.push(
         '/braindrill/intermission',
       )
+
     }, 1200)
+  }
+
+/* -----------------------------
+   STORE CLOSE
+----------------------------- */
+
+const handleBereStoreClose =
+  (
+    payload,
+  ) => {
+
+    showBereStore.value =
+      false
+
+    /* USER BOUGHT */
+
+    if (
+      payload?.purchased
+    ) {
+      return
+    }
+
+    gameFrozen.value =
+      true
+
+    clearInterval(
+      timer,
+    )
+
+    clearTimeout(
+      answerTimeout,
+    )
+
+    const passed =
+      correctAnswers.value >=
+      currentLevel.requiredCorrect
+
+    playSound(
+      passed
+        ? 'pass'
+        : 'fail',
+    )
+
+    /* QUESTIONS COMPLETE */
+
+    if (
+      questionsComplete.value
+    ) {
+
+      showCompletedModal.value =
+        true
+
+      setTimeout(() => {
+
+        endGame()
+
+      }, 1800)
+
+      return
+    }
+
+    /* TIME UP */
+
+    showTimeUpModal.value =
+      true
+
+    setTimeout(() => {
+
+      endGame()
+
+    }, 1800)
+  }
+
+/* -----------------------------
+   EVENTS
+----------------------------- */
+
+const handleSuccess =
+  () => {
+
+    if (
+      gameFrozen.value
+    ) {
+      return
+    }
+
+    correctAnswers.value++
+
+    playSound(
+      'correct',
+    )
+
+    answerTimeout =
+      setTimeout(() => {
+
+        if (
+          gameFrozen.value
+        ) {
+          return
+        }
+
+        nextQuestion()
+
+      }, 600)
+  }
+
+const handleFail =
+  () => {
+
+    if (
+      gameFrozen.value
+    ) {
+      return
+    }
+
+    playSound(
+      'wrong',
+    )
+
+    answerTimeout =
+      setTimeout(() => {
+
+        if (
+          gameFrozen.value
+        ) {
+          return
+        }
+
+        nextQuestion()
+
+      }, 600)
+  }
+
+/* -----------------------------
+   NEXT QUESTION
+----------------------------- */
+
+const nextQuestion =
+  () => {
+
+    if (
+      gameFrozen.value
+    ) {
+      return
+    }
+
+    if (
+      currentQuestionIndex.value >=
+      shuffledQuestions.length -
+        1
+    ) {
+
+      completeQuestions()
+
+      return
+    }
+
+    currentQuestionIndex.value++
   }
 
 /* -----------------------------
@@ -583,8 +843,13 @@ const endGame =
 
 const leaveGame =
   () => {
+
     clearInterval(
       timer,
+    )
+
+    clearTimeout(
+      answerTimeout,
     )
 
     playSound(
@@ -602,6 +867,7 @@ const leaveGame =
 
 const currentComponent =
   computed(() => {
+
     if (
       gameType ===
       'quiz'
@@ -638,19 +904,24 @@ const currentComponent =
 ----------------------------- */
 
 onMounted(() => {
+
   startTimer()
 })
 
 onBeforeUnmount(() => {
+
   clearInterval(
     timer,
   )
+
+  clearTimeout(
+    answerTimeout,
+  )
 })
 </script>
-
 <template>
   <main
-    class="min-h-screen bg-[#FF2AA3] pb-24 px-4 pt-4"
+    class="min-h-screen bg-[#FF2AA3] pb-24 px-4 pt-4 overflow-hidden"
   >
     <section
       class="max-w-md mx-auto"
@@ -763,9 +1034,6 @@ onBeforeUnmount(() => {
           @fail="
             handleFail
           "
-          @complete="
-            handleComplete
-          "
         />
       </div>
 
@@ -774,11 +1042,24 @@ onBeforeUnmount(() => {
         @click="
           leaveGame
         "
-        class="mt-4 w-full bg-white border-4 border-black rounded-2xl py-4 text-black text-lg font-black"
+        class="mt-4 w-full bg-white border-4 border-black rounded-2xl py-4 text-black text-lg font-black active:scale-[0.98]"
       >
         LEAVE DRILL
       </button>
     </section>
+
+    <!-- BERE STORE -->
+    <BereStoreIngame
+      :show="
+        showBereStore
+      "
+      @close="
+        handleBereStoreClose
+      "
+      @time-added="
+        addExtraTime
+      "
+    />
 
     <!-- TIME UP MODAL -->
     <div
@@ -788,7 +1069,7 @@ onBeforeUnmount(() => {
       class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-6"
     >
       <div
-        class="w-full max-w-[280px] bg-[#F3F400] border-4 border-black rounded-[2rem] p-6 text-center shadow-[0_10px_0_#000]"
+        class="w-full max-w-[280px] bg-[#F3F400] border-4 border-black rounded-[2rem] p-6 text-center"
       >
         <h2
           class="text-3xl font-black text-black"
@@ -803,18 +1084,18 @@ onBeforeUnmount(() => {
         </p>
 
         <div
-          class="mt-5 bg-[#FF2AA3] border-4 border-black rounded-2xl py-4 shadow-[0_6px_0_#000]"
+          class="mt-5 bg-[#FF2AA3] border-4 border-black rounded-2xl py-4"
         >
           <p
             class="text-white text-xl font-black"
           >
-            RETURNING...
+            LOADING...
           </p>
         </div>
       </div>
     </div>
 
-    <!-- COMPLETED MODAL -->
+    <!-- COMPLETE MODAL -->
     <div
       v-if="
         showCompletedModal
@@ -822,7 +1103,7 @@ onBeforeUnmount(() => {
       class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-6"
     >
       <div
-        class="w-full max-w-[280px] bg-[#03B5EC] border-4 border-black rounded-[2rem] p-6 text-center shadow-[0_10px_0_#000]"
+        class="w-full max-w-[280px] bg-[#03B5EC] border-4 border-black rounded-[2rem] p-6 text-center"
       >
         <h2
           class="text-3xl font-black text-black"
@@ -837,12 +1118,12 @@ onBeforeUnmount(() => {
         </p>
 
         <div
-          class="mt-5 bg-[#FF2AA3] border-4 border-black rounded-2xl py-4 shadow-[0_6px_0_#000]"
+          class="mt-5 bg-[#FF2AA3] border-4 border-black rounded-2xl py-4"
         >
           <p
             class="text-white text-xl font-black"
           >
-            PROCESSING...
+            LOADING...
           </p>
         </div>
       </div>

@@ -18,7 +18,6 @@ const emit =
   defineEmits([
     'success',
     'fail',
-    'complete',
   ])
 
 const answered =
@@ -35,6 +34,7 @@ watch(
   () =>
     props.question,
   () => {
+
     answered.value =
       false
 
@@ -49,6 +49,7 @@ watch(
 
 const chooseAnswer =
   (answer) => {
+
     /* NO QUESTION */
 
     if (
@@ -78,6 +79,7 @@ const chooseAnswer =
       props.question
         ?.answer
     ) {
+
       emit(
         'success',
       )
@@ -86,18 +88,11 @@ const chooseAnswer =
     /* FAIL */
 
     else {
+
       emit(
         'fail',
       )
     }
-
-    /* COMPLETE */
-
-    setTimeout(() => {
-      emit(
-        'complete',
-      )
-    }, 600)
   }
 </script>
 
@@ -142,16 +137,21 @@ const chooseAnswer =
         "
         class="w-full border-[3px] border-black rounded-[1.2rem] py-3 text-xl font-black transition-all duration-150"
         :class="[
+
           answered &&
           question?.answer ===
             true
+
             ? 'bg-green-400'
+
             : answered &&
                 selectedAnswer ===
                   true &&
                 question?.answer !==
                   true
+
               ? 'bg-red-400'
+
               : 'bg-[#03B5EC]',
         ]"
       >
@@ -167,16 +167,21 @@ const chooseAnswer =
         "
         class="w-full border-[3px] border-black rounded-[1.2rem] py-3 text-xl font-black transition-all duration-150"
         :class="[
+
           answered &&
           question?.answer ===
             false
+
             ? 'bg-green-400'
+
             : answered &&
                 selectedAnswer ===
                   false &&
                 question?.answer !==
                   false
+
               ? 'bg-red-400'
+
               : 'bg-[#FF2AA3]',
         ]"
       >

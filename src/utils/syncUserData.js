@@ -21,7 +21,7 @@ export const syncUserData =
           .trim()
           .toUpperCase()
 
-      /* FETCH ALL USERS */
+      /* FETCH ALL LEADERBOARD USERS */
 
       const {
         data: leaderboard,
@@ -104,6 +104,33 @@ export const syncUserData =
         return
       }
 
+      /* FETCH BRAINDRILL LEVEL */
+
+      const {
+        data: brainDrillUser,
+        error:
+          brainDrillError,
+      } = await supabase
+        .from(
+          'examinity_users',
+        )
+        .select(
+          'braindrill_level',
+        )
+        .eq(
+          'username',
+          username,
+        )
+        .maybeSingle()
+
+      if (
+        brainDrillError
+      ) {
+        console.error(
+          brainDrillError,
+        )
+      }
+
       /* SAVE LOCAL */
 
       localStorage.setItem(
@@ -134,6 +161,15 @@ export const syncUserData =
       )
 
       localStorage.setItem(
+        'braindrill_unlocked_level',
+        String(
+          Number(
+            brainDrillUser?.braindrill_level,
+          ) || 1,
+        ),
+      )
+
+      localStorage.setItem(
         'total_score',
         String(
           Number(
@@ -150,7 +186,11 @@ export const syncUserData =
           ) || 0,
         ),
       )
-    } catch (err) {
-      console.error(err)
+    }
+
+    catch (err) {
+      console.error(
+        err,
+      )
     }
   }
