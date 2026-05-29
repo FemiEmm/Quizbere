@@ -2,6 +2,7 @@
 import {
   ref,
   onMounted,
+  onBeforeUnmount,
 } from 'vue'
 
 import { supabase } from '../lib/supabase'
@@ -34,6 +35,21 @@ const wrongPassword =
 
 const refreshCountdown =
   ref(3600)
+
+const refreshing =
+  ref(false)
+
+const refreshStatus =
+  ref('idle')
+
+let autoRefreshInterval =
+  null
+
+let countdownInterval =
+  null
+
+let refreshStatusTimeout =
+  null
 
 /* -----------------------------
    LOGIN
@@ -70,7 +86,7 @@ const login =
       authenticated.value =
         true
 
-      fetchData()
+      await fetchData()
     }
 
     else {
@@ -90,14 +106,20 @@ const fetchUsers =
   async () => {
     const {
       data,
+      error,
     } = await supabase
       .from(
         'examinity_leaderboard',
       )
       .select('*')
 
-    if (!data) {
-      return
+    if (
+      error ||
+      !data
+    ) {
+      throw error || new Error(
+        'Unable to fetch users',
+      )
     }
 
     const ranked =
@@ -131,6 +153,7 @@ const fetchWinners =
   async () => {
     const {
       data,
+      error,
     } = await supabase
       .from(
         'examinity_winners',
@@ -143,9 +166,43 @@ const fetchWinners =
         },
       )
 
-    if (data) {
-      winners.value =
-        data
+    if (
+      error ||
+      !data
+    ) {
+      throw error || new Error(
+        'Unable to fetch winners',
+      )
+    }
+
+    winners.value =
+      data
+  }
+
+/* -----------------------------
+   REFRESH STATUS
+----------------------------- */
+
+const setRefreshStatus =
+  (
+    status,
+  ) => {
+    refreshStatus.value =
+      status
+
+    clearTimeout(
+      refreshStatusTimeout,
+    )
+
+    if (
+      status === 'success' ||
+      status === 'error'
+    ) {
+      refreshStatusTimeout =
+        setTimeout(() => {
+          refreshStatus.value =
+            'idle'
+        }, 1200)
     }
   }
 
@@ -155,40 +212,91 @@ const fetchWinners =
 
 const fetchData =
   async () => {
-    await Promise.all([
-      fetchUsers(),
+    if (
+      refreshing.value
+    ) {
+      return
+    }
 
-      fetchWinners(),
-    ])
+    refreshing.value =
+      true
+
+    setRefreshStatus(
+      'loading',
+    )
+
+    try {
+      await Promise.all([
+        fetchUsers(),
+
+        fetchWinners(),
+      ])
+
+      refreshCountdown.value =
+        3600
+
+      setRefreshStatus(
+        'success',
+      )
+    }
+
+    catch (error) {
+      console.error(
+        error,
+      )
+
+      setRefreshStatus(
+        'error',
+      )
+    }
+
+    finally {
+      refreshing.value =
+        false
+    }
+  }
+
+/* -----------------------------
+   MANUAL REFRESH
+----------------------------- */
+
+const refreshColumns =
+  async () => {
+    await fetchData()
   }
 
 /* -----------------------------
    AUTO REFRESH
 ----------------------------- */
 
-setInterval(() => {
-  if (
-    authenticated.value
-  ) {
-    fetchData()
-
-    refreshCountdown.value =
-      3600
+const startAutoRefresh =
+  () => {
+    autoRefreshInterval =
+      setInterval(() => {
+        if (
+          authenticated.value
+        ) {
+          fetchData()
+        }
+      }, 3600000)
   }
-}, 3600000)
 
 /* -----------------------------
    COUNTDOWN
 ----------------------------- */
 
-setInterval(() => {
-  if (
-    refreshCountdown.value >
-    0
-  ) {
-    refreshCountdown.value--
+const startCountdown =
+  () => {
+    countdownInterval =
+      setInterval(() => {
+        if (
+          refreshCountdown.value >
+          0
+        ) {
+          refreshCountdown.value--
+        }
+      }, 1000)
   }
-}, 1000)
 
 /* -----------------------------
    FORMAT
@@ -223,6 +331,31 @@ const formatRefresh =
 onMounted(() => {
   document.body.style.overflow =
     'hidden'
+
+  startAutoRefresh()
+
+  startCountdown()
+})
+
+/* -----------------------------
+   UNMOUNT
+----------------------------- */
+
+onBeforeUnmount(() => {
+  document.body.style.overflow =
+    ''
+
+  clearInterval(
+    autoRefreshInterval,
+  )
+
+  clearInterval(
+    countdownInterval,
+  )
+
+  clearTimeout(
+    refreshStatusTimeout,
+  )
 })
 </script>
 
@@ -282,7 +415,11 @@ onMounted(() => {
           "
           class="mt-5 w-full bg-[#F3F400] rounded-2xl py-4 text-black text-lg font-black"
         >
-          ENTER
+          {{
+            loading
+              ? 'CHECKING...'
+              : 'ENTER'
+          }}
         </button>
       </div>
     </div>
@@ -414,15 +551,62 @@ onMounted(() => {
           </div>
         </section>
 
-        <!-- TIMERS -->
+        <!-- TIMERS / LIVE CONTROLS -->
         <section
           class="border border-[#F3F400] rounded-2xl p-4 bg-[#111] overflow-hidden flex flex-col"
         >
-          <h1
-            class="text-2xl font-black text-[#F3F400]"
+          <div
+            class="flex items-center justify-between gap-3"
           >
-            TIMERS
-          </h1>
+            <h1
+              class="text-2xl font-black text-[#F3F400]"
+            >
+              TIMERS
+            </h1>
+
+            <!-- LIVE STATUS -->
+            <div
+              class="flex items-center gap-2"
+            >
+              <span
+                class="w-3 h-3 rounded-full bg-green-500 animate-pulse"
+              />
+
+              <span
+                class="text-xs font-black text-green-400"
+              >
+                LIVE
+              </span>
+            </div>
+          </div>
+
+          <!-- REFRESH BUTTON -->
+          <button
+            @click="
+              refreshColumns
+            "
+            :disabled="
+              refreshing
+            "
+            :class="[
+              refreshStatus === 'success'
+                ? 'bg-[#F3F400] text-black animate-pulse'
+                : refreshStatus === 'error'
+                  ? 'bg-red-600 text-white animate-pulse'
+                  : refreshStatus === 'loading'
+                    ? 'bg-[#03B5EC] text-black animate-pulse'
+                    : 'bg-white text-black',
+            ]"
+            class="mt-5 w-full border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] disabled:opacity-80"
+          >
+            {{
+              refreshStatus === 'error'
+                ? 'REFRESH ERROR'
+                : refreshing
+                  ? 'REFRESHING...'
+                  : 'REFRESH USERS + WINNERS'
+            }}
+          </button>
 
           <!-- LEAGUE TIMER -->
           <div
