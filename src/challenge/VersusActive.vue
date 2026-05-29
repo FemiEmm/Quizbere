@@ -39,42 +39,148 @@ const username =
 const loading =
   ref(false)
 
-const playerOnePoints =
-  ref(0)
+const activeMatches =
+  ref([])
 
-const playerTwoPoints =
-  ref(0)
+const selectedMatchId =
+  ref(
+    props.match?.id || null,
+  )
 
 let interval =
   null
 
 /* -----------------------------
+   SELECTED MATCH
+----------------------------- */
+
+const selectedMatch =
+  computed(() => {
+    return (
+      activeMatches.value.find(
+        (match) =>
+          match.id ===
+          selectedMatchId.value,
+      ) ||
+      activeMatches.value[0] ||
+      props.match ||
+      null
+    )
+  })
+
+/* -----------------------------
+   PLAYER SCORES
+----------------------------- */
+
+const playerOnePoints =
+  computed(() => {
+    return Number(
+      selectedMatch.value?.player_one_score,
+    ) || 0
+  })
+
+const playerTwoPoints =
+  computed(() => {
+    return Number(
+      selectedMatch.value?.player_two_score,
+    ) || 0
+  })
+
+/* -----------------------------
    OPPONENT
 ----------------------------- */
 
+const getOpponent =
+  (
+    match,
+  ) => {
+    if (
+      !match
+    ) {
+      return ''
+    }
+
+    const playerOne =
+      String(
+        match.player_one || '',
+      )
+        .trim()
+        .toUpperCase()
+
+    if (
+      playerOne ===
+      username
+    ) {
+      return match.player_two
+    }
+
+    return match.player_one
+  }
+
 const opponent =
   computed(() => {
-    return props.match
-      .player_one ===
-      username
-      ? props.match
-          .player_two
-      : props.match
-          .player_one
+    return getOpponent(
+      selectedMatch.value,
+    )
   })
+
+/* -----------------------------
+   TAB LABEL
+----------------------------- */
+
+const getTabLabel =
+  (
+    match,
+  ) => {
+    const opponentName =
+      getOpponent(
+        match,
+      )
+
+    return opponentName || 'MATCH'
+  }
+
+/* -----------------------------
+   TAB SCORE
+----------------------------- */
+
+const getTabScore =
+  (
+    match,
+  ) => {
+    const p1 =
+      Number(
+        match.player_one_score,
+      ) || 0
+
+    const p2 =
+      Number(
+        match.player_two_score,
+      ) || 0
+
+    return `${p1} - ${p2}`
+  }
 
 /* -----------------------------
    TIME LEFT
 ----------------------------- */
 
-const timeLeft =
-  computed(() => {
+const getTimeLeft =
+  (
+    match,
+  ) => {
+    if (
+      !match?.ends_at
+    ) {
+      return 'MATCH OVER'
+    }
+
     const now =
       new Date()
 
     const end =
       new Date(
-        props.match.ends_at,
+        match.ends_at,
       )
 
     const diff =
@@ -113,13 +219,36 @@ const timeLeft =
       )
 
     return `${hours}H ${minutes}M`
+  }
+
+const timeLeft =
+  computed(() => {
+    return getTimeLeft(
+      selectedMatch.value,
+    )
   })
 
 /* -----------------------------
-   FETCH MATCH SCORE
+   SELECT TAB
 ----------------------------- */
 
-const fetchScores =
+const selectMatch =
+  (
+    match,
+  ) => {
+    playSound(
+      'button',
+    )
+
+    selectedMatchId.value =
+      match.id
+  }
+
+/* -----------------------------
+   FETCH ACTIVE MATCHES
+----------------------------- */
+
+const fetchMatches =
   async () => {
     const {
       data,
@@ -129,13 +258,21 @@ const fetchScores =
         'versus_matches',
       )
       .select(
-        'id, status, player_one_score, player_two_score, ends_at, winner',
+        '*',
       )
       .eq(
-        'id',
-        props.match.id,
+        'status',
+        'active',
       )
-      .maybeSingle()
+      .or(
+        `player_one.eq.${username},player_two.eq.${username}`,
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false,
+        },
+      )
 
     if (
       error
@@ -147,8 +284,12 @@ const fetchScores =
       return
     }
 
+    activeMatches.value =
+      data || []
+
     if (
-      !data
+      activeMatches.value.length ===
+      0
     ) {
       emit(
         'refresh',
@@ -157,105 +298,120 @@ const fetchScores =
       return
     }
 
-    playerOnePoints.value =
-      Number(
-        data.player_one_score,
-      ) || 0
-
-    playerTwoPoints.value =
-      Number(
-        data.player_two_score,
-      ) || 0
-
-    if (
-      data.status !==
-      'active'
-    ) {
-      emit(
-        'refresh',
+    const selectedStillExists =
+      activeMatches.value.some(
+        (match) =>
+          match.id ===
+          selectedMatchId.value,
       )
 
-      return
+    if (
+      !selectedStillExists
+    ) {
+      selectedMatchId.value =
+        activeMatches.value[0].id
     }
 
-    await checkWinner(
-      data,
-    )
+    await checkExpiredMatches()
   }
 
 /* -----------------------------
-   CHECK WINNER
+   CHECK EXPIRED MATCHES
 ----------------------------- */
 
-const checkWinner =
-  async (
-    matchData,
-  ) => {
+const checkExpiredMatches =
+  async () => {
     const now =
       new Date()
 
-    const end =
-      new Date(
-        matchData.ends_at,
-      )
-
-    if (
-      now < end
+    for (
+      const match of activeMatches.value
     ) {
-      return
-    }
+      const end =
+        new Date(
+          match.ends_at,
+        )
 
-    let winner =
-      'draw'
+      if (
+        now < end
+      ) {
+        continue
+      }
 
-    if (
-      playerOnePoints.value >
-      playerTwoPoints.value
-    ) {
-      winner =
-        props.match
-          .player_one
-    }
+      let winner =
+        'draw'
 
-    if (
-      playerTwoPoints.value >
-      playerOnePoints.value
-    ) {
-      winner =
-        props.match
-          .player_two
-    }
+      const playerOneScore =
+        Number(
+          match.player_one_score,
+        ) || 0
 
-    const {
-      error,
-    } = await supabase
-      .from(
-        'versus_matches',
-      )
-      .update({
-        status:
-          'completed',
+      const playerTwoScore =
+        Number(
+          match.player_two_score,
+        ) || 0
 
-        winner,
-      })
-      .eq(
-        'id',
-        props.match.id,
-      )
+      if (
+        playerOneScore >
+        playerTwoScore
+      ) {
+        winner =
+          match.player_one
+      }
 
-    if (
-      error
-    ) {
-      console.error(
+      if (
+        playerTwoScore >
+        playerOneScore
+      ) {
+        winner =
+          match.player_two
+      }
+
+      const {
         error,
-      )
+      } = await supabase
+        .from(
+          'versus_matches',
+        )
+        .update({
+          status:
+            'completed',
 
-      return
+          winner,
+        })
+        .eq(
+          'id',
+          match.id,
+        )
+
+      if (
+        error
+      ) {
+        console.error(
+          error,
+        )
+      }
     }
 
-    emit(
-      'refresh',
-    )
+    const expiredExists =
+      activeMatches.value.some(
+        (match) => {
+          const end =
+            new Date(
+              match.ends_at,
+            )
+
+          return now >= end
+        },
+      )
+
+    if (
+      expiredExists
+    ) {
+      emit(
+        'refresh',
+      )
+    }
   }
 
 /* -----------------------------
@@ -280,7 +436,8 @@ const earnPoints =
 const giveUp =
   async () => {
     if (
-      loading.value
+      loading.value ||
+      !selectedMatch.value
     ) {
       return
     }
@@ -307,7 +464,7 @@ const giveUp =
       })
       .eq(
         'id',
-        props.match.id,
+        selectedMatch.value.id,
       )
 
     loading.value =
@@ -333,11 +490,11 @@ const giveUp =
 ----------------------------- */
 
 onMounted(() => {
-  fetchScores()
+  fetchMatches()
 
   interval =
     setInterval(() => {
-      fetchScores()
+      fetchMatches()
     }, 10000)
 })
 
@@ -396,9 +553,74 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
+      <!-- BROWSER STYLE TABS -->
+      <div
+        v-if="
+          activeMatches.length > 1
+        "
+        class="mt-5 overflow-x-auto scrollbar-hide"
+      >
+        <div
+          class="flex items-end gap-1 min-w-max"
+        >
+          <button
+            v-for="
+              match in activeMatches
+            "
+            :key="
+              match.id
+            "
+            @click="
+              selectMatch(
+                match,
+              )
+            "
+            class="min-w-[130px] max-w-[150px] border-x-2 border-t-2 border-white/10 rounded-t-2xl px-3 py-3 text-left transition-all duration-100"
+            :class="
+              selectedMatch?.id === match.id
+                ? 'bg-[#181818] text-white border-white/20'
+                : 'bg-[#262626] text-white/50'
+            "
+          >
+            <p
+              class="text-[8px] font-black uppercase tracking-[0.18em] truncate"
+            >
+              {{
+                getTabLabel(
+                  match,
+                )
+              }}
+            </p>
+
+            <p
+              class="mt-1 text-xs font-black"
+              :class="
+                selectedMatch?.id === match.id
+                  ? 'text-[#F3F400]'
+                  : 'text-white/40'
+              "
+            >
+              {{
+                getTabScore(
+                  match,
+                )
+              }}
+            </p>
+          </button>
+        </div>
+      </div>
+
       <!-- MATCH CARD -->
       <div
-        class="mt-6 bg-[#181818] border border-white/10 rounded-[2rem] p-5"
+        v-if="
+          selectedMatch
+        "
+        class="bg-[#181818] border border-white/10 rounded-[2rem] p-5"
+        :class="
+          activeMatches.length > 1
+            ? 'rounded-tl-none'
+            : 'mt-6'
+        "
       >
         <!-- PLAYER ONE -->
         <div
@@ -418,7 +640,7 @@ onBeforeUnmount(() => {
               class="mt-1 text-xl font-black truncate"
             >
               {{
-                props.match
+                selectedMatch
                   .player_one
               }}
             </h2>
@@ -473,7 +695,7 @@ onBeforeUnmount(() => {
               class="mt-1 text-xl font-black truncate"
             >
               {{
-                props.match
+                selectedMatch
                   .player_two
               }}
             </h2>
@@ -500,6 +722,18 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
+      <!-- NO MATCH FALLBACK -->
+      <div
+        v-else
+        class="mt-6 bg-[#181818] border border-white/10 rounded-[2rem] p-5 text-center"
+      >
+        <p
+          class="text-sm font-black text-white/50"
+        >
+          No active match found.
+        </p>
+      </div>
+
       <!-- BUTTONS -->
       <div
         class="mt-5 flex flex-col gap-3"
@@ -520,7 +754,8 @@ onBeforeUnmount(() => {
             giveUp
           "
           :disabled="
-            loading
+            loading ||
+            !selectedMatch
           "
           class="h-[56px] rounded-2xl bg-[#262626] border border-white/10 text-white text-base font-black active:scale-[0.98] transition-all duration-100 disabled:opacity-50"
         >
@@ -534,3 +769,15 @@ onBeforeUnmount(() => {
     </div>
   </section>
 </template>
+
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+
+  scrollbar-width: none;
+}
+</style>
