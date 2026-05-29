@@ -244,13 +244,13 @@ export const braindrillLevels = [
 
     gameType: 'spell',
 
-    questions: 4,
+    questions: 8,
 
-    time: 170,
+    time: 80,
 
-    requiredCorrect: 4,
+    requiredCorrect: 8,
 
-    points: 45,
+    points: 250,
 
     color: 'bg-white',
   },
@@ -484,13 +484,13 @@ export const braindrillLevels = [
 
     gameType: 'spell',
 
-    questions: 4,
+    questions: 12,
 
     time: 190,
 
-    requiredCorrect: 4,
+    requiredCorrect: 12,
 
-    points: 215,
+    points: 500,
 
     color: 'bg-white',
   },
