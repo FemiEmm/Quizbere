@@ -1,0 +1,24 @@
+{
+  "folder-path-color.folders": [
+    {
+      "path": "**/easy",
+      "color": "green",
+      "symbol": "E"
+    },
+    {
+      "path": "**/mid",
+      "color": "yellow",
+      "symbol": "M"
+    },
+    {
+      "path": "**/hard",
+      "color": "red",
+      "symbol": "H"
+    },
+    {
+      "path": "**/extreme",
+      "color": "magenta",
+      "symbol": "X"
+    }
+  ]
+}

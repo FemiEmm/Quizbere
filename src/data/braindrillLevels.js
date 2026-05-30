@@ -466,13 +466,13 @@ export const braindrillLevels = [
   {
     level: 30,
 
-    gameType: 'quiz',
+    gameType: 'flash',
 
-    questions: 40,
+    questions: 10,
 
     time: 70,
 
-    requiredCorrect: 35,
+    requiredCorrect: 5,
 
     points: 210,
 
@@ -546,15 +546,15 @@ export const braindrillLevels = [
   {
     level: 35,
 
-    gameType: 'quiz',
+    gameType: 'flash',
 
-    questions: 46,
+    questions: 20,
 
     time: 65,
 
-    requiredCorrect: 41,
+    requiredCorrect: 15,
 
-    points: 240,
+    points: 700,
 
     color: 'bg-[#F3F400]',
   },
@@ -626,15 +626,15 @@ export const braindrillLevels = [
   {
     level: 40,
 
-    gameType: 'quiz',
+    gameType: 'flash',
 
-    questions: 52,
+    questions: 60,
 
-    time: 60,
+    time: 150,
 
-    requiredCorrect: 47,
+    requiredCorrect: 40,
 
-    points: 270,
+    points: 1000,
 
     color: 'bg-[#F3F400]',
   },

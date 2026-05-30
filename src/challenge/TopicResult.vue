@@ -28,7 +28,7 @@ const result =
 const passRemarks = [
   'Good work. You actually used your brain today.',
 
-  'Impressive. The mascot almost smiled.',
+  'Impressive. I almost smiled.',
 
   'Solid performance. No complaints today.',
 

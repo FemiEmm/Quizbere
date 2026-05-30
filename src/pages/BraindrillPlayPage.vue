@@ -1,3 +1,5 @@
+<!-- src/views/BrainDrillPlay.vue -->
+
 <script setup>
 import {
   computed,
@@ -25,6 +27,8 @@ import BrainTrueFalse from '../braindrill/BrainTrueFalse.vue'
 import BrainTap from '../braindrill/BrainTap.vue'
 
 import BrainSpell from '../braindrill/BrainSpell.vue'
+
+import BrainFlash from '../braindrill/BrainFlash.vue'
 
 import BereStoreIngame from '../components/BereStoreIngame.vue'
 
@@ -126,11 +130,17 @@ let answerTimeout =
 ----------------------------- */
 
 const difficultyMap = {
-  1: ['easy'],
+  1: [
+    'easy',
+  ],
 
-  2: ['easy'],
+  2: [
+    'easy',
+  ],
 
-  3: ['easy'],
+  3: [
+    'easy',
+  ],
 
   4: [
     'easy',
@@ -235,214 +245,205 @@ const difficultyMap = {
   ],
 
   21: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-22: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  22: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-23: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  23: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-24: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  24: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-25: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  25: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-26: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  26: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-27: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  27: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-28: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  28: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-29: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  29: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-30: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  30: [
+    'easy',
+  ],
 
-31: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  31: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-32: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  32: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-33: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  33: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-34: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  34: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-35: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  35: [
+    'mid',
+  ],
 
-36: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  36: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-37: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  37: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-38: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  38: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-39: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  39: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-40: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  40: [
+    'hard',
+  ],
 
-41: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  41: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-42: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  42: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-43: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  43: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-44: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  44: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-45: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  45: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-46: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  46: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-47: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  47: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-48: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  48: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-49: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  49: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 
-50: [
-  'easy',
-  'mid',
-  'hard',
-  'extreme',
-],
+  50: [
+    'easy',
+    'mid',
+    'hard',
+    'extreme',
+  ],
 }
 
 /* -----------------------------
@@ -457,7 +458,9 @@ const difficulties =
       ]
     : difficultyMap[
         currentLevel.level
-      ] || ['easy']
+      ] || [
+        'easy',
+      ]
 
 /* -----------------------------
    IMPORT MODULES
@@ -583,6 +586,27 @@ if (
     )
 }
 
+if (
+  gameType ===
+  'flash'
+) {
+
+  filteredModules =
+    Object.entries(
+      allModules,
+    ).filter(
+      ([path]) =>
+        difficulties.some(
+          (
+            difficulty,
+          ) =>
+            path.includes(
+              `/data/othergames/flash/${difficulty}/`,
+            ),
+        ),
+    )
+}
+
 /* -----------------------------
    QUESTIONS
 ----------------------------- */
@@ -604,7 +628,9 @@ const allQuestions =
   )
 
 const shuffledQuestions =
-  [...allQuestions]
+  [
+    ...allQuestions,
+  ]
     .sort(
       () =>
         Math.random() -
@@ -1199,6 +1225,13 @@ const currentComponent =
       'spell'
     ) {
       return BrainSpell
+    }
+
+    if (
+      gameType ===
+      'flash'
+    ) {
+      return BrainFlash
     }
 
     return BrainQuiz
