@@ -55,7 +55,7 @@ const goToNamePage =
     )
 
     router.push(
-      '/name',
+      '/braindrill',
     )
   }
 </script>
@@ -122,7 +122,7 @@ const goToNamePage =
           <span
             class="font-black text-sm"
           >
-            ₦100K
+            BIBLE
           </span>
         </div>
 
@@ -132,7 +132,7 @@ const goToNamePage =
           <span
             class="font-black text-sm"
           >
-            ₦10K
+            SPORTS
           </span>
         </div>
 
@@ -142,7 +142,7 @@ const goToNamePage =
           <span
             class="font-black text-sm"
           >
-            ₦2K
+            HISTORY
           </span>
         </div>
       </div>
@@ -154,7 +154,7 @@ const goToNamePage =
         "
         class="mt-5 w-full bg-[#FD9501] text-black text-lg font-black py-4 rounded-2xl border-4 border-black shadow-[0_7px_0_#000] active:translate-y-[4px] active:shadow-[0_3px_0_#000] transition-all duration-100"
       >
-        START QUIZ
+        START BRAINDRILL
       </button>
 
       <!-- BOTTOM TEXT -->

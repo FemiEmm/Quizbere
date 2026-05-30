@@ -7,6 +7,8 @@ import {
   useRouter,
 } from 'vue-router'
 
+import BottomNavbar from '../components/BottomNavbar.vue'
+
 const router = useRouter()
 
 const playerName =
@@ -71,14 +73,14 @@ const startQuiz =
       <h1
         class="text-3xl sm:text-5xl font-black text-white leading-none"
       >
-        INPUT NAME
+        BIBLE RUSH
       </h1>
 
       <!-- SUBTITLE -->
       <p
         class="mt-3 text-black text-base font-bold"
       >
-        Input a name you can be identified with here. Social media handle or Real name.
+        Answer 10 fast-paced Bible questions for a chance to win a spin.
       </p>
 
       <!-- INPUT CARD -->
@@ -124,5 +126,6 @@ const startQuiz =
         Temporary Name • These Sessions Only
       </p>
     </section>
+    <BottomNavbar />
   </main>
 </template>

@@ -16,6 +16,8 @@ import MorePage from '../components/MorePage.vue'
 
 import BereStore from '../components/BereStore.vue'
 
+import ProfileView from '../components/ProfileView.vue'
+
 import {
   playSound,
 } from '../utils/playSound'
@@ -49,6 +51,9 @@ const muted =
 const showBereStore =
   ref(false)
 
+const showProfileView =
+  ref(false)
+
 /* -----------------------------
    FETCH USERNAME
 ----------------------------- */
@@ -72,6 +77,24 @@ const displayUsername =
 const isAdmin =
   username ===
   'ADMINDEVELOPER'
+
+/* -----------------------------
+   PROFILE VIEW
+----------------------------- */
+
+const openProfileView =
+  () => {
+    playSound('button')
+
+    showProfileView.value =
+      true
+  }
+
+const closeProfileView =
+  () => {
+    showProfileView.value =
+      false
+  }
 
 /* -----------------------------
    OPEN STORE
@@ -340,6 +363,16 @@ const deleteAccount =
       "
     />
 
+    <!-- PROFILE VIEW -->
+    <ProfileView
+      :show="
+        showProfileView
+      "
+      @close="
+        closeProfileView
+      "
+    />
+
     <!-- DELETE MODAL -->
     <div
       v-if="showDeleteModal"
@@ -424,7 +457,10 @@ const deleteAccount =
         >
           <!-- USER -->
           <button
-            class="flex-1 bg-[#F3F400] border-4 border-black rounded-2xl px-4 py-4 text-black text-lg font-black shadow-[0_6px_0_#000] truncate"
+            @click="
+              openProfileView
+            "
+            class="flex-1 bg-[#F3F400] border-4 border-black rounded-2xl px-4 py-4 text-black text-lg font-black shadow-[0_6px_0_#000] active:translate-y-[3px] active:shadow-[0_3px_0_#000] transition-all duration-100 truncate"
           >
             @{{ displayUsername }}
           </button>

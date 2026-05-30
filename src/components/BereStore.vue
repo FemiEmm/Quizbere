@@ -126,6 +126,30 @@ const closeStore =
   }
 
 /* -----------------------------
+   OPEN BOUTIQUE
+----------------------------- */
+
+const openBoutique =
+  () => {
+    if (
+      loading.value
+    )
+      return
+
+    playSound(
+      'button',
+    )
+
+    emit(
+      'close',
+    )
+
+    router.push(
+      '/cosmetics-store',
+    )
+  }
+
+/* -----------------------------
    MYSTERY REWARDS
 ----------------------------- */
 
@@ -969,13 +993,13 @@ const purchaseOffer =
 
         <div>
           <h1
-            class="text-[1.25rem] leading-none font-black text-[#FF2AA3]"
+            class="text-[0.95rem] leading-none font-black text-[#FF2AA3]"
           >
             MAMA NO CREDIT
           </h1>
 
           <p
-            class="mt-1 text-xs font-black text-black"
+            class="mt-1 text-[0.75rem] font-black text-black"
           >
             STORE
           </p>
@@ -988,6 +1012,47 @@ const purchaseOffer =
         </div>
       </div>
 
+      <!-- BOUTIQUE -->
+      <div
+        class="mt-4 bg-white border-4 border-black rounded-[1.5rem] p-4 shadow-[0_5px_0_#000]"
+      >
+        <div
+          class="flex items-center justify-between gap-3"
+        >
+          <div>
+            <h2
+              class="text-[0.95rem] font-black text-[#7C3AED]"
+            >
+              BOUTIQUE
+            </h2>
+
+            <p
+              class="mt-1 text-sm font-black text-black"
+            >
+              AVATARS
+            </p>
+
+            <p
+              class="mt-1 text-[10px] font-bold text-black/70"
+            >
+              Buy and equip profile avatars.
+            </p>
+          </div>
+
+          <button
+            @click="
+              openBoutique
+            "
+            :disabled="
+              loading
+            "
+            class="bg-[#7C3AED] border-4 border-black rounded-2xl px-4 py-3 text-sm font-black text-white shadow-[0_4px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] disabled:opacity-70"
+          >
+            OPEN
+          </button>
+        </div>
+      </div>
+
       <!-- FREE SPIN -->
       <div
         class="mt-4 bg-white border-4 border-black rounded-[1.5rem] p-4 shadow-[0_5px_0_#000]"
@@ -997,7 +1062,7 @@ const purchaseOffer =
         >
           <div>
             <h2
-              class="text-xl font-black text-[#FD9501]"
+              class="text-[0.95rem] font-black text-[#FD9501]"
             >
               FREE SPIN
             </h2>
@@ -1044,7 +1109,7 @@ const purchaseOffer =
         >
           <div>
             <h2
-              class="text-xl font-black text-[#FF2AA3]"
+              class="text-[0.95rem] font-black text-[#FF2AA3]"
             >
               MYSTERY REWARD
             </h2>
@@ -1091,7 +1156,7 @@ const purchaseOffer =
         >
           <div>
             <h2
-              class="text-xl font-black text-[#03B5EC]"
+              class="text-[0.95rem] font-black text-[#03B5EC]"
             >
               NEXT LEVEL
             </h2>

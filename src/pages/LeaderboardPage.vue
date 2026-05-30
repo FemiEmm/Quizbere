@@ -1,6 +1,7 @@
 <script setup>
 import {
   onMounted,
+  onUnmounted,
   ref,
 } from 'vue'
 
@@ -36,6 +37,12 @@ const showWinnerModal =
 
 const weeklyWinner =
   ref(null)
+
+const winnerWindowInterval =
+  ref(null)
+
+const winnerWindowChecked =
+  ref(false)
 
 /* -----------------------------
    LEAGUES
@@ -79,6 +86,167 @@ const isAdmin =
   'ADMINDEVELOPER'
 
 /* -----------------------------
+   AVATAR
+----------------------------- */
+
+const defaultAvatar =
+  'avatar-default.webp'
+
+const defaultAvatarBgColor =
+  '#F3F400'
+
+const cleanUsername =
+  (name) => {
+    return String(
+      name || '',
+    )
+      .trim()
+      .toUpperCase()
+  }
+
+const cleanAvatar =
+  (avatar) => {
+    const safeAvatar =
+      String(
+        avatar ||
+          defaultAvatar,
+      ).trim()
+
+    return safeAvatar ||
+      defaultAvatar
+  }
+
+const cleanAvatarBgColor =
+  (color) => {
+    const safeColor =
+      String(
+        color ||
+          defaultAvatarBgColor,
+      ).trim()
+
+    return safeColor ||
+      defaultAvatarBgColor
+  }
+
+const getAvatarPath =
+  (avatar) => {
+    return `${import.meta.env.BASE_URL}profile-icons/${cleanAvatar(
+      avatar,
+    )}`
+  }
+
+const getAvatarBgColor =
+  (color) => {
+    return cleanAvatarBgColor(
+      color,
+    )
+  }
+
+const handleAvatarError =
+  (event) => {
+    event.target.src =
+      `${import.meta.env.BASE_URL}profile-icons/${defaultAvatar}`
+  }
+
+/* -----------------------------
+   WINNER WINDOW
+   WAT = UTC + 1
+   Saturday 8pm WAT to Sunday 8am WAT
+----------------------------- */
+
+const getWatDate =
+  () => {
+    const now =
+      new Date()
+
+    return new Date(
+      now.getTime() +
+        60 *
+          60 *
+          1000,
+    )
+  }
+
+const isWinnerAnnouncementWindow =
+  () => {
+    const watDate =
+      getWatDate()
+
+    const watDay =
+      watDate.getUTCDay()
+
+    const watHour =
+      watDate.getUTCHours()
+
+    const isSaturdayNight =
+      watDay === 6 &&
+      watHour >= 20
+
+    const isSundayMorning =
+      watDay === 0 &&
+      watHour < 8
+
+    return (
+      isSaturdayNight ||
+      isSundayMorning
+    )
+  }
+
+const checkWinnerAnnouncementWindow =
+  async () => {
+    if (
+      winnerWindowChecked.value ||
+      showWinnerModal.value
+    ) {
+      return
+    }
+
+    if (
+      !currentLeague.value
+    ) {
+      return
+    }
+
+    if (
+      !isWinnerAnnouncementWindow()
+    ) {
+      return
+    }
+
+    winnerWindowChecked.value =
+      true
+
+    await announceWinner()
+  }
+
+const startWinnerWindowWatcher =
+  () => {
+    checkWinnerAnnouncementWindow()
+
+    winnerWindowInterval.value =
+      setInterval(
+        () => {
+          checkWinnerAnnouncementWindow()
+        },
+        60000,
+      )
+  }
+
+const stopWinnerWindowWatcher =
+  () => {
+    if (
+      winnerWindowInterval.value
+    ) {
+      clearInterval(
+        winnerWindowInterval.value,
+      )
+
+      winnerWindowInterval.value =
+        null
+    }
+  }
+
+/* -----------------------------
    SET LEAGUE INDEX
 ----------------------------- */
 
@@ -96,6 +264,87 @@ const setLeagueIndex =
       index >= 0
         ? index
         : 0
+  }
+
+/* -----------------------------
+   FETCH AVATAR DATA
+----------------------------- */
+
+const fetchUserAvatarData =
+  async (
+    usernames,
+  ) => {
+    const cleanUsernames =
+      [
+        ...new Set(
+          usernames
+            .map(
+              (name) =>
+                cleanUsername(
+                  name,
+                ),
+            )
+            .filter(
+              Boolean,
+            ),
+        ),
+      ]
+
+    if (
+      cleanUsernames.length ===
+      0
+    ) {
+      return {}
+    }
+
+    const {
+      data,
+      error,
+    } = await supabase
+      .from(
+        'examinity_users',
+      )
+      .select(
+        'username, active_avatar, avatar_bg_color',
+      )
+      .in(
+        'username',
+        cleanUsernames,
+      )
+
+    if (
+      error ||
+      !data
+    ) {
+      return {}
+    }
+
+    return data.reduce(
+      (
+        map,
+        user,
+      ) => {
+        const key =
+          cleanUsername(
+            user.username,
+          )
+
+        map[key] = {
+          active_avatar:
+            cleanAvatar(
+              user.active_avatar,
+            ),
+
+          avatar_bg_color:
+            cleanAvatarBgColor(
+              user.avatar_bg_color,
+            ),
+        }
+
+        return map
+      },
+      {},
+    )
   }
 
 /* -----------------------------
@@ -173,17 +422,45 @@ const fetchLeaderboard =
       !error &&
       data
     ) {
+      const usernames =
+        data.map(
+          (player) =>
+            player.username,
+        )
+
+      const avatarMap =
+        await fetchUserAvatarData(
+          usernames,
+        )
+
       const updatedData =
         data.map(
-          (player) => ({
-            ...player,
+          (player) => {
+            const avatarInfo =
+              avatarMap[
+                cleanUsername(
+                  player.username,
+                )
+              ] || {}
 
-            total_score:
-              (player.best_run_score ||
-                0) +
-              (player.challenge_points ||
-                0),
-          }),
+            return {
+              ...player,
+
+              active_avatar:
+                avatarInfo.active_avatar ||
+                defaultAvatar,
+
+              avatar_bg_color:
+                avatarInfo.avatar_bg_color ||
+                defaultAvatarBgColor,
+
+              total_score:
+                (player.best_run_score ||
+                  0) +
+                (player.challenge_points ||
+                  0),
+            }
+          },
         )
 
       updatedData.sort(
@@ -230,11 +507,16 @@ const goPreviousLeague =
     currentLeagueIndex.value =
       previousIndex
 
+    winnerWindowChecked.value =
+      false
+
     fetchLeaderboard(
       leagues[
         previousIndex
       ],
-    )
+    ).then(() => {
+      checkWinnerAnnouncementWindow()
+    })
   }
 
 const goNextLeague =
@@ -259,11 +541,16 @@ const goNextLeague =
     currentLeagueIndex.value =
       nextIndex
 
+    winnerWindowChecked.value =
+      false
+
     fetchLeaderboard(
       leagues[
         nextIndex
       ],
-    )
+    ).then(() => {
+      checkWinnerAnnouncementWindow()
+    })
   }
 
 /* -----------------------------
@@ -272,6 +559,12 @@ const goNextLeague =
 
 const announceWinner =
   async () => {
+    if (
+      !currentLeague.value
+    ) {
+      return
+    }
+
     const {
       data,
       error,
@@ -297,17 +590,45 @@ const announceWinner =
       return
     }
 
+    const usernames =
+      data.map(
+        (player) =>
+          player.username,
+      )
+
+    const avatarMap =
+      await fetchUserAvatarData(
+        usernames,
+      )
+
     const rankedPlayers =
       data.map(
-        (player) => ({
-          ...player,
+        (player) => {
+          const avatarInfo =
+            avatarMap[
+              cleanUsername(
+                player.username,
+              )
+            ] || {}
 
-          total_score:
-            (player.best_run_score ||
-              0) +
-            (player.challenge_points ||
-              0),
-        }),
+          return {
+            ...player,
+
+            active_avatar:
+              avatarInfo.active_avatar ||
+              defaultAvatar,
+
+            avatar_bg_color:
+              avatarInfo.avatar_bg_color ||
+              defaultAvatarBgColor,
+
+            total_score:
+              (player.best_run_score ||
+                0) +
+              (player.challenge_points ||
+                0),
+          }
+        },
       )
 
     rankedPlayers.sort(
@@ -319,6 +640,10 @@ const announceWinner =
     weeklyWinner.value =
       rankedPlayers[0]
 
+    playSound(
+      'pass',
+    )
+
     showWinnerModal.value =
       true
   }
@@ -327,12 +652,14 @@ const announceWinner =
    MOUNT
 ----------------------------- */
 
-onMounted(() => {
-  playSound(
-    'pass',
-  )
+onMounted(async () => {
+  await fetchLeaderboard()
 
-  fetchLeaderboard()
+  startWinnerWindowWatcher()
+})
+
+onUnmounted(() => {
+  stopWinnerWindowWatcher()
 })
 </script>
 
@@ -470,7 +797,7 @@ onMounted(() => {
             <div
               class="flex items-center gap-3"
             >
-              <!-- LEFT -->
+              <!-- WINNER BADGE -->
               <div
                 class="w-[80px] flex justify-center shrink-0"
               >
@@ -489,7 +816,7 @@ onMounted(() => {
 
               <!-- RIGHT -->
               <div
-                class="flex-1 min-w-0 pr-2"
+                class="flex-1 min-w-0 pr-1"
               >
                 <!-- TOP -->
                 <div
@@ -522,24 +849,55 @@ onMounted(() => {
                   }}
                 </h2>
 
-                <!-- SCORE -->
+                <!-- AVATAR + SCORE -->
                 <div
-                  class="mt-3 bg-white border-4 border-black rounded-2xl py-3 text-center"
+                  class="mt-3 flex items-center gap-3"
                 >
-                  <p
-                    class="text-[9px] font-black text-[#FF2AA3]"
+                  <!-- AVATAR -->
+                  <div
+                    class="w-14 h-14 border-4 border-black rounded-full overflow-hidden shrink-0 flex items-center justify-center"
+                    :style="{
+                      backgroundColor:
+                        getAvatarBgColor(
+                          leaderboard[0]
+                            .avatar_bg_color,
+                        ),
+                    }"
                   >
-                    TOTAL SCORE
-                  </p>
+                    <img
+                      :src="
+                        getAvatarPath(
+                          leaderboard[0]
+                            .active_avatar,
+                        )
+                      "
+                      alt="Leader avatar"
+                      class="w-full h-full object-contain"
+                      @error="
+                        handleAvatarError
+                      "
+                    />
+                  </div>
 
-                  <h3
-                    class="mt-1 text-3xl font-black text-black leading-none"
+                  <!-- SCORE -->
+                  <div
+                    class="bg-white border-4 border-black rounded-2xl px-4 py-2 text-center min-w-[115px]"
                   >
-                    {{
-                      leaderboard[0]
-                        .total_score
-                    }}
-                  </h3>
+                    <p
+                      class="text-[8px] font-black text-[#FF2AA3] leading-none"
+                    >
+                      TOTAL SCORE
+                    </p>
+
+                    <h3
+                      class="mt-1 text-2xl font-black text-black leading-none"
+                    >
+                      {{
+                        leaderboard[0]
+                          .total_score
+                      }}
+                    </h3>
+                  </div>
                 </div>
               </div>
             </div>
@@ -559,44 +917,69 @@ onMounted(() => {
                 ? 'bg-[#FF2AA3] text-white'
                 : 'bg-white',
 
-              'border-4 border-black rounded-2xl pl-3 pr-5 py-3 grid grid-cols-[20%_80%] gap-2 items-center',
+              'border-4 border-black rounded-2xl pl-3 pr-5 py-3 grid grid-cols-[62px_1fr] gap-3 items-center',
             ]"
           >
-            <!-- POSITION -->
+            <!-- AVATAR CIRCLE -->
             <div
-              class="flex justify-center"
+              class="w-14 h-14 border-4 border-black rounded-full overflow-hidden flex items-center justify-center"
+              :style="{
+                backgroundColor:
+                  getAvatarBgColor(
+                    player.avatar_bg_color,
+                  ),
+              }"
             >
-              <div
-                class="w-12 h-12 rounded-xl bg-[#F3F400] border-4 border-black flex items-center justify-center"
-              >
-                <span
-                  class="text-sm font-black text-black"
-                >
-                  #{{
-                    index + 2
-                  }}
-                </span>
-              </div>
+              <img
+                :src="
+                  getAvatarPath(
+                    player.active_avatar,
+                  )
+                "
+                alt="Player avatar"
+                class="w-full h-full object-contain"
+                @error="
+                  handleAvatarError
+                "
+              />
             </div>
 
             <!-- RIGHT -->
             <div
               class="min-w-0 pr-2"
             >
-              <!-- NAME -->
-              <h2
-                :class="[
-                  index >= 6
-                    ? 'text-white'
-                    : 'text-black',
-
-                  'text-base font-black truncate',
-                ]"
+              <!-- NAME + POSITION -->
+              <div
+                class="flex items-center gap-2 min-w-0"
               >
-                {{
-                  player.username
-                }}
-              </h2>
+                <span
+                  :class="[
+                    index >= 6
+                      ? 'bg-[#F3F400] text-black'
+                      : 'bg-black text-white',
+
+                    'shrink-0 px-2 py-1 rounded-lg text-[11px] font-black',
+                  ]"
+                >
+                  #{{
+                    index + 2
+                  }}
+                </span>
+
+                <h2
+                  :class="[
+                    index >= 6
+                      ? 'text-white'
+                      : 'text-black',
+
+                    'text-base font-black truncate',
+                  ]"
+                >
+                  {{
+                    player.username
+                  }}
+                </h2>
+              </div>
 
               <!-- LEVEL + SCORE -->
               <div

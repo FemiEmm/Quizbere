@@ -45,6 +45,8 @@ import Onboarding from '../pages/OnBoarding.vue'
 
 import AdminUse from '@/pages/AdminUse.vue'
 
+import cosmeticsStore from '@/components/CosmeticsStore.vue'
+
 const routes = [
   {
     path: '/',
@@ -193,6 +195,11 @@ const routes = [
 
     component:
       Onboarding,
+  },
+
+  {
+    path: '/cosmetics-store',
+    component: cosmeticsStore,
   },
 
   {

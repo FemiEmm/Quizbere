@@ -23,7 +23,7 @@ const navItems = [
   },
 
   {
-    path: '/braindrill',
+    path: '/name',
     icon: faBrain,
   },
 
