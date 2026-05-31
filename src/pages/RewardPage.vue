@@ -30,6 +30,13 @@ const username =
   ).trim()
 
 /* -----------------------------
+   COST
+----------------------------- */
+
+const spinCost =
+  500
+
+/* -----------------------------
    STATE
 ----------------------------- */
 
@@ -43,9 +50,18 @@ const wheelRef = ref(null)
 const showLevelModal =
   ref(false)
 
+const showSpinErrorModal =
+  ref(false)
+
+const spinErrorTitle =
+  ref('')
+
+const spinErrorMessage =
+  ref('')
+
 const levelMessage =
   ref(
-    'You need to at least be in level 10 to spin this wheel, play BRAINDRILL to level up.',
+    'You need to at least be in level 10 to spin this wheel. Play BRAINDRILL to level up.',
   )
 
 /* -----------------------------
@@ -123,17 +139,48 @@ const checkSpinLevel =
   }
 
 /* -----------------------------
-   SPIN TOKEN
+   SHOW SPIN ERROR
 ----------------------------- */
 
-const consumeSpinToken =
+const showSpinError =
+  (
+    title,
+    message,
+  ) => {
+    spinErrorTitle.value =
+      title
+
+    spinErrorMessage.value =
+      message
+
+    showSpinErrorModal.value =
+      true
+  }
+
+/* -----------------------------
+   CLOSE SPIN ERROR
+----------------------------- */
+
+const closeSpinErrorModal =
+  () => {
+    playSound('button')
+
+    showSpinErrorModal.value =
+      false
+  }
+
+/* -----------------------------
+   SPIN PAYMENT
+----------------------------- */
+
+const payForSpin =
   async () => {
     try {
-      /* FETCH USER */
+      /* FETCH USER TOKEN + LEVEL */
 
       const {
         data: user,
-        error,
+        error: userError,
       } = await supabase
         .from(
           'examinity_users',
@@ -148,32 +195,83 @@ const consumeSpinToken =
         .maybeSingle()
 
       if (
-        error ||
+        userError ||
         !user
       ) {
+        showSpinError(
+          'USER ERROR',
+          'Could not load your spin token. Try again.',
+        )
+
         return false
       }
-
-      /* CURRENT TOKENS */
 
       const currentTokens =
         Number(
           user.spin_token,
         ) || 0
 
-      /* NO TOKENS */
-
       if (
         currentTokens <= 0
       ) {
+        showSpinError(
+          'NO SPIN TOKEN',
+          'You need at least 1 spin token to spin this wheel.',
+        )
+
         return false
       }
 
-      /* UPDATE */
+      /* FETCH CP */
 
       const {
-        error:
-          updateError,
+        data: leaderboardUser,
+        error: leaderboardError,
+      } = await supabase
+        .from(
+          'examinity_leaderboard',
+        )
+        .select(
+          'challenge_points',
+        )
+        .eq(
+          'username',
+          username,
+        )
+        .maybeSingle()
+
+      if (
+        leaderboardError ||
+        !leaderboardUser
+      ) {
+        showSpinError(
+          'CP ERROR',
+          'Could not load your CP. Try again.',
+        )
+
+        return false
+      }
+
+      const currentCp =
+        Number(
+          leaderboardUser.challenge_points,
+        ) || 0
+
+      if (
+        currentCp < spinCost
+      ) {
+        showSpinError(
+          'NOT ENOUGH CP',
+          `Every spin costs ${spinCost} CP. Play challenges to earn more CP.`,
+        )
+
+        return false
+      }
+
+      /* UPDATE TOKEN */
+
+      const {
+        error: tokenUpdateError,
       } = await supabase
         .from(
           'examinity_users',
@@ -188,13 +286,64 @@ const consumeSpinToken =
           username,
         )
 
-      if (updateError) {
+      if (
+        tokenUpdateError
+      ) {
+        showSpinError(
+          'TOKEN ERROR',
+          'Could not remove your spin token. Try again.',
+        )
+
         return false
       }
+
+      /* UPDATE CP */
+
+      const newCp =
+        currentCp -
+        spinCost
+
+      const {
+        error: cpUpdateError,
+      } = await supabase
+        .from(
+          'examinity_leaderboard',
+        )
+        .update({
+          challenge_points:
+            newCp,
+        })
+        .eq(
+          'username',
+          username,
+        )
+
+      if (
+        cpUpdateError
+      ) {
+        showSpinError(
+          'CP ERROR',
+          'Spin token was removed, but CP could not be updated.',
+        )
+
+        return false
+      }
+
+      localStorage.setItem(
+        'challenge_total_points',
+        String(
+          newCp,
+        ),
+      )
 
       return true
     } catch (err) {
       console.error(err)
+
+      showSpinError(
+        'SPIN ERROR',
+        'Something went wrong. Try again.',
+      )
 
       return false
     }
@@ -288,12 +437,14 @@ const startSpin =
       'examinity_claimed',
     )
 
-    /* CONSUME TOKEN */
+    /* PAY TOKEN + CP */
 
-    const allowed =
-      await consumeSpinToken()
+    const paid =
+      await payForSpin()
 
-    if (!allowed) {
+    if (
+      !paid
+    ) {
       playSound('fail')
 
       return
@@ -402,9 +553,37 @@ const handleButton =
         your reward.
       </p>
 
+      <!-- COST NOTICE -->
+      <div
+        class="mt-5 bg-white border-4 border-black rounded-[1.5rem] px-4 py-3 shadow-[0_5px_0_#000]"
+      >
+        <p
+          class="text-sm font-black text-black leading-6"
+        >
+          Every spin costs
+          <span
+            class="text-[#FF2AA3]"
+          >
+            1 spin token
+          </span>
+          +
+          <span
+            class="text-[#FF2AA3]"
+          >
+            500 CP.
+          </span>
+        </p>
+
+        <p
+          class="mt-1 text-[11px] font-bold text-black/60"
+        >
+          You must also be at least level 10.
+        </p>
+      </div>
+
       <!-- CUSTOM WHEEL -->
       <div
-        class="mt-8 flex justify-center"
+        class="mt-7 flex justify-center"
       >
         <SpinWheel
           ref="wheelRef"
@@ -492,6 +671,43 @@ const handleButton =
             closeLevelModal
           "
           class="mt-3 w-full bg-black text-white text-base font-black py-4 rounded-2xl border-4 border-black shadow-[0_5px_0_#000] active:translate-y-[3px] active:shadow-[0_2px_0_#000]"
+        >
+          CLOSE
+        </button>
+      </section>
+    </div>
+
+    <!-- SPIN ERROR MODAL -->
+    <div
+      v-if="
+        showSpinErrorModal
+      "
+      class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-5"
+    >
+      <section
+        class="w-full max-w-sm bg-white border-4 border-black rounded-[2rem] p-5 text-center shadow-[0_8px_0_#000]"
+      >
+        <h2
+          class="text-2xl font-black text-[#FF2AA3]"
+        >
+          {{
+            spinErrorTitle
+          }}
+        </h2>
+
+        <p
+          class="mt-4 text-sm font-black text-black leading-6"
+        >
+          {{
+            spinErrorMessage
+          }}
+        </p>
+
+        <button
+          @click="
+            closeSpinErrorModal
+          "
+          class="mt-5 w-full bg-[#F3F400] text-black text-lg font-black py-4 rounded-2xl border-4 border-black shadow-[0_5px_0_#000] active:translate-y-[3px] active:shadow-[0_2px_0_#000]"
         >
           CLOSE
         </button>
