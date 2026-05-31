@@ -154,7 +154,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 20,
 
-    points: 100,
+    points: 50,
 
     color: 'bg-[#F3F400]',
   },
@@ -186,7 +186,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 9,
 
-    points: 28,
+    points: 25,
 
     color: 'bg-white',
   },
@@ -234,7 +234,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 30,
 
-    points: 100,
+    points: 50,
 
     color: 'bg-[#F3F400]',
   },
@@ -314,7 +314,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 50,
 
-    points: 150,
+    points: 50,
 
     color: 'bg-[#F3F400]',
   },
@@ -330,7 +330,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 14,
 
-    points: 155,
+    points: 75,
 
     color: 'bg-white',
   },
@@ -346,7 +346,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 17,
 
-    points: 160,
+    points: 80,
 
     color: 'bg-white',
   },
@@ -362,7 +362,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 18,
 
-    points: 165,
+    points: 85,
 
     color: 'bg-white',
   },
@@ -378,7 +378,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 23,
 
-    points: 170,
+    points: 90,
 
     color: 'bg-white',
   },
@@ -394,7 +394,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 25,
 
-    points: 180,
+    points: 100,
 
     color: 'bg-[#F3F400]',
   },
@@ -410,7 +410,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 25,
 
-    points: 185,
+    points: 95,
 
     color: 'bg-white',
   },
@@ -426,7 +426,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 29,
 
-    points: 190,
+    points: 100,
 
     color: 'bg-white',
   },
@@ -442,7 +442,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 22,
 
-    points: 195,
+    points: 105,
 
     color: 'bg-white',
   },
@@ -458,7 +458,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 31,
 
-    points: 200,
+    points: 110,
 
     color: 'bg-white',
   },
@@ -474,7 +474,7 @@ export const braindrillLevels = [
 
     requiredCorrect: 5,
 
-    points: 210,
+    points: 100,
 
     color: 'bg-[#F3F400]',
   },
