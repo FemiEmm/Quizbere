@@ -40,6 +40,14 @@ const selectedReward =
 
 const wheelRef = ref(null)
 
+const showLevelModal =
+  ref(false)
+
+const levelMessage =
+  ref(
+    'You need to at least be in level 10 to spin this wheel, play BRAINDRILL to level up.',
+  )
+
 /* -----------------------------
    CLAIM CODE GENERATOR
 ----------------------------- */
@@ -69,6 +77,49 @@ const generateClaimCode =
       )
 
     return `${firstLetters}${lastLetters}EXA${randomNumber}`
+  }
+
+/* -----------------------------
+   LEVEL CHECK
+----------------------------- */
+
+const checkSpinLevel =
+  async () => {
+    try {
+      const {
+        data: user,
+        error,
+      } = await supabase
+        .from(
+          'examinity_users',
+        )
+        .select(
+          'braindrill_level',
+        )
+        .eq(
+          'username',
+          username,
+        )
+        .maybeSingle()
+
+      if (
+        error ||
+        !user
+      ) {
+        return false
+      }
+
+      const userLevel =
+        Number(
+          user.braindrill_level,
+        ) || 0
+
+      return userLevel >= 10
+    } catch (err) {
+      console.error(err)
+
+      return false
+    }
   }
 
 /* -----------------------------
@@ -211,6 +262,22 @@ const startSpin =
     if (spinning.value)
       return
 
+    /* CHECK LEVEL FIRST */
+
+    const levelAllowed =
+      await checkSpinLevel()
+
+    if (
+      !levelAllowed
+    ) {
+      playSound('fail')
+
+      showLevelModal.value =
+        true
+
+      return
+    }
+
     /* RESET OLD CLAIM DATA */
 
     localStorage.removeItem(
@@ -237,6 +304,34 @@ const startSpin =
     spinning.value = true
 
     wheelRef.value.spin()
+  }
+
+/* -----------------------------
+   CLOSE LEVEL MODAL
+----------------------------- */
+
+const closeLevelModal =
+  () => {
+    playSound('button')
+
+    showLevelModal.value =
+      false
+  }
+
+/* -----------------------------
+   GO TO BRAINDRILL
+----------------------------- */
+
+const goToBrainDrill =
+  () => {
+    playSound('button')
+
+    showLevelModal.value =
+      false
+
+    router.push(
+      '/braindrill',
+    )
   }
 
 /* -----------------------------
@@ -358,6 +453,50 @@ const handleButton =
         {{ buttonText }}
       </button>
     </section>
+
+    <!-- LEVEL LOCK MODAL -->
+    <div
+      v-if="
+        showLevelModal
+      "
+      class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-5"
+    >
+      <section
+        class="w-full max-w-sm bg-white border-4 border-black rounded-[2rem] p-5 text-center shadow-[0_8px_0_#000]"
+      >
+        <h2
+          class="text-2xl font-black text-[#FF2AA3]"
+        >
+          LEVEL LOCKED
+        </h2>
+
+        <p
+          class="mt-4 text-sm font-black text-black leading-6"
+        >
+          {{
+            levelMessage
+          }}
+        </p>
+
+        <button
+          @click="
+            goToBrainDrill
+          "
+          class="mt-5 w-full bg-[#F3F400] text-black text-lg font-black py-4 rounded-2xl border-4 border-black shadow-[0_5px_0_#000] active:translate-y-[3px] active:shadow-[0_2px_0_#000]"
+        >
+          PLAY BRAINDRILL
+        </button>
+
+        <button
+          @click="
+            closeLevelModal
+          "
+          class="mt-3 w-full bg-black text-white text-base font-black py-4 rounded-2xl border-4 border-black shadow-[0_5px_0_#000] active:translate-y-[3px] active:shadow-[0_2px_0_#000]"
+        >
+          CLOSE
+        </button>
+      </section>
+    </div>
 
     <BottomNavbar />
   </main>
