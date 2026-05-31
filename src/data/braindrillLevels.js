@@ -326,7 +326,7 @@ export const braindrillLevels = [
 
     questions: 18,
 
-    time: 95,
+    time: 250,
 
     requiredCorrect: 14,
 
@@ -342,7 +342,7 @@ export const braindrillLevels = [
 
     questions: 22,
 
-    time: 90,
+    time: 300,
 
     requiredCorrect: 17,
 
@@ -358,7 +358,7 @@ export const braindrillLevels = [
 
     questions: 12,
 
-    time: 85,
+    time: 250,
 
     requiredCorrect: 18,
 
@@ -374,7 +374,7 @@ export const braindrillLevels = [
 
     questions: 28,
 
-    time: 80,
+    time: 150,
 
     requiredCorrect: 23,
 
@@ -390,7 +390,7 @@ export const braindrillLevels = [
 
     questions: 30,
 
-    time: 80,
+    time: 120,
 
     requiredCorrect: 25,
 
@@ -406,7 +406,7 @@ export const braindrillLevels = [
 
     questions: 30,
 
-    time: 100,
+    time: 200,
 
     requiredCorrect: 25,
 
@@ -422,7 +422,7 @@ export const braindrillLevels = [
 
     questions: 34,
 
-    time: 75,
+    time: 700,
 
     requiredCorrect: 29,
 
@@ -454,7 +454,7 @@ export const braindrillLevels = [
 
     questions: 36,
 
-    time: 70,
+    time: 500,
 
     requiredCorrect: 31,
 
