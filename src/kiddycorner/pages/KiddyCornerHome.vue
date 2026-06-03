@@ -7,7 +7,7 @@
     <section class="mx-auto flex w-full max-w-6xl flex-col gap-8 md:gap-12">
       <div class="bubble-in text-center">
         <p class="mb-2 text-sm font-black uppercase tracking-[0.18em] text-orange-500 md:text-base">
-          KiddyCorner
+          KiddiesCorner
         </p>
 
         <h1 class="text-4xl font-black leading-none text-slate-800 sm:text-5xl md:text-7xl">
