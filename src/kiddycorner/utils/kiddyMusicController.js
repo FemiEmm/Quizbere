@@ -18,9 +18,17 @@ const musicState =
   })
 
 let backgroundAudio = null
+let audioContext = null
+let sourceNode = null
+let gainNode = null
+let hasConnectedAudio = false
 
 const musicPath =
   '/kiddyanimals/sounds/gameplaysound.mp3'
+
+/* -----------------------------
+   SETTINGS
+----------------------------- */
 
 const loadSavedSettings =
   () => {
@@ -59,7 +67,7 @@ const loadSavedSettings =
           parsedSettings.isMuted
       }
     } catch (error) {
-      // If localStorage fails, keep default settings.
+      // Keep default settings if localStorage fails.
     }
   }
 
@@ -77,13 +85,20 @@ const saveSettings =
         }),
       )
     } catch (error) {
-      // If localStorage fails, keep the game running.
+      // Keep the game running if localStorage fails.
     }
   }
 
+/* -----------------------------
+   VOLUME
+----------------------------- */
+
 const getRealVolume =
   () => {
-    if (musicState.isMuted) {
+    if (
+      musicState.isMuted ||
+      musicState.volume <= 0
+    ) {
       return 0
     }
 
@@ -92,57 +107,210 @@ const getRealVolume =
 
 const applyVolumeToAudio =
   () => {
-    if (!backgroundAudio) {
+    const realVolume =
+      getRealVolume()
+
+    if (gainNode) {
+      gainNode.gain.value =
+        realVolume
+    }
+
+    if (backgroundAudio) {
+      /*
+        Desktop / Android fallback.
+        iPhone and iPad may ignore this,
+        so GainNode is the real control.
+      */
+
+      try {
+        backgroundAudio.volume =
+          realVolume
+      } catch (error) {
+        // Some browsers may block volume control.
+      }
+
+      backgroundAudio.muted =
+        realVolume <= 0
+    }
+  }
+
+/* -----------------------------
+   AUDIO SETUP
+----------------------------- */
+
+const createAudioElement =
+  () => {
+    if (backgroundAudio) {
       return
     }
 
-    backgroundAudio.volume =
-      getRealVolume()
+    backgroundAudio =
+      new Audio(
+        musicPath,
+      )
+
+    backgroundAudio.loop =
+      true
+
+    backgroundAudio.preload =
+      'auto'
+
+    backgroundAudio.playsInline =
+      true
+
+    backgroundAudio.addEventListener(
+      'play',
+      () => {
+        musicState.isPlaying =
+          true
+      },
+    )
+
+    backgroundAudio.addEventListener(
+      'pause',
+      () => {
+        musicState.isPlaying =
+          false
+      },
+    )
+
+    backgroundAudio.addEventListener(
+      'ended',
+      () => {
+        musicState.isPlaying =
+          false
+      },
+    )
   }
+
+const getAudioContext =
+  () => {
+    if (audioContext) {
+      return audioContext
+    }
+
+    const AudioContextClass =
+      window.AudioContext ||
+      window.webkitAudioContext
+
+    if (!AudioContextClass) {
+      return null
+    }
+
+    audioContext =
+      new AudioContextClass()
+
+    return audioContext
+  }
+
+const setupWebAudio =
+  () => {
+    createAudioElement()
+
+    const context =
+      getAudioContext()
+
+    if (
+      !context ||
+      !backgroundAudio ||
+      hasConnectedAudio
+    ) {
+      return
+    }
+
+    sourceNode =
+      context.createMediaElementSource(
+        backgroundAudio,
+      )
+
+    gainNode =
+      context.createGain()
+
+    sourceNode.connect(
+      gainNode,
+    )
+
+    gainNode.connect(
+      context.destination,
+    )
+
+    hasConnectedAudio =
+      true
+
+    applyVolumeToAudio()
+  }
+
+const resumeAudioContext =
+  async () => {
+    if (!audioContext) {
+      return
+    }
+
+    if (
+      audioContext.state ===
+      'suspended'
+    ) {
+      try {
+        await audioContext.resume()
+      } catch (error) {
+        // Browser may still require another tap.
+      }
+    }
+  }
+
+/* -----------------------------
+   PUBLIC METHODS
+----------------------------- */
 
 export const initKiddyMusic =
   () => {
     loadSavedSettings()
+    createAudioElement()
+    applyVolumeToAudio()
   }
 
 export const startKiddyMusic =
-  () => {
+  async () => {
     loadSavedSettings()
 
-    if (!backgroundAudio) {
-      try {
-        backgroundAudio =
-          new Audio(
-            musicPath,
-          )
+    try {
+      setupWebAudio()
+      applyVolumeToAudio()
 
-        backgroundAudio.loop =
-          true
-
-        backgroundAudio.volume =
-          getRealVolume()
-      } catch (error) {
-        backgroundAudio =
-          null
-
+      if (
+        musicState.isMuted ||
+        musicState.volume <= 0
+      ) {
+        pauseKiddyMusic()
         return
       }
-    }
 
-    applyVolumeToAudio()
+      await resumeAudioContext()
 
-    const playPromise =
-      backgroundAudio.play()
+      if (!backgroundAudio) {
+        return
+      }
 
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          musicState.isPlaying =
-            true
-        })
-        .catch(() => {
-          // Browser may block autoplay until the child taps the screen.
-        })
+      backgroundAudio.muted =
+        false
+
+      const playPromise =
+        backgroundAudio.play()
+
+      if (playPromise !== undefined) {
+        await playPromise
+      }
+
+      musicState.isPlaying =
+        true
+    } catch (error) {
+      /*
+        iPhone/iPad may block sound until the user taps.
+        Do not crash the app.
+      */
+
+      musicState.isPlaying =
+        false
     }
   }
 
@@ -153,8 +321,13 @@ export const stopKiddyMusic =
     }
 
     backgroundAudio.pause()
-    backgroundAudio.currentTime =
-      0
+
+    try {
+      backgroundAudio.currentTime =
+        0
+    } catch (error) {
+      // Ignore reset failure.
+    }
 
     musicState.isPlaying =
       false
@@ -184,7 +357,11 @@ export const setKiddyMusicVolume =
         volume,
       )
 
-    if (Number.isNaN(cleanVolume)) {
+    if (
+      Number.isNaN(
+        cleanVolume,
+      )
+    ) {
       return
     }
 
@@ -197,13 +374,29 @@ export const setKiddyMusicVolume =
         ),
       )
 
-    if (musicState.volume > 0) {
+    if (
+      musicState.volume > 0
+    ) {
       musicState.isMuted =
         false
     }
 
+    if (
+      musicState.volume <= 0
+    ) {
+      musicState.isMuted =
+        true
+    }
+
+    setupWebAudio()
     applyVolumeToAudio()
     saveSettings()
+
+    if (
+      musicState.volume <= 0
+    ) {
+      pauseKiddyMusic()
+    }
   }
 
 export const toggleKiddyMusicMute =
@@ -211,8 +404,22 @@ export const toggleKiddyMusicMute =
     musicState.isMuted =
       !musicState.isMuted
 
+    setupWebAudio()
     applyVolumeToAudio()
     saveSettings()
+
+    if (
+      musicState.isMuted
+    ) {
+      pauseKiddyMusic()
+      return
+    }
+
+    if (
+      musicState.volume > 0
+    ) {
+      startKiddyMusic()
+    }
   }
 
 export const setKiddyMusicMuted =
@@ -222,8 +429,22 @@ export const setKiddyMusicMuted =
         value,
       )
 
+    setupWebAudio()
     applyVolumeToAudio()
     saveSettings()
+
+    if (
+      musicState.isMuted
+    ) {
+      pauseKiddyMusic()
+      return
+    }
+
+    if (
+      musicState.volume > 0
+    ) {
+      startKiddyMusic()
+    }
   }
 
 export const useKiddyMusic =
