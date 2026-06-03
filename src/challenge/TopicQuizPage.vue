@@ -1,6 +1,7 @@
 <script setup>
 import {
   computed,
+  onBeforeUnmount,
   onMounted,
   ref,
 } from 'vue'
@@ -61,6 +62,10 @@ const username =
   localStorage.getItem(
     'examinity_username',
   ) || 'anonymous'
+
+if (!selectedTopic) {
+  router.push('/topic')
+}
 
 /* -----------------------------
    MUSIC
@@ -138,6 +143,25 @@ const selectedAnswers =
 const showCorrect =
   ref(false)
 
+/*
+  HARD BLOCKS
+
+  isProcessingAnswer stops users from submitting
+  the same question more than once.
+
+  quizFinished stops finishQuiz from running
+  more than once.
+*/
+
+const isProcessingAnswer =
+  ref(false)
+
+const quizFinished =
+  ref(false)
+
+let nextQuestionTimeout =
+  null
+
 /* -----------------------------
    CURRENT QUESTION
 ----------------------------- */
@@ -146,7 +170,7 @@ const currentQuestion =
   computed(() => {
     return questions[
       currentIndex.value
-    ]
+    ] || null
   })
 
 /* -----------------------------
@@ -157,9 +181,25 @@ const isMultipleChoice =
   computed(() => {
     return Array.isArray(
       currentQuestion.value
-        .answers,
+        ?.answers,
     )
   })
+
+/* -----------------------------
+   CLEANUP
+----------------------------- */
+
+const clearQuizTimeouts =
+  () => {
+    if (nextQuestionTimeout) {
+      clearTimeout(
+        nextQuestionTimeout,
+      )
+
+      nextQuestionTimeout =
+        null
+    }
+  }
 
 /* -----------------------------
    SAVE RESULT
@@ -170,6 +210,20 @@ const finishQuiz =
     forcedScore =
       null,
   ) => {
+    if (
+      quizFinished.value
+    ) {
+      return
+    }
+
+    quizFinished.value =
+      true
+
+    isProcessingAnswer.value =
+      true
+
+    clearQuizTimeouts()
+
     const finalScore =
       forcedScore !== null
         ? forcedScore
@@ -245,36 +299,54 @@ const finishQuiz =
 
 const nextQuestion =
   () => {
+    if (
+      quizFinished.value
+    ) {
+      return
+    }
+
     const delay =
       isMultipleChoice.value
         ? 2000
         : 1000
 
-    setTimeout(
-      async () => {
-        if (
-          currentIndex.value <
-          questions.length -
-            1
-        ) {
-          currentIndex.value++
+    clearQuizTimeouts()
 
-          selectedAnswer.value =
-            null
+    nextQuestionTimeout =
+      setTimeout(
+        async () => {
+          if (
+            quizFinished.value
+          ) {
+            return
+          }
 
-          selectedAnswers.value =
-            []
+          if (
+            currentIndex.value <
+            questions.length -
+              1
+          ) {
+            currentIndex.value++
 
-          showCorrect.value =
-            false
+            selectedAnswer.value =
+              null
 
-          return
-        }
+            selectedAnswers.value =
+              []
 
-        finishQuiz()
-      },
-      delay,
-    )
+            showCorrect.value =
+              false
+
+            isProcessingAnswer.value =
+              false
+
+            return
+          }
+
+          finishQuiz()
+        },
+        delay,
+      )
   }
 
 /* -----------------------------
@@ -283,6 +355,14 @@ const nextQuestion =
 
 const selectAnswer =
   async (answer) => {
+    if (
+      quizFinished.value ||
+      isProcessingAnswer.value ||
+      !currentQuestion.value
+    ) {
+      return
+    }
+
     if (
       isMultipleChoice.value
     ) {
@@ -298,6 +378,9 @@ const selectAnswer =
     ) {
       return
     }
+
+    isProcessingAnswer.value =
+      true
 
     selectedAnswer.value =
       answer
@@ -331,6 +414,8 @@ const selectAnswer =
 const toggleMultipleAnswer =
   (answer) => {
     if (
+      quizFinished.value ||
+      isProcessingAnswer.value ||
       showCorrect.value
     ) {
       return
@@ -363,11 +448,18 @@ const toggleMultipleAnswer =
 const submitMultipleAnswers =
   () => {
     if (
+      quizFinished.value ||
+      isProcessingAnswer.value ||
+      showCorrect.value ||
       selectedAnswers.value
-        .length === 0
+        .length === 0 ||
+      !currentQuestion.value
     ) {
       return
     }
+
+    isProcessingAnswer.value =
+      true
 
     showCorrect.value =
       true
@@ -408,6 +500,16 @@ const submitMultipleAnswers =
 
 const skipQuestion =
   () => {
+    if (
+      quizFinished.value ||
+      isProcessingAnswer.value
+    ) {
+      return
+    }
+
+    isProcessingAnswer.value =
+      true
+
     playSound('wrong')
 
     finishQuiz(0)
@@ -419,6 +521,16 @@ const skipQuestion =
 
 const giveUp =
   () => {
+    if (
+      quizFinished.value ||
+      isProcessingAnswer.value
+    ) {
+      return
+    }
+
+    isProcessingAnswer.value =
+      true
+
     playSound('fail')
 
     finishQuiz(0)
@@ -493,7 +605,16 @@ const getButtonClass =
 
     return 'bg-[#F3F400]'
   }
+
+/* -----------------------------
+   UNMOUNT
+----------------------------- */
+
+onBeforeUnmount(() => {
+  clearQuizTimeouts()
+})
 </script>
+
 <template>
   <main
     class="min-h-screen bg-[#03B5EC] px-4 pt-5 pb-5"
@@ -507,10 +628,15 @@ const getButtonClass =
       >
         <!-- BACK -->
         <button
+          type="button"
+          :disabled="
+            quizFinished ||
+            isProcessingAnswer
+          "
           @click="
             router.back()
           "
-          class="bg-black text-white border-4 border-black rounded-2xl px-4 py-3 text-xs font-black shadow-[0_5px_0_#222] active:translate-y-[2px] active:shadow-[0_2px_0_#222]"
+          class="bg-black text-white border-4 border-black rounded-2xl px-4 py-3 text-xs font-black shadow-[0_5px_0_#222] active:translate-y-[2px] active:shadow-[0_2px_0_#222] disabled:pointer-events-none disabled:opacity-60"
         >
           BACK
         </button>
@@ -526,6 +652,7 @@ const getButtonClass =
 
         <!-- MUTE -->
         <button
+          type="button"
           @click="
             toggleMusic
           "
@@ -558,6 +685,9 @@ const getButtonClass =
 
       <!-- QUESTION CARD -->
       <div
+        v-if="
+          currentQuestion
+        "
         class="mt-4 bg-white border-4 border-black rounded-[2rem] p-5"
       >
         <!-- QUESTION COUNT -->
@@ -600,16 +730,22 @@ const getButtonClass =
           <button
             v-for="answer in currentQuestion.options"
             :key="answer"
+            type="button"
             @click="
               selectAnswer(
                 answer,
               )
             "
             :disabled="
-              !isMultipleChoice &&
-              selectedAnswer
+              quizFinished ||
+              isProcessingAnswer ||
+              showCorrect ||
+              (
+                !isMultipleChoice &&
+                selectedAnswer
+              )
             "
-            class="border-4 border-black rounded-2xl py-4 px-4 text-base font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] transition-all duration-100"
+            class="border-4 border-black rounded-2xl py-4 px-4 text-base font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] transition-all duration-100 disabled:pointer-events-none"
             :class="
               getButtonClass(
                 answer,
@@ -632,20 +768,30 @@ const getButtonClass =
           >
             <!-- SKIP -->
             <button
+              type="button"
+              :disabled="
+                quizFinished ||
+                isProcessingAnswer
+              "
               @click="
                 skipQuestion
               "
-              class="flex-1 bg-[#FD9501] border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+              class="flex-1 bg-[#FD9501] border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] disabled:pointer-events-none disabled:opacity-60"
             >
               SKIP
             </button>
 
             <!-- GIVE UP -->
             <button
+              type="button"
+              :disabled="
+                quizFinished ||
+                isProcessingAnswer
+              "
               @click="
                 giveUp
               "
-              class="flex-1 bg-[#EF4444] text-white border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+              class="flex-1 bg-[#EF4444] text-white border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] disabled:pointer-events-none disabled:opacity-60"
             >
               GIVE UP
             </button>
@@ -657,10 +803,17 @@ const getButtonClass =
           >
             <!-- SUBMIT -->
             <button
+              type="button"
+              :disabled="
+                quizFinished ||
+                isProcessingAnswer ||
+                showCorrect ||
+                selectedAnswers.length === 0
+              "
               @click="
                 submitMultipleAnswers
               "
-              class="w-full bg-[#FF2AA3] text-white border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000]"
+              class="w-full bg-[#FF2AA3] text-white border-4 border-black rounded-2xl py-4 text-sm font-black shadow-[0_5px_0_#000] active:translate-y-[2px] active:shadow-[0_2px_0_#000] disabled:pointer-events-none disabled:opacity-60"
             >
               SUBMIT ANSWER
             </button>

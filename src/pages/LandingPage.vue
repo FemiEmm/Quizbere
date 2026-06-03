@@ -41,7 +41,7 @@ onMounted(() => {
 })
 
 /* -----------------------------
-   START QUIZ
+   START BRAINDRILL
 ----------------------------- */
 
 const goToNamePage =
@@ -56,6 +56,21 @@ const goToNamePage =
 
     router.push(
       '/braindrill',
+    )
+  }
+
+/* -----------------------------
+   LEADERBOARD
+----------------------------- */
+
+const goToLeaderboard =
+  () => {
+    playSound(
+      'button',
+    )
+
+    router.push(
+      '/leaderboard',
     )
   }
 </script>
@@ -155,6 +170,16 @@ const goToNamePage =
         class="mt-5 w-full bg-[#FD9501] text-black text-lg font-black py-4 rounded-2xl border-4 border-black shadow-[0_7px_0_#000] active:translate-y-[4px] active:shadow-[0_3px_0_#000] transition-all duration-100"
       >
         START BRAINDRILL
+      </button>
+
+      <!-- LEADERBOARD BUTTON -->
+      <button
+        @click="
+          goToLeaderboard
+        "
+        class="mt-3 w-full bg-white text-black text-lg font-black py-4 rounded-2xl border-4 border-black shadow-[0_7px_0_#000] active:translate-y-[4px] active:shadow-[0_3px_0_#000] transition-all duration-100"
+      >
+        LEADERBOARD
       </button>
 
       <!-- BOTTOM TEXT -->

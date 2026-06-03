@@ -47,6 +47,8 @@ import AdminUse from '@/pages/AdminUse.vue'
 
 import cosmeticsStore from '@/components/CosmeticsStore.vue'
 
+import { kiddyCornerRoutes } from '../kiddycorner/kiddyCornerRoutes'
+
 const routes = [
   {
     path: '/',
@@ -189,7 +191,7 @@ const routes = [
       LeaderboardPage,
   },
 
-    {
+  {
     path:
       '/onboarding',
 
@@ -205,7 +207,9 @@ const routes = [
   {
     path: '/admin-use',
     component: AdminUse,
-  }
+  },
+
+  ...kiddyCornerRoutes,
 ]
 
 const router =

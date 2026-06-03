@@ -98,6 +98,22 @@ const timeLeft = ref(
     0,
 )
 
+/*
+  HARD LOCKS
+
+  isProcessingAnswer stops users from triggering
+  answer logic more than once per question.
+
+  challengeFinished stops result saving / routing
+  from running more than once.
+*/
+
+const isProcessingAnswer =
+  ref(false)
+
+const challengeFinished =
+  ref(false)
+
 /* -----------------------------
    MODAL
 ----------------------------- */
@@ -126,12 +142,44 @@ const currentQuestion =
 ----------------------------- */
 
 let timer = null
+let answerTimeout = null
+let finishTimeout = null
+
+const clearGameTimers = () => {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+
+  if (answerTimeout) {
+    clearTimeout(answerTimeout)
+    answerTimeout = null
+  }
+
+  if (finishTimeout) {
+    clearTimeout(finishTimeout)
+    finishTimeout = null
+  }
+}
 
 const startTimer = () => {
   if (!challenge.useTimer)
     return
 
+  if (timer) {
+    clearInterval(timer)
+  }
+
   timer = setInterval(() => {
+    if (
+      challengeFinished.value ||
+      showResultModal.value
+    ) {
+      clearInterval(timer)
+      timer = null
+      return
+    }
+
     if (
       timeLeft.value > 0
     ) {
@@ -148,7 +196,17 @@ const startTimer = () => {
 
 const showTimeUpModal =
   () => {
-    clearInterval(timer)
+    if (
+      challengeFinished.value ||
+      showResultModal.value
+    ) {
+      return
+    }
+
+    challengeFinished.value =
+      true
+
+    clearGameTimers()
 
     resultType.value =
       'timesup'
@@ -158,9 +216,10 @@ const showTimeUpModal =
 
     playSound('fail')
 
-    setTimeout(() => {
-      finishChallenge()
-    }, 1800)
+    finishTimeout =
+      setTimeout(() => {
+        finishChallenge()
+      }, 1800)
   }
 
 /* -----------------------------
@@ -169,7 +228,17 @@ const showTimeUpModal =
 
 const showCompleteModal =
   () => {
-    clearInterval(timer)
+    if (
+      challengeFinished.value ||
+      showResultModal.value
+    ) {
+      return
+    }
+
+    challengeFinished.value =
+      true
+
+    clearGameTimers()
 
     resultType.value =
       'done'
@@ -179,9 +248,10 @@ const showCompleteModal =
 
     playSound('pass')
 
-    setTimeout(() => {
-      finishChallenge()
-    }, 1800)
+    finishTimeout =
+      setTimeout(() => {
+        finishChallenge()
+      }, 1800)
   }
 
 /* -----------------------------
@@ -190,7 +260,7 @@ const showCompleteModal =
 
 const finishChallenge =
   () => {
-    clearInterval(timer)
+    clearGameTimers()
 
     const passed =
       correctAnswers.value >=
@@ -223,23 +293,34 @@ const finishChallenge =
 ----------------------------- */
 
 const nextQuestion = () => {
+  if (
+    challengeFinished.value ||
+    showResultModal.value
+  ) {
+    return
+  }
+
+  const nextIndex =
+    currentQuestionIndex.value + 1
+
+  if (
+    nextIndex >=
+    shuffledQuestions.length
+  ) {
+    showCompleteModal()
+    return
+  }
+
+  currentQuestionIndex.value =
+    nextIndex
+
   answered.value = false
 
   selectedAnswer.value =
     ''
 
-  currentQuestionIndex.value++
-
-  /* END */
-
-  if (
-    currentQuestionIndex.value >=
-    shuffledQuestions.length
-  ) {
-    showCompleteModal()
-
-    return
-  }
+  isProcessingAnswer.value =
+    false
 }
 
 /* -----------------------------
@@ -251,10 +332,21 @@ const selectAnswer = (
 ) => {
   if (
     answered.value ||
+    isProcessingAnswer.value ||
+    challengeFinished.value ||
+    showResultModal.value ||
     !currentQuestion.value
   ) {
     return
   }
+
+  /*
+    Lock immediately before any sound,
+    score update, or timeout.
+  */
+
+  isProcessingAnswer.value =
+    true
 
   answered.value = true
 
@@ -302,17 +394,19 @@ const selectAnswer = (
       challenge.mode ===
       'sudden_death'
     ) {
-      setTimeout(() => {
-        showTimeUpModal()
-      }, 700)
+      answerTimeout =
+        setTimeout(() => {
+          showTimeUpModal()
+        }, 700)
 
       return
     }
   }
 
-  setTimeout(() => {
-    nextQuestion()
-  }, 500)
+  answerTimeout =
+    setTimeout(() => {
+      nextQuestion()
+    }, 500)
 }
 
 /* -----------------------------
@@ -321,7 +415,7 @@ const selectAnswer = (
 
 const leaveChallenge =
   () => {
-    clearInterval(timer)
+    clearGameTimers()
 
     playSound('button')
 
@@ -339,7 +433,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  clearInterval(timer)
+  clearGameTimers()
 })
 </script>
 
@@ -509,12 +603,19 @@ onBeforeUnmount(() => {
           <button
             v-for="option in currentQuestion?.options || []"
             :key="option"
+            type="button"
+            :disabled="
+              answered ||
+              isProcessingAnswer ||
+              challengeFinished ||
+              showResultModal
+            "
             @click="
               selectAnswer(
                 option,
               )
             "
-            class="w-full border-4 border-black rounded-2xl px-4 py-4 text-base font-black transition-all duration-100"
+            class="w-full border-4 border-black rounded-2xl px-4 py-4 text-base font-black transition-all duration-100 disabled:pointer-events-none"
             :class="[
               answered &&
               option ===
@@ -534,6 +635,7 @@ onBeforeUnmount(() => {
 
       <!-- LEAVE -->
       <button
+        type="button"
         @click="
           leaveChallenge
         "

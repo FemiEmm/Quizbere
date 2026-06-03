@@ -7,7 +7,7 @@ import {
 import {
   faHouse,
   faBrain,
-  faTrophy,
+  faPaw,
   faBolt,
   faHeadset,
 } from '@fortawesome/free-solid-svg-icons'
@@ -18,8 +18,8 @@ const route = useRoute()
 
 const navItems = [
   {
-    path: '/leaderboard',
-    icon: faTrophy,
+    path: '/kiddycorner',
+    icon: faPaw,
   },
 
   {
@@ -95,8 +95,8 @@ const playNavSound =
             v-else
             class="w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-200"
             :class="[
-              route.path ===
-              item.path
+              route.path === item.path ||
+              route.path.startsWith(item.path + '/')
                 ? 'bg-[#FF2AA3]/20 border-[#FF2AA3]'
                 : 'border-transparent',
             ]"
