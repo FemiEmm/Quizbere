@@ -486,7 +486,7 @@ export const braindrillLevels = [
 
     questions: 12,
 
-    time: 190,
+    time: 100,
 
     requiredCorrect: 12,
 
@@ -502,7 +502,7 @@ export const braindrillLevels = [
 
     questions: 42,
 
-    time: 68,
+    time: 150,
 
     requiredCorrect: 37,
 

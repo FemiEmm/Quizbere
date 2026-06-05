@@ -1040,4 +1040,1004 @@ export const questions = [
       'Enough sleep',
     ],
   },
+
+  {
+  id: 53,
+
+  question:
+    'Which of these help prevent sun damage?',
+
+  options: [
+    'Sunscreen',
+    'Shade',
+    'Protective clothing',
+    'Staring at the sun',
+  ],
+
+  answers: [
+    'Sunscreen',
+    'Shade',
+    'Protective clothing',
+  ],
+},
+
+{
+  id: 54,
+
+  question:
+    'Which of these are signs of an allergic reaction?',
+
+  options: [
+    'Skin rash',
+    'Swelling',
+    'Itching',
+    'Stronger bones',
+  ],
+
+  answers: [
+    'Skin rash',
+    'Swelling',
+    'Itching',
+  ],
+},
+
+{
+  id: 55,
+
+  question:
+    'Which of these can help prevent choking?',
+
+  options: [
+    'Chewing properly',
+    'Eating slowly',
+    'Sitting while eating',
+    'Running while eating',
+  ],
+
+  answers: [
+    'Chewing properly',
+    'Eating slowly',
+    'Sitting while eating',
+  ],
+},
+
+{
+  id: 56,
+
+  question:
+    'Which of these are signs of asthma trouble?',
+
+  options: [
+    'Wheezing',
+    'Chest tightness',
+    'Shortness of breath',
+    'Clearer vision',
+  ],
+
+  answers: [
+    'Wheezing',
+    'Chest tightness',
+    'Shortness of breath',
+  ],
+},
+
+{
+  id: 57,
+
+  question:
+    'Which of these help prevent back pain?',
+
+  options: [
+    'Good posture',
+    'Lifting safely',
+    'Stretching',
+    'Carrying too much weight',
+  ],
+
+  answers: [
+    'Good posture',
+    'Lifting safely',
+    'Stretching',
+  ],
+},
+
+{
+  id: 58,
+
+  question:
+    'Which of these can be signs of diabetes?',
+
+  options: [
+    'Frequent urination',
+    'Increased thirst',
+    'Unusual tiredness',
+    'Growing taller overnight',
+  ],
+
+  answers: [
+    'Frequent urination',
+    'Increased thirst',
+    'Unusual tiredness',
+  ],
+},
+
+{
+  id: 59,
+
+  question:
+    'Which of these help protect against heat illness?',
+
+  options: [
+    'Drinking water',
+    'Resting in shade',
+    'Light clothing',
+    'Wearing thick coats in heat',
+  ],
+
+  answers: [
+    'Drinking water',
+    'Resting in shade',
+    'Light clothing',
+  ],
+},
+
+{
+  id: 60,
+
+  question:
+    'Which of these are signs of heat exhaustion?',
+
+  options: [
+    'Heavy sweating',
+    'Weakness',
+    'Dizziness',
+    'Frozen fingers',
+  ],
+
+  answers: [
+    'Heavy sweating',
+    'Weakness',
+    'Dizziness',
+  ],
+},
+
+{
+  id: 61,
+
+  question:
+    'Which of these are safe exercise habits?',
+
+  options: [
+    'Start slowly',
+    'Use proper form',
+    'Take rest days',
+    'Ignore sharp pain',
+  ],
+
+  answers: [
+    'Start slowly',
+    'Use proper form',
+    'Take rest days',
+  ],
+},
+
+{
+  id: 62,
+
+  question:
+    'Which of these can support healthy blood pressure?',
+
+  options: [
+    'Less salt',
+    'Regular activity',
+    'Healthy weight',
+    'Too much alcohol',
+  ],
+
+  answers: [
+    'Less salt',
+    'Regular activity',
+    'Healthy weight',
+  ],
+},
+
+{
+  id: 63,
+
+  question:
+    'Which of these are signs of low blood sugar?',
+
+  options: [
+    'Shaking',
+    'Sweating',
+    'Confusion',
+    'Longer hair',
+  ],
+
+  answers: [
+    'Shaking',
+    'Sweating',
+    'Confusion',
+  ],
+},
+
+{
+  id: 64,
+
+  question:
+    'Which of these help protect babies from sickness?',
+
+  options: [
+    'Vaccines',
+    'Clean hands',
+    'Safe feeding',
+    'Dirty bottles',
+  ],
+
+  answers: [
+    'Vaccines',
+    'Clean hands',
+    'Safe feeding',
+  ],
+},
+
+{
+  id: 65,
+
+  question:
+    'Which of these are safe kitchen habits?',
+
+  options: [
+    'Wash cutting boards',
+    'Cook meat well',
+    'Separate raw food',
+    'Use dirty knives',
+  ],
+
+  answers: [
+    'Wash cutting boards',
+    'Cook meat well',
+    'Separate raw food',
+  ],
+},
+
+{
+  id: 66,
+
+  question:
+    'Which of these help prevent burns?',
+
+  options: [
+    'Keep hot pots away',
+    'Use oven mitts',
+    'Check bath water',
+    'Touch open flames',
+  ],
+
+  answers: [
+    'Keep hot pots away',
+    'Use oven mitts',
+    'Check bath water',
+  ],
+},
+
+{
+  id: 67,
+
+  question:
+    'Which of these are signs of a burn injury?',
+
+  options: [
+    'Red skin',
+    'Pain',
+    'Blisters',
+    'Extra teeth',
+  ],
+
+  answers: [
+    'Red skin',
+    'Pain',
+    'Blisters',
+  ],
+},
+
+{
+  id: 68,
+
+  question:
+    'Which of these support healthy pregnancy?',
+
+  options: [
+    'Clinic visits',
+    'Balanced meals',
+    'Avoiding alcohol',
+    'Skipping all checkups',
+  ],
+
+  answers: [
+    'Clinic visits',
+    'Balanced meals',
+    'Avoiding alcohol',
+  ],
+},
+
+{
+  id: 69,
+
+  question:
+    'Which of these are signs of anxiety?',
+
+  options: [
+    'Fast heartbeat',
+    'Worry',
+    'Restlessness',
+    'Instant healing',
+  ],
+
+  answers: [
+    'Fast heartbeat',
+    'Worry',
+    'Restlessness',
+  ],
+},
+
+{
+  id: 70,
+
+  question:
+    'Which of these can help during panic feelings?',
+
+  options: [
+    'Slow breathing',
+    'Grounding exercise',
+    'Talking to someone',
+    'Holding breath too long',
+  ],
+
+  answers: [
+    'Slow breathing',
+    'Grounding exercise',
+    'Talking to someone',
+  ],
+},
+
+{
+  id: 71,
+
+  question:
+    'Which of these can help prevent falls?',
+
+  options: [
+    'Clear walkways',
+    'Good lighting',
+    'Non-slip shoes',
+    'Wet floors',
+  ],
+
+  answers: [
+    'Clear walkways',
+    'Good lighting',
+    'Non-slip shoes',
+  ],
+},
+
+{
+  id: 72,
+
+  question:
+    'Which of these are signs of a sprain?',
+
+  options: [
+    'Swelling',
+    'Pain',
+    'Bruising',
+    'Better eyesight',
+  ],
+
+  answers: [
+    'Swelling',
+    'Pain',
+    'Bruising',
+  ],
+},
+
+{
+  id: 73,
+
+  question:
+    'Which of these are safe road habits?',
+
+  options: [
+    'Look both ways',
+    'Use crosswalks',
+    'Obey traffic lights',
+    'Run into roads',
+  ],
+
+  answers: [
+    'Look both ways',
+    'Use crosswalks',
+    'Obey traffic lights',
+  ],
+},
+
+{
+  id: 74,
+
+  question:
+    'Which of these can help prevent mosquito breeding?',
+
+  options: [
+    'Empty containers',
+    'Cover water tanks',
+    'Clear drains',
+    'Leave stagnant water',
+  ],
+
+  answers: [
+    'Empty containers',
+    'Cover water tanks',
+    'Clear drains',
+  ],
+},
+
+{
+  id: 75,
+
+  question:
+    'Which of these are signs of measles?',
+
+  options: [
+    'Fever',
+    'Rash',
+    'Cough',
+    'Stronger nails',
+  ],
+
+  answers: [
+    'Fever',
+    'Rash',
+    'Cough',
+  ],
+},
+
+{
+  id: 76,
+
+  question:
+    'Which of these help protect against measles?',
+
+  options: [
+    'Vaccination',
+    'Avoiding exposure',
+    'Good hygiene',
+    'Sharing cups with sick people',
+  ],
+
+  answers: [
+    'Vaccination',
+    'Avoiding exposure',
+    'Good hygiene',
+  ],
+},
+
+{
+  id: 77,
+
+  question:
+    'Which of these can help prevent diarrhea?',
+
+  options: [
+    'Safe water',
+    'Clean food',
+    'Hand washing',
+    'Eating spoiled meals',
+  ],
+
+  answers: [
+    'Safe water',
+    'Clean food',
+    'Hand washing',
+  ],
+},
+
+{
+  id: 78,
+
+  question:
+    'Which of these are signs of diarrhea danger?',
+
+  options: [
+    'Blood in stool',
+    'Severe weakness',
+    'Dry mouth',
+    'Fresh haircut',
+  ],
+
+  answers: [
+    'Blood in stool',
+    'Severe weakness',
+    'Dry mouth',
+  ],
+},
+
+{
+  id: 79,
+
+  question:
+    'Which of these help prevent anemia?',
+
+  options: [
+    'Iron-rich foods',
+    'Leafy greens',
+    'Beans',
+    'Eating only ice',
+  ],
+
+  answers: [
+    'Iron-rich foods',
+    'Leafy greens',
+    'Beans',
+  ],
+},
+
+{
+  id: 80,
+
+  question:
+    'Which of these can be signs of anemia?',
+
+  options: [
+    'Pale skin',
+    'Weakness',
+    'Short breath',
+    'Glowing eyes',
+  ],
+
+  answers: [
+    'Pale skin',
+    'Weakness',
+    'Short breath',
+  ],
+},
+
+{
+  id: 81,
+
+  question:
+    'Which of these support healthy immunity?',
+
+  options: [
+    'Enough sleep',
+    'Balanced meals',
+    'Vaccines',
+    'Eating dirt',
+  ],
+
+  answers: [
+    'Enough sleep',
+    'Balanced meals',
+    'Vaccines',
+  ],
+},
+
+{
+  id: 82,
+
+  question:
+    'Which of these are safe swimming habits?',
+
+  options: [
+    'Swim with supervision',
+    'Use life jackets',
+    'Avoid deep water alone',
+    'Dive into unknown water',
+  ],
+
+  answers: [
+    'Swim with supervision',
+    'Use life jackets',
+    'Avoid deep water alone',
+  ],
+},
+
+{
+  id: 83,
+
+  question:
+    'Which of these can protect against sports injuries?',
+
+  options: [
+    'Proper gear',
+    'Warm-up exercise',
+    'Learning technique',
+    'Playing while dizzy',
+  ],
+
+  answers: [
+    'Proper gear',
+    'Warm-up exercise',
+    'Learning technique',
+  ],
+},
+
+{
+  id: 84,
+
+  question:
+    'Which of these are signs of concussion?',
+
+  options: [
+    'Headache',
+    'Confusion',
+    'Vomiting',
+    'Stronger hearing',
+  ],
+
+  answers: [
+    'Headache',
+    'Confusion',
+    'Vomiting',
+  ],
+},
+
+{
+  id: 85,
+
+  question:
+    'Which of these should be done after a head injury?',
+
+  options: [
+    'Rest',
+    'Watch symptoms',
+    'Seek help if severe',
+    'Keep playing immediately',
+  ],
+
+  answers: [
+    'Rest',
+    'Watch symptoms',
+    'Seek help if severe',
+  ],
+},
+
+{
+  id: 86,
+
+  question:
+    'Which of these are signs of depression?',
+
+  options: [
+    'Long sadness',
+    'Loss of interest',
+    'Low energy',
+    'Permanent happiness',
+  ],
+
+  answers: [
+    'Long sadness',
+    'Loss of interest',
+    'Low energy',
+  ],
+},
+
+{
+  id: 87,
+
+  question:
+    'Which of these can support emotional health?',
+
+  options: [
+    'Trusted support',
+    'Healthy routines',
+    'Professional help',
+    'Keeping all pain secret',
+  ],
+
+  answers: [
+    'Trusted support',
+    'Healthy routines',
+    'Professional help',
+  ],
+},
+
+{
+  id: 88,
+
+  question:
+    'Which of these are signs of poor nutrition?',
+
+  options: [
+    'Weight loss',
+    'Weakness',
+    'Slow growth',
+    'Extra fingers',
+  ],
+
+  answers: [
+    'Weight loss',
+    'Weakness',
+    'Slow growth',
+  ],
+},
+
+{
+  id: 89,
+
+  question:
+    'Which of these are good sources of fiber?',
+
+  options: [
+    'Beans',
+    'Vegetables',
+    'Whole grains',
+    'Soft drinks',
+  ],
+
+  answers: [
+    'Beans',
+    'Vegetables',
+    'Whole grains',
+  ],
+},
+
+{
+  id: 90,
+
+  question:
+    'Which of these can help prevent constipation?',
+
+  options: [
+    'Fiber foods',
+    'Water',
+    'Movement',
+    'Holding stool always',
+  ],
+
+  answers: [
+    'Fiber foods',
+    'Water',
+    'Movement',
+  ],
+},
+
+{
+  id: 91,
+
+  question:
+    'Which of these are signs of breathing emergency?',
+
+  options: [
+    'Blue lips',
+    'Severe wheezing',
+    'Gasping',
+    'Mild thirst',
+  ],
+
+  answers: [
+    'Blue lips',
+    'Severe wheezing',
+    'Gasping',
+  ],
+},
+
+{
+  id: 92,
+
+  question:
+    'Which of these are safe dental habits?',
+
+  options: [
+    'Use fluoride toothpaste',
+    'Avoid too much sugar',
+    'Visit dentist',
+    'Open bottles with teeth',
+  ],
+
+  answers: [
+    'Use fluoride toothpaste',
+    'Avoid too much sugar',
+    'Visit dentist',
+  ],
+},
+
+{
+  id: 93,
+
+  question:
+    'Which of these are signs of ear infection?',
+
+  options: [
+    'Ear pain',
+    'Fever',
+    'Fluid from ear',
+    'Longer legs',
+  ],
+
+  answers: [
+    'Ear pain',
+    'Fever',
+    'Fluid from ear',
+  ],
+},
+
+{
+  id: 94,
+
+  question:
+    'Which of these can help prevent ear problems?',
+
+  options: [
+    'Avoid loud noise',
+    'Keep ears dry',
+    'Get ear pain checked',
+    'Push sharp objects inside',
+  ],
+
+  answers: [
+    'Avoid loud noise',
+    'Keep ears dry',
+    'Get ear pain checked',
+  ],
+},
+
+{
+  id: 95,
+
+  question:
+    'Which of these are signs of skin irritation?',
+
+  options: [
+    'Redness',
+    'Itching',
+    'Swelling',
+    'New shoes',
+  ],
+
+  answers: [
+    'Redness',
+    'Itching',
+    'Swelling',
+  ],
+},
+
+{
+  id: 96,
+
+  question:
+    'Which of these help prevent skin infections?',
+
+  options: [
+    'Clean clothes',
+    'Dry skin folds',
+    'Avoid sharing towels',
+    'Wear wet socks daily',
+  ],
+
+  answers: [
+    'Clean clothes',
+    'Dry skin folds',
+    'Avoid sharing towels',
+  ],
+},
+
+{
+  id: 97,
+
+  question:
+    'Which of these are signs of serious bleeding?',
+
+  options: [
+    'Blood soaking cloth',
+    'Bleeding that will not stop',
+    'Dizziness',
+    'Small clean scratch',
+  ],
+
+  answers: [
+    'Blood soaking cloth',
+    'Bleeding that will not stop',
+    'Dizziness',
+  ],
+},
+
+{
+  id: 98,
+
+  question:
+    'Which of these help control serious bleeding?',
+
+  options: [
+    'Apply pressure',
+    'Use clean cloth',
+    'Get emergency help',
+    'Rub pepper on wound',
+  ],
+
+  answers: [
+    'Apply pressure',
+    'Use clean cloth',
+    'Get emergency help',
+  ],
+},
+
+{
+  id: 99,
+
+  question:
+    'Which of these are signs of poisoning?',
+
+  options: [
+    'Vomiting',
+    'Confusion',
+    'Trouble breathing',
+    'Clean hands',
+  ],
+
+  answers: [
+    'Vomiting',
+    'Confusion',
+    'Trouble breathing',
+  ],
+},
+
+{
+  id: 100,
+
+  question:
+    'Which of these help prevent poisoning?',
+
+  options: [
+    'Label chemicals',
+    'Store medicines safely',
+    'Keep poisons from children',
+    'Drink unknown liquids',
+  ],
+
+  answers: [
+    'Label chemicals',
+    'Store medicines safely',
+    'Keep poisons from children',
+  ],
+},
+
+{
+  id: 101,
+
+  question:
+    'Which of these are safe screen habits?',
+
+  options: [
+    'Take breaks',
+    'Blink often',
+    'Use good lighting',
+    'Keep screen too close always',
+  ],
+
+  answers: [
+    'Take breaks',
+    'Blink often',
+    'Use good lighting',
+  ],
+},
+
+{
+  id: 102,
+
+  question:
+    'Which of these can support good posture?',
+
+  options: [
+    'Sit upright',
+    'Screen at eye level',
+    'Feet supported',
+    'Slouch all day',
+  ],
+
+  answers: [
+    'Sit upright',
+    'Screen at eye level',
+    'Feet supported',
+  ],
+},
 ]

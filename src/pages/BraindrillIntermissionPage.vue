@@ -18,6 +18,10 @@ import { syncUserData } from '../utils/syncUserData'
 
 const router = useRouter()
 
+/* -----------------------------
+   LEVEL / SCORE
+----------------------------- */
+
 const level =
   Number(
     localStorage.getItem(
@@ -54,9 +58,29 @@ const currentLevel =
     (lvl) => lvl.level === level,
   )
 
+const maxLevel =
+  Math.max(
+    ...braindrillLevels.map(
+      (lvl) => lvl.level,
+    ),
+  )
+
+const requiredCorrect =
+  currentLevel?.requiredCorrect || 0
+
+const totalQuestions =
+  currentLevel?.questions || 0
+
+const levelPoints =
+  currentLevel?.points || 0
+
 const unlocked =
-  correctAnswers >=
-  currentLevel.requiredCorrect
+  currentLevel
+    ? correctAnswers >= requiredCorrect
+    : false
+
+const hasNextLevel =
+  unlocked && level < maxLevel
 
 /* -----------------------------
    MESSAGES
@@ -86,8 +110,16 @@ const failMessages = [
   'Not enough. Repeat the level.',
 ]
 
+const missingLevelMessages = [
+  'Level data missing. Return to training.',
+]
+
 const mascotMessage =
   computed(() => {
+    if (!currentLevel) {
+      return missingLevelMessages[0]
+    }
+
     const messages =
       unlocked
         ? passMessages
@@ -107,6 +139,10 @@ const mascotMessage =
 
 const resultStatus =
   computed(() => {
+    if (!currentLevel) {
+      return 'LEVEL DATA MISSING'
+    }
+
     if (unlocked) {
       return 'PASSED: PROMOTION'
     }
@@ -120,15 +156,22 @@ const resultStatus =
 
 const saveBraindrillScore =
   async () => {
+    if (!currentLevel) {
+      return
+    }
+
     if (!unlocked) {
       return
     }
 
     /* DUPLICATE PROTECTION */
 
+    const rewardKey =
+      `braindrill_reward_claimed_level_${level}`
+
     const rewardClaimed =
       localStorage.getItem(
-        'reward_claimed',
+        rewardKey,
       ) === 'true'
 
     if (rewardClaimed) {
@@ -156,6 +199,7 @@ const saveBraindrillScore =
 
     const {
       data: existingUser,
+      error: fetchError,
     } = await supabase
       .from(
         'examinity_leaderboard',
@@ -167,18 +211,28 @@ const saveBraindrillScore =
       )
       .maybeSingle()
 
+    if (fetchError) {
+      console.error(
+        'Failed to fetch leaderboard user:',
+        fetchError,
+      )
+
+      return
+    }
+
     /* UPDATED SCORE */
 
     const updatedScore =
       (
         existingUser?.best_run_score ||
         0
-      ) +
-      currentLevel.points
+      ) + levelPoints
 
     /* UPDATE LEADERBOARD */
 
-    await supabase
+    const {
+      error: leaderboardError,
+    } = await supabase
       .from(
         'examinity_leaderboard',
       )
@@ -194,9 +248,20 @@ const saveBraindrillScore =
         username,
       )
 
+    if (leaderboardError) {
+      console.error(
+        'Failed to update leaderboard:',
+        leaderboardError,
+      )
+
+      return
+    }
+
     /* UPDATE USERS */
 
-    await supabase
+    const {
+      error: usersError,
+    } = await supabase
       .from(
         'examinity_users',
       )
@@ -208,6 +273,15 @@ const saveBraindrillScore =
         'username',
         username,
       )
+
+    if (usersError) {
+      console.error(
+        'Failed to update user level:',
+        usersError,
+      )
+
+      return
+    }
 
     /* SAVE LOCAL */
 
@@ -228,7 +302,7 @@ const saveBraindrillScore =
     /* REWARD CLAIMED */
 
     localStorage.setItem(
-      'reward_claimed',
+      rewardKey,
       'true',
     )
 
@@ -243,18 +317,25 @@ const saveBraindrillScore =
 
 const nextLevel =
   () => {
+    if (!hasNextLevel) {
+      return
+    }
+
+    const nextLevelNumber =
+      level + 1
+
     localStorage.setItem(
       'braindrill_selected_level',
       JSON.stringify({
         level:
-          level + 1,
+          nextLevelNumber,
       }),
     )
 
     localStorage.setItem(
       'braindrill_current_level',
       String(
-        level + 1,
+        nextLevelNumber,
       ),
     )
 
@@ -396,7 +477,7 @@ onMounted(
               <p
                 class="mt-[2px] text-[10px] font-black text-[#FF2D2D] leading-none"
               >
-                /{{ currentLevel.questions }}
+                /{{ totalQuestions }}
               </p>
             </div>
           </div>
@@ -421,8 +502,7 @@ onMounted(
         >
           <button
             v-if="
-              unlocked &&
-              level < 10
+              hasNextLevel
             "
             @click="
               nextLevel
